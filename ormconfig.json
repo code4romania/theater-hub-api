@@ -1,0 +1,24 @@
+{
+  "type": "postgres",
+  "host": "127.0.0.1",
+  "port": 5432,
+  "username": "postgres",
+  "password": "pass1234",
+  "database": "TheaterHub",
+  "synchronize": false,
+  "logging": false,
+  "entities": [
+     "dist/models/**/*.js"
+  ],
+  "migrations": [
+     "dist/migrations/**/*.js"
+  ],
+  "subscribers": [
+     "src/subscribers/**/*.ts"
+  ],
+  "cli": {
+     "entitiesDir": ["src/models"],
+     "migrationsDir": ["src/migrations"],
+     "subscribersDir": ["src/subscribers"]
+  }
+}
