@@ -2,7 +2,7 @@
   "name": "theater-hub-api",
   "version": "0.1.0",
   "author": "Code4Romania <contact@code4.ro>",
-  "license": "MIT",
+  "license": "MPL-2.0",
   "scripts": {
     "start": "npm run build && npm run watch",
     "build": "npm run build-ts && npm run tslint && npm run copy-static-assets",
