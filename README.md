@@ -1,4 +1,4 @@
-# Theatre Hub API 
+# Theater Hub API 
 
 [![GitHub contributors](https://img.shields.io/github/contributors/code4romania/theater-hub-api.svg?style=for-the-badge)]() [![GitHub last commit](https://img.shields.io/github/last-commit/code4romania/theater-hub-api.svg?style=for-the-badge)]() [![License: MPL 2.0](https://img.shields.io/badge/license-MPL%202.0-brightgreen.svg?style=for-the-badge)](https://opensource.org/licenses/MPL-2.0)
 
@@ -23,7 +23,7 @@ as one of the core aims is to coagulate them into a community. Theaters, bands, 
 
 People willing to contribute to projects they like via donations, or with volunteer or paid services will have their own place on the platform.
 
-This repo holds the API of Theatre Hub.
+This repo holds the API of Theater Hub.
 
 [Built with](#built-with) | [Repos and projects](#repos-and-projects) | [Deployment](#deployment) | [Contributing](#contributing) | [Feedback](#feedback) | [License](#license) | [About Code4Ro](#about-code4ro)
 
