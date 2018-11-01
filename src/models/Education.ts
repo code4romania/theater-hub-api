@@ -9,10 +9,13 @@ export class Education extends BaseEntity {
   ID: string;
 
   @Column("varchar", { length: 100 })
-  Name: string;
+  Title: string;
 
   @Column("varchar", { length: 100 })
-  Title: string;
+  Institution: string;
+
+  @Column("varchar")
+  Description: string;
 
   @Column("timestamp with time zone")
   StartDate: Date;
