@@ -44,7 +44,7 @@ createConnection().then(async (connection: Connection) => {
    * Express configuration.
    */
 
-  app.set("port", process.env.PORT || 3000);
+  app.set("port", process.env.PORT || 4000);
   app.set("models", models);
   app.use(compression());
   app.use(logger("dev"));
@@ -77,6 +77,12 @@ createConnection().then(async (connection: Connection) => {
         req.path == "/account") {
       req.session.returnTo = req.path;
     }
+    next();
+  });
+  app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
     next();
   });
   app.use(express.static(path.join(__dirname, "public"), { maxAge: 31557600000 }));

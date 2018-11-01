@@ -9,7 +9,13 @@ export class Award extends BaseEntity {
   ID: string;
 
   @Column("varchar", { length: 100 })
-  Name: string;
+  Title: string;
+
+  @Column("varchar", { length: 100 })
+  Issuer: string;
+
+  @Column("varchar")
+  Description: string;
 
   @Column("timestamp with time zone")
   Date: Date;
