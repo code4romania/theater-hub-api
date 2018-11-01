@@ -1,6 +1,6 @@
 # Theater Hub API 
 
-[![GitHub contributors](https://img.shields.io/github/contributors/code4romania/theater-hub-api.svg?style=for-the-badge)]() [![GitHub last commit](https://img.shields.io/github/last-commit/code4romania/theater-hub-api.svg?style=for-the-badge)]() [![License: MPL 2.0](https://img.shields.io/badge/license-MPL%202.0-brightgreen.svg?style=for-the-badge)](https://opensource.org/licenses/MPL-2.0)
+[![GitHub contributors](https://img.shields.io/github/contributors/code4romania/theater-hub-api.svg?style=for-the-badge)](https://github.com/code4romania/theater-hub-api/graphs/contributors) [![GitHub last commit](https://img.shields.io/github/last-commit/code4romania/theater-hub-api.svg?style=for-the-badge)](https://github.com/code4romania/theater-hub-api/commits/master) [![License: MPL 2.0](https://img.shields.io/badge/license-MPL%202.0-brightgreen.svg?style=for-the-badge)](https://opensource.org/licenses/MPL-2.0)
 
 * enabling theater through civic tech
 * make collaboration as simple as a text message
