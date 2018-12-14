@@ -23,7 +23,8 @@ export class Education extends BaseEntity {
   @Column("timestamp with time zone")
   EndDate: Date;
 
-  @ManyToOne(type => Professional, professional => professional.Education)
+  @ManyToOne(type => Professional, professional => professional.Education, { onDelete: "CASCADE" })
   @JoinColumn({ name: "ProfessionalID" })
   Professional: Professional;
+
 }

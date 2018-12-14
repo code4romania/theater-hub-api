@@ -1,13 +1,14 @@
-import { UserRoleType } from "../enums/UserRoleType";
+import { UserRoleType } from "../../enums/UserRoleType";
 
 export class UserDTO {
+
     public ID: string;
 
     public Description: string;
 
     public Email: string;
 
-    public Phone: string;
+    public PhoneNumber: string;
 
     public Website: string;
 

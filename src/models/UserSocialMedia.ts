@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryColumn,
-             ManyToOne, OneToOne, JoinColumn } from "typeorm";
+      ManyToOne, OneToOne, JoinColumn, Index } from "typeorm";
 import { SocialMediaCategory }                 from "./SocialMediaCategory";
 import { BaseEntity }                          from "./BaseEntity";
 import { User}                                 from "./User";
@@ -16,13 +16,12 @@ export class UserSocialMedia extends BaseEntity {
   @Column("varchar")
   Link: string;
 
-  @ManyToOne(type => User, user => user.SocialMedia)
+  @ManyToOne(type => User, user => user.SocialMedia, { onDelete: "CASCADE" })
   @JoinColumn({ name: "UserID" })
   User: User;
 
-  @OneToOne(type => SocialMediaCategory)
+  @ManyToOne(type => SocialMediaCategory)
   @JoinColumn({ name: "SocialMediaCategoryID" })
   SocialMediaCategory: SocialMediaCategory;
-
 
 }

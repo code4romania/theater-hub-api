@@ -14,4 +14,6 @@ export interface IBaseRepository<T extends BaseEntity> {
 
     deleteByID(id: string): Promise<T>;
 
+    runCreateQueryBuilder(): any;
+
 }

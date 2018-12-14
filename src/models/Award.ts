@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn }  from "typeorm";
-import { Professional }                                                   from "./Professional";
+import { User }                                                           from "./User";
 import { BaseEntity }                                                     from "./BaseEntity";
 
 @Entity("Award")
@@ -20,7 +20,7 @@ export class Award extends BaseEntity {
   @Column("timestamp with time zone")
   Date: Date;
 
-  @ManyToOne(type => Professional, professional => professional.Awards)
-  @JoinColumn({ name: "ProfessionalID" })
-  Professional: Professional;
+  @ManyToOne(type => User, user => user.Awards, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "UserID" })
+  User: User;
 }

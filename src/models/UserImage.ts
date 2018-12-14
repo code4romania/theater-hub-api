@@ -12,9 +12,10 @@ export class UserImage extends BaseEntity {
   Image: string;
 
   @Column("boolean")
-  IsProfileImage: boolean;
+  IsProfileImage?: boolean;
 
-  @ManyToOne(type => User, user => user.PhotoGallery)
+  @ManyToOne(type => User, user => user.PhotoGallery, { onDelete: "CASCADE" })
   @JoinColumn({ name: "UserID" })
   User: User;
+
 }

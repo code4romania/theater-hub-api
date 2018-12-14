@@ -13,10 +13,12 @@ import * as dotenv        from "dotenv";
 import * as flash         from "express-flash";
 import * as path          from "path";
 import * as passport      from "passport";
+import * as https         from "https";
 import * as models        from "./models";
 import chalk              from "chalk";
 import { createConnection, Connection } from "typeorm";
 const expressValidator   = require("express-validator");
+const fs                 = require("fs");
 
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
@@ -44,12 +46,12 @@ createConnection().then(async (connection: Connection) => {
    * Express configuration.
    */
 
-  app.set("port", process.env.PORT || 4000);
+  app.set("port", process.env.PORT || 443);
   app.set("models", models);
   app.use(compression());
   app.use(logger("dev"));
-  app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(bodyParser.json());
   app.use(expressValidator());
   app.use(session({
     resave: true,
@@ -81,7 +83,7 @@ createConnection().then(async (connection: Connection) => {
   });
   app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Headers", "*");
 
     next();
   });
@@ -106,11 +108,19 @@ createConnection().then(async (connection: Connection) => {
    */
   app.use(errorHandler());
 
+  // const httpsOptions = {
+  //   key: fs.readFileSync(path.join(process.cwd(), "certificate", "server.key"), "utf8"),
+  //   cert: fs.readFileSync(path.join(process.cwd(), "certificate", "server.cert"), "utf8")
+  // };
+
+  // const httpsServer = https.createServer(httpsOptions, app);
+
+
   /**
    * Start Express server.
    */
-  app.listen(app.get("port"), () => {
-    console.log(("  App is running at http://localhost:%d in %s mode"), app.get("port"), app.get("env"));
+  app.listen(443, () => {
+    console.log(("  App is running at https://localhost:%d in %s mode"), app.get("port"), app.get("env"));
     console.log("  Press CTRL-C to stop\n");
   });
 }).catch(error => console.log("TypeORM connection error: ", error));
