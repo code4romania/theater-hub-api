@@ -9,9 +9,9 @@ export class UserVideo extends BaseEntity {
   ID: string;
 
   @Column("varchar")
-  Link: string;
+  Video: string;
 
-  @ManyToOne(type => User, user => user.VideoGallery)
+  @ManyToOne(type => User, user => user.VideoGallery, { onDelete: "CASCADE" })
   @JoinColumn({ name: "UserID" })
   User: User;
 }

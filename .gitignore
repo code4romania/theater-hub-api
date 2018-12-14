@@ -30,3 +30,9 @@ Thumbs.db
 
 # Ignore built ts files
 dist/**/*
+
+#Ignore file containing sensitive information
+src/config/env/common.ts
+src/config/env/development.ts
+src/config/env/production.ts
+certificate/*

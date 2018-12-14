@@ -1,9 +1,10 @@
-import { inject, injectable }                      from "inversify";
-import { Request, Response }                       from "express";
-import { TYPES }                                   from "../types";
-import { User }                                    from "../models/User";
-import { IAuthenticationController }               from "./IAuthenticationController";
-import { IAuthenticationService, IUserService }    from "../services";
+import { inject, injectable }                                  from "inversify";
+import { Request, Response }                                   from "express";
+import { TYPES }                                               from "../types";
+import { User }                                                from "../models/User";
+import { IAuthenticationController }                           from "./IAuthenticationController";
+import { IAuthenticationService, IUserService }                from "../services";
+import { AuthenticationRequestDTO, AuthenticationResponseDTO } from "../dtos";
 
 @injectable()
 export class AuthenticationController implements IAuthenticationController {
@@ -17,16 +18,12 @@ export class AuthenticationController implements IAuthenticationController {
         this._userService            = userService;
     }
 
-    public async login(request: Request, response: Response): Promise<void> {
+    public async authenticate(request: Request, response: Response): Promise<void> {
 
-        if (!request.params.email || !request.params.password) {
-          response.status(400).json("Incorrect login request.");
-          response.end();
-          return;
-        }
+        const authenticationRequestDTO: AuthenticationRequestDTO = request.body as AuthenticationRequestDTO;
 
-        const user: User = await this._userService.getByEmail(request.params.email);
+        const authenticationResponse: AuthenticationResponseDTO = await this._authenticationService.authenticate(authenticationRequestDTO);
 
-        response.send(user);
+        response.send(authenticationResponse);
     }
 }

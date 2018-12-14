@@ -12,7 +12,7 @@ export class BaseRepository<T extends BaseEntity> implements IBaseRepository<T> 
         this._repository = repository;
     }
 
-    public async insert(entity: T): Promise<T> {
+    public async insert(entity: any): Promise<T> {
         return await this._repository.save(entity);
     }
 
@@ -21,10 +21,10 @@ export class BaseRepository<T extends BaseEntity> implements IBaseRepository<T> 
     }
 
     public async getByID(id: string): Promise<T> {
-        return await this._repository.findOneById(id);
+        return await this._repository.findOne(id);
     }
 
-    public async update(entity: T): Promise<T> {
+    public async update(entity: any): Promise<T> {
         return await this._repository.save(entity);
     }
 
@@ -36,6 +36,10 @@ export class BaseRepository<T extends BaseEntity> implements IBaseRepository<T> 
         const entity: T = await this.getByID(id);
 
         return this.delete(entity);
+    }
+
+    public runCreateQueryBuilder(): any {
+        return this._repository.createQueryBuilder();
     }
 
 }

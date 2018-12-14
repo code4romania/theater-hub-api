@@ -1,11 +1,11 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne,
-       OneToMany, JoinColumn } from "typeorm";
-import { BaseEntity }          from "./BaseEntity";
-import { Award }               from "./Award";
-import { Education }           from "./Education";
-import { ProfessionalTheater } from "./ProfessionalTheater";
-import { User }                from "./User";
-import { EntityCategory }      from "./EntityCategory";
+       OneToMany, JoinColumn }     from "typeorm";
+import { BaseEntity }              from "./BaseEntity";
+import { Experience }              from "./Experience";
+import { Education }               from "./Education";
+import { ProfessionalInstitution } from "./ProfessionalInstitution";
+import { User }                    from "./User";
+import { ProfessionalSkill }       from "./ProfessionalSkill";
 
 @Entity("Professional")
 export class Professional extends BaseEntity {
@@ -19,20 +19,20 @@ export class Professional extends BaseEntity {
   @Column("varchar", { length: 100 })
   LastName: string;
 
-  @OneToOne(type => User, user => user.Professional)
+  @OneToOne(type => User, user => user.Professional, { onDelete: "CASCADE" })
   @JoinColumn({ name: "UserID" })
   User: User;
 
-  @OneToOne(type => EntityCategory)
-  @JoinColumn({ name: "EntityCategoryID" })
-  EntityCategory: EntityCategory;
+  @OneToMany(type => ProfessionalSkill, professionalSkill => professionalSkill.Professional, { cascade: true, eager: true })
+  Skills: ProfessionalSkill[];
 
-  @OneToMany(type => Award, award => award.Professional)
-  Awards: Award[];
+  @OneToMany(type => Experience, experience => experience.Professional, { cascade: true, eager: true })
+  Experience: Experience[];
 
-  @OneToMany(type => Education, education => education.Professional)
+  @OneToMany(type => Education, education => education.Professional, { cascade: true, eager: true })
   Education: Education[];
 
-  @OneToMany(type => ProfessionalTheater, professionalTheater => professionalTheater.Professional)
-  Theaters: ProfessionalTheater[];
+  @OneToMany(type => ProfessionalInstitution, professionalInstitution => professionalInstitution.Professional, { eager: true })
+  Institutions: ProfessionalInstitution[];
+
 }

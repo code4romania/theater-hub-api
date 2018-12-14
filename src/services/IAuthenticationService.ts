@@ -1,8 +1,9 @@
-import { LoginRequest, RegisterRequest } from "../requests";
-
+import { AuthenticationRequestDTO, AuthenticationResponseDTO } from "../dtos";
 
 export interface IAuthenticationService {
 
-    login(request: LoginRequest): void;
+    authenticate(request: AuthenticationRequestDTO): Promise<AuthenticationResponseDTO>;
+
+    areValidCredentials(email: string, password: string): Promise<boolean>;
 
 }
