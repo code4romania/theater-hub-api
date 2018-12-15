@@ -99,7 +99,6 @@
     "@types/uuid": "^3.4.3",
     "concurrently": "^3.4.0",
     "jest": "^19.0.2",
-    "node-sass": "^4.5.2",
     "nodemon": "^1.11.0",
     "shelljs": "^0.7.7",
     "supertest": "^2.0.1",
