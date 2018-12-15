@@ -31,8 +31,16 @@ Thumbs.db
 # Ignore built ts files
 dist/**/*
 
+#Elasticbeanstalk directory
+elasticbeanstalk
+
 #Ignore file containing sensitive information
 src/config/env/common.ts
 src/config/env/development.ts
 src/config/env/production.ts
 certificate/*
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
