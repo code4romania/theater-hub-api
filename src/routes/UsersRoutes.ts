@@ -17,7 +17,9 @@ export default (app: any) => {
         message: "Welcome to the Theater HUB API!",
     }));
 
-    app.get("/api/users/me", authorizationMiddleware, (req: Request, res: Response) => usersController.getMe(req, res));
+    app.get("/api/users/me",     authorizationMiddleware, (req: Request, res: Response) => usersController.getMe(req, res));
+
+    app.delete("/api/users/me",  authorizationMiddleware, (req: Request, res: Response) => usersController.deleteMe(req, res));
 
     app.post("/api/users/register", userRoutesValidators.getRegisterValidators(), validatorMiddleware,
                                               (req: Request, res: Response) => usersController.register(req, res));
@@ -30,6 +32,9 @@ export default (app: any) => {
 
     app.post("/api/users/password/reset", userRoutesValidators.getResetPasswordValidators(), validatorMiddleware,
                                               (req: Request, res: Response) => usersController.resetPassword(req, res));
+
+    app.post("/api/users/password/change", authorizationMiddleware, userRoutesValidators.getChangePasswordValidators(), validatorMiddleware,
+                                              (req: Request, res: Response) => usersController.changePassword(req, res));
 
     app.post("/api/users/profile/create", authorizationMiddleware, userRoutesValidators.getCreateProfile(), validatorMiddleware,
                                               (req: Request, res: Response) => usersController.createProfile(req, res));
@@ -57,6 +62,10 @@ export default (app: any) => {
 
     app.post("/api/users/resume",             (req: Request, res: Response) => usersController.generateResume(req, res));
 
+    app.get("/api/users/settings",     authorizationMiddleware, (req: Request, res: Response) => usersController.getSettings(req, res));
+
+    app.patch("/api/users/settings",   authorizationMiddleware, (req: Request, res: Response) => usersController.updateSettings(req, res));
+
     app.post("/api/users",                    (req: Request, res: Response) => usersController.create(req, res));
 
     app.get("/api/users", authorizationMiddleware, (req: Request, res: Response) => usersController.getAll(req, res));
@@ -67,10 +76,10 @@ export default (app: any) => {
 
     app.delete("/api/users/:userID",          (req: Request, res: Response) => usersController.delete(req, res));
 
-    app.delete("/api/users/enable/:userID", authorizationMiddleware, checkUserRoleMiddleware(UserRoleType.Admin),
+    app.patch("/api/users/enable/:userID", authorizationMiddleware, checkUserRoleMiddleware(UserRoleType.Admin),
                                                                 (req: Request, res: Response) => usersController.enable(req, res));
 
-    app.delete("/api/users/disable/:userID", authorizationMiddleware, checkUserRoleMiddleware(UserRoleType.Admin),
+    app.patch("/api/users/disable/:userID", authorizationMiddleware, checkUserRoleMiddleware(UserRoleType.Admin),
                                                                 (req: Request, res: Response) => usersController.disable(req, res));
 
 };

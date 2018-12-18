@@ -1,3 +1,5 @@
+export * from "./ChangePasswordRequestDTO";
+export * from "./ChangePasswordResponseDTO";
 export * from "./CreateAccountEmailDTO";
 export * from "./FinishRegistrationResponseDTO";
 export * from "./FinishRegistrationRequestDTO";
@@ -5,5 +7,6 @@ export * from "./ProfileDTO";
 export * from "./RegisterDTO";
 export * from "./ResetPasswordEmailDTO";
 export * from "./ResetPasswordRequestDTO";
+export * from "./SettingsDTO";
 export * from "./UpdateProfileSection";
 export * from "./UserDTO";

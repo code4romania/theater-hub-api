@@ -4,4 +4,6 @@ export interface IAuthenticationController {
 
     authenticate(request: Request, response: Response): Promise<void>;
 
+    checkUserPassword(request: Request, response: Response): Promise<void>;
+
 }

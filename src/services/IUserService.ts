@@ -1,11 +1,14 @@
 import { IBaseService }                                                    from "./IBaseService";
 import { Award, Education, Experience, Skill, User, UserImage, UserVideo } from "../models";
-import { FinishRegistrationResponseDTO, ProfileDTO,
-        RegisterDTO, ResetPasswordRequestDTO, UpdateProfileSection }        from "../dtos";
+import { ChangePasswordRequestDTO, ChangePasswordResponseDTO,
+        FinishRegistrationResponseDTO, ProfileDTO, RegisterDTO,
+        ResetPasswordRequestDTO, SettingsDTO, UpdateProfileSection }       from "../dtos";
 
 export interface IUserService extends IBaseService<User> {
 
     getMe(email: string): Promise<ProfileDTO>;
+
+    deleteMe(email: string): Promise<ProfileDTO>;
 
     updateGeneralInformation(userEmail: string, generalInformationSection: ProfileDTO): Promise<void>;
 
@@ -35,7 +38,13 @@ export interface IUserService extends IBaseService<User> {
 
     resetPassword(resetPasswordRequest: ResetPasswordRequestDTO): Promise<void>;
 
+    changePassword(email: string, changePasswordRequest: ChangePasswordRequestDTO): Promise<ChangePasswordResponseDTO>;
+
     createProfile(profile: ProfileDTO): Promise<void>;
+
+    getSettings(email: string): Promise<SettingsDTO>;
+
+    updateSettings(email: string, settings: SettingsDTO): Promise<void>;
 
     enableByID(id: string): Promise<User>;
 
