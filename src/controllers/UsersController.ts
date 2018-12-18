@@ -10,10 +10,13 @@ import { BaseApiController }           from "./BaseApiController";
 import { IUserService, IEmailService } from "../services";
 import { UserRoleType }                from "../enums";
 import { Validators }                  from "../utils";
-import { FinishRegistrationRequestDTO,
+import { ChangePasswordRequestDTO,
+   ChangePasswordResponseDTO,
+   FinishRegistrationRequestDTO,
    FinishRegistrationResponseDTO,
    ProfileDTO, RegisterDTO,
    ResetPasswordRequestDTO,
+   SettingsDTO,
    UpdateProfileSection }              from "../dtos";
 import { Award, Education,
   Experience, Skill,
@@ -38,6 +41,13 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     const profile: ProfileDTO = await this._userService.getMe(request.Principal.Email);
 
     response.send(profile);
+  }
+
+  public async deleteMe(request: Request, response: Response): Promise<void> {
+    response.send({});
+    const profile: ProfileDTO = await this._userService.deleteMe(request.Principal.Email);
+
+     response.send(profile);
   }
 
   public async updateMyGeneralInformation(request: Request, response: Response): Promise<void> {
@@ -108,10 +118,22 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
   }
 
   public async resetPassword(request: Request, response: Response): Promise<void> {
+
     const resetPasswordRequest: ResetPasswordRequestDTO = request.body as ResetPasswordRequestDTO;
+
     await this._userService.resetPassword(resetPasswordRequest);
 
     response.sendStatus(200);
+  }
+
+  public async changePassword(request: Request, response: Response): Promise<void> {
+
+    const changePasswordRequest: ChangePasswordRequestDTO = request.body as ChangePasswordRequestDTO;
+
+    const changePasswordResponse: ChangePasswordResponseDTO =
+                                     await this._userService.changePassword(request.Principal.Email, changePasswordRequest);
+
+    response.send(changePasswordResponse);
   }
 
   public async createProfile(request: Request, response: Response): Promise<void> {
@@ -132,6 +154,22 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     });
 
     response.send();
+  }
+
+  public async getSettings(request: Request, response: Response): Promise<void> {
+
+    const settings = await this._userService.getSettings(request.Principal.Email);
+
+    response.send(settings);
+  }
+
+  public async updateSettings(request: Request, response: Response): Promise<void> {
+
+    const settings = request.body as SettingsDTO;
+
+    await this._userService.updateSettings(request.Principal.Email, settings);
+
+    response.sendStatus(200);
   }
 
   public async create(request: Request, response: Response): Promise<void> {
@@ -223,12 +261,6 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
   }
 
   public async delete(request: Request, response: Response): Promise<void> {
-
-    if (!request.params.userID || !Validators.isValidUUID(request.params.userID)) {
-      response.status(400).json("Incorrect id.");
-      response.end();
-      return;
-    }
 
     let user: User = await this._userService.getByID(request.params.userID);
 
