@@ -4,7 +4,8 @@ import { TYPES }                                               from "../types";
 import { User }                                                from "../models/User";
 import { IAuthenticationController }                           from "./IAuthenticationController";
 import { IAuthenticationService, IUserService }                from "../services";
-import { AuthenticationRequestDTO, AuthenticationResponseDTO } from "../dtos";
+import { AuthenticationRequestDTO, AuthenticationResponseDTO,
+                                CheckUserPasswordRequestDTO } from "../dtos";
 
 @injectable()
 export class AuthenticationController implements IAuthenticationController {
@@ -25,5 +26,10 @@ export class AuthenticationController implements IAuthenticationController {
         const authenticationResponse: AuthenticationResponseDTO = await this._authenticationService.authenticate(authenticationRequestDTO);
 
         response.send(authenticationResponse);
+    }
+
+    public async checkUserPassword(request: Request, response: Response): Promise<void> {
+
+        response.sendStatus(200);
     }
 }

@@ -6,6 +6,8 @@ export interface IUsersController extends IBaseApiController {
 
     getMe(req: Request, res: Response): Promise<void>;
 
+    deleteMe(req: Request, res: Response): Promise<void>;
+
     updateMyGeneralInformation(req: Request, res: Response): Promise<void>;
 
     updateMySkills(req: Request, res: Response): Promise<void>;
@@ -28,9 +30,15 @@ export interface IUsersController extends IBaseApiController {
 
     resetPassword(req: Request, res: Response): Promise<void>;
 
+    changePassword(req: Request, res: Response): Promise<void>;
+
     createProfile(req: Request, res: Response): Promise<void>;
 
     generateResume(req: Request, res: Response): Promise<void>;
+
+    getSettings(req: Request, res: Response): Promise<void>;
+
+    updateSettings(req: Request, res: Response): Promise<void>;
 
     enable(req: Request, res: Response): Promise<User>;
 

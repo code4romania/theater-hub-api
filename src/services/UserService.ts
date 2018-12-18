@@ -26,11 +26,13 @@ import { IAwardRepository,
     IUserRepository,
     IUserSocialMediaRepository,
     IUserVideoRepository }                     from "../repositories";
-import { CreateAccountEmailDTO,
+import { ChangePasswordResponseDTO,
+    ChangePasswordRequestDTO,
+    CreateAccountEmailDTO,
     FinishRegistrationResponseDTO,
     ResetPasswordEmailDTO, ProfileDTO,
     RegisterDTO, ResetPasswordRequestDTO,
-    UpdateProfileSection }                     from "../dtos";
+    SettingsDTO, UpdateProfileSection }        from "../dtos";
 import { EntityCategoryType }                  from "../enums/EntityCategoryType";
 import { ProfileSectionType }                  from "../enums/ProfileSectionType";
 import { SocialMediaCategoryType }             from "../enums/SocialMediaCategoryType";
@@ -101,6 +103,16 @@ export class UserService extends BaseService<User> implements IUserService {
         const user: User = await this.getByEmail(email);
 
         return new ProfileDTO(user);
+    }
+
+    public async deleteMe(email: string): Promise<ProfileDTO> {
+
+        const dbUser     = await this._userRepository.getByEmail(email);
+        const profile    = new ProfileDTO(dbUser);
+
+        this._userRepository.delete(dbUser);
+
+        return profile;
     }
 
     public async updateGeneralInformation(userEmail: string, generalInformationSection: ProfileDTO): Promise<void> {
@@ -428,9 +440,9 @@ export class UserService extends BaseService<User> implements IUserService {
 
         const dbUser: User = await this._userRepository.getByEmail(email);
 
-        // if (!dbUser || dbUser.AccountSettings.AccountStatus !== UserAccountStatusType.Registered) {
-        //     return false;
-        // }
+        if (!dbUser || dbUser.AccountSettings.AccountStatus !== UserAccountStatusType.Registered) {
+            return false;
+        }
 
         const isRegistrationIDCorrect = bcrypt.compareSync(registrationID, dbUser.AccountSettings.RegistrationIDHash);
 
@@ -451,7 +463,7 @@ export class UserService extends BaseService<User> implements IUserService {
                 lastName: dbUser.Professional.LastName,
                 email,
                 role: dbUserAccountSettings.Role,
-                accountStatus: dbUser.AccountSettings.AccountStatus
+                accountStatus: dbUserAccountSettings.AccountStatus
             }, config.application.tokenSecret)
         };
 
@@ -492,14 +504,42 @@ export class UserService extends BaseService<User> implements IUserService {
         return isResetForgottenPasswordIDCorrect;
     }
 
-    public async resetPassword(resetPasswordRequest: ResetPasswordRequestDTO): Promise<void> {
+    public async newPassword(email: string, password: string, generateToken: boolean = false) {
 
-        const dbUser: User       = await this._userRepository.getByEmail(resetPasswordRequest.Email);
+        const dbUser: User       = await this._userRepository.getByEmail(email);
         const saltRounds: number = 10;
         const passwordSalt       = bcrypt.genSaltSync(saltRounds);
-        dbUser.PasswordHash      = bcrypt.hashSync(resetPasswordRequest.Password, passwordSalt);
+        dbUser.PasswordHash      = bcrypt.hashSync(password, passwordSalt);
 
         this.update(dbUser);
+
+        if (generateToken) {
+
+            return jwt.sign({
+                firstName: dbUser.Professional.FirstName,
+                lastName: dbUser.Professional.LastName,
+                email,
+                role: dbUser.AccountSettings.Role,
+                accountStatus: dbUser.AccountSettings.AccountStatus
+            }, config.application.tokenSecret);
+        }
+
+    }
+
+    public async resetPassword(resetPasswordRequest: ResetPasswordRequestDTO): Promise<void> {
+
+        this.newPassword(resetPasswordRequest.Email, resetPasswordRequest.Password);
+    }
+
+    public async changePassword(email: string, changePasswordRequest: ChangePasswordRequestDTO): Promise<ChangePasswordResponseDTO> {
+
+        const token: string = await this.newPassword(email, changePasswordRequest.NewPassword, true);
+
+        const response: ChangePasswordResponseDTO = {
+            Token: token
+        };
+
+        return response;
     }
 
     public async createProfile(profile: ProfileDTO): Promise<void> {
@@ -655,7 +695,7 @@ export class UserService extends BaseService<User> implements IUserService {
             } as UserSocialMedia);
         }
 
-        // Security
+        // Privacy
 
         user.AccountSettings.ProfileVisibility       = profile.ProfileVisibility;
         user.AccountSettings.EmailVisibility         = profile.EmailVisibility;
@@ -665,6 +705,31 @@ export class UserService extends BaseService<User> implements IUserService {
         user.AccountSettings.AccountStatus  = UserAccountStatusType.Enabled;
 
         this.update(user);
+    }
+
+    public async getSettings(email: string): Promise<SettingsDTO> {
+        const dbUser: User = await this._userRepository.getByEmail(email);
+
+        const settings = {
+            ProfileVisibility: dbUser.AccountSettings.ProfileVisibility,
+            EmailVisibility: dbUser.AccountSettings.EmailVisibility,
+            BirthDateVisibility: dbUser.AccountSettings.BirthDateVisibility,
+            PhoneNumberVisibility: dbUser.AccountSettings.PhoneNumberVisibility
+        } as SettingsDTO;
+
+        return settings;
+    }
+
+    public async updateSettings(email: string, settings: SettingsDTO): Promise<void> {
+        const dbUser: User                  = await this._userRepository.getByEmail(email);
+        const dbUserAccountSettings         = await this._userAccountSettingsRepository.getByID(dbUser.AccountSettings.ID);
+
+        dbUserAccountSettings.ProfileVisibility       = settings.ProfileVisibility;
+        dbUserAccountSettings.EmailVisibility         = settings.EmailVisibility;
+        dbUserAccountSettings.BirthDateVisibility     = settings.BirthDateVisibility;
+        dbUserAccountSettings.PhoneNumberVisibility   = settings.PhoneNumberVisibility;
+
+        this._userAccountSettingsRepository.update(dbUserAccountSettings);
     }
 
     public async enableByID(id: string): Promise<User> {

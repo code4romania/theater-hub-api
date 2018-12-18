@@ -2,7 +2,8 @@ import { container }                       from "../config/inversify.config";
 import { TYPES }                           from "../types/custom-types";
 import { IAuthenticationController }       from "../controllers";
 import { IAuthenticationRoutesValidators } from "../validators";
-import { validatorMiddleware }             from "../middlewares";
+import { authorizationMiddleware,
+         validatorMiddleware }             from "../middlewares";
 import { Request, Response }               from "express";
 import * as passport                       from "passport";
 
@@ -18,5 +19,9 @@ export default (app: any) => {
 
     app.post("/api/authentication", authenticationRoutesValidators.getAuthenticateValidators(), validatorMiddleware,
                                                         (req: Request, res: Response) => authenticationController.authenticate(req, res));
+
+    app.post("/api/authentication/password/validity", authorizationMiddleware,
+                                              authenticationRoutesValidators.getCheckUserPasswordValidators(), validatorMiddleware,
+                                              (req: Request, res: Response) => authenticationController.checkUserPassword(req, res));
 
 };
