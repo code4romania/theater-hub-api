@@ -6,7 +6,8 @@ import { UserVideo }               from "../models/UserVideo";
 import { Award }                   from "../models/Award";
 import { Education }               from "../models/Education";
 import { Experience }              from "../models/Experience";
-import { IUserService }            from "../services";
+import { IAuthenticationService,
+         IUserService }            from "../services";
 import { Validators }              from "../utils";
 import { SocialMediaCategoryType } from "../enums";
 import { IUserRoutesValidators }   from "./IUserRoutesValidators";
@@ -15,10 +16,13 @@ const { check }                    = require("express-validator/check");
 @injectable()
 export class UserRoutesValidators implements IUserRoutesValidators {
 
+    private readonly _authenticationService: IAuthenticationService;
     private readonly _userService: IUserService;
 
-    constructor(@inject(TYPES.UserService) userService: IUserService) {
-        this._userService  = userService;
+    constructor(@inject(TYPES.AuthenticationService) authenticationService: IAuthenticationService,
+                                                        @inject(TYPES.UserService) userService: IUserService) {
+        this._authenticationService = authenticationService;
+        this._userService           = userService;
     }
 
     public getRegisterValidators() {
@@ -130,6 +134,43 @@ export class UserRoutesValidators implements IUserRoutesValidators {
                 })
         ];
     }
+
+    public getChangePasswordValidators() {
+
+        return [
+           check("Password").not().isEmpty().withMessage("Current password is required")
+               .custom(async (value: string, { req }: any) => {
+
+                    if (!Validators.isValidPassword(value)) {
+                       return Promise.reject("Password must be between 7 and 50 characters long and include upper and lowercase characters");
+                   }
+
+                    const isPasswordCorrect: boolean = await this._authenticationService.areValidCredentials(req.Principal.Email, value);
+
+                    if (!isPasswordCorrect) {
+                       return Promise.reject("Credentials are invalid");
+                   }
+
+                    return true;
+               }),
+           check("NewPassword").not().isEmpty().withMessage("New password is required")
+               .custom((value: string) => {
+                   if (!Validators.isValidPassword(value)) {
+                       throw new Error("Password must be between 7 and 50 characters long and include upper and lowercase characters");
+                   }
+
+                    return true;
+               }),
+           check("ConfirmNewPassword").not().isEmpty().withMessage("Confirm new password is required")
+               .custom((value: string, { req }: any) => {
+                   if (value !== req.body.NewPassword) {
+                       throw new Error("Confirm new password must match the new password");
+                   }
+
+                    return true;
+               })
+       ];
+   }
 
     public getCreateProfile() {
 

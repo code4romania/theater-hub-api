@@ -107,7 +107,7 @@ export class ProfileDTO {
 
     public LinkedinLink?: string;
 
-    // Security
+    // Privacy
 
     public ProfileVisibility?: VisibilityType;
 

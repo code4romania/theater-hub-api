@@ -40,4 +40,24 @@ export class AuthenticationRoutesValidators implements IAuthenticationRoutesVali
         ];
     }
 
+    public getCheckUserPasswordValidators() {
+
+        return [
+           check("Password").not().isEmpty().withMessage("Password is required")
+               .custom(async (value: string, { req }: any) => {
+                   if (!Validators.isValidPassword(value)) {
+                       return Promise.reject("Password must be between 7 and 50 characters long and include upper and lowercase characters");
+                   }
+
+                    const isValidPassword: boolean = await this._authenticationService.areValidCredentials(req.Principal.Email, value);
+
+                    if (!isValidPassword) {
+                       return Promise.reject("Password is invalid");
+                   }
+
+                    return true;
+               })
+       ];
+   }
+
 }
