@@ -44,10 +44,9 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
   }
 
   public async deleteMe(request: Request, response: Response): Promise<void> {
-    response.send({});
     const profile: ProfileDTO = await this._userService.deleteMe(request.Principal.Email);
 
-     response.send(profile);
+    response.send(profile);
   }
 
   public async updateMyGeneralInformation(request: Request, response: Response): Promise<void> {
@@ -93,7 +92,6 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
   }
 
   public async register(request: Request, response: Response): Promise<void> {
-
     const register: RegisterDTO = request.body as RegisterDTO;
 
     await this._userService.register(register);
