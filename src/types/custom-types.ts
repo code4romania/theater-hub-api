@@ -10,6 +10,7 @@ declare global {
 }
 
 const TYPES = {
+    ApplicationDataController: Symbol("ApplicationDataController"),
     AuthenticationController: Symbol("AuthenticationController"),
     MessagesController: Symbol("MessagesController"),
     ProjectsController: Symbol("ProjectsController"),
@@ -18,6 +19,7 @@ const TYPES = {
     AuthenticationRoutesValidators: Symbol("AuthenticationRoutesValidators"),
     ProjectRoutesValidators: Symbol("ProjectRoutesValidators"),
     UserRoutesValidators: Symbol("UserRoutesValidators"),
+    ApplicationDataService: Symbol("ApplicationDataService"),
     AuthenticationService: Symbol("AuthenticationService"),
     MessageService: Symbol("MessageService"),
     ProjectService: Symbol("ProjectService"),

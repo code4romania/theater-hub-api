@@ -107,12 +107,12 @@ export class UserService extends BaseService<User> implements IUserService {
 
     public async deleteMe(email: string): Promise<ProfileDTO> {
 
-        const dbUser     = await this._userRepository.getByEmail(email);
-        const profile    = new ProfileDTO(dbUser);
-
-        this._userRepository.delete(dbUser);
-
-        return profile;
+        return this._userRepository
+                .runCreateQueryBuilder()
+                .delete()
+                .from(User)
+                .where("Email = :email", { email })
+                .execute();
     }
 
     public async updateGeneralInformation(userEmail: string, generalInformationSection: ProfileDTO): Promise<void> {
@@ -394,6 +394,15 @@ export class UserService extends BaseService<User> implements IUserService {
 
     public async register(register: RegisterDTO): Promise<User> {
 
+        const dbUser: User = await this.getByEmail(register.Email);
+
+        if (dbUser && dbUser.AccountSettings.AccountStatus !== UserAccountStatusType.Registered) {
+            throw new Error("E-mail already in use");
+        } else if (!!dbUser) {
+            // Delete previous unfinished registration attempt.
+            this.deleteByID(dbUser.ID);
+        }
+
         const saltRounds: number = 10;
 
         // TODO: refactor to make hashing the password async
@@ -548,7 +557,7 @@ export class UserService extends BaseService<User> implements IUserService {
 
         const user: User = await this._userRepository.getByEmail(profile.Email);
 
-        if (user.AccountSettings.AccountStatus !== UserAccountStatusType.Registered) {
+        if (user.AccountSettings.AccountStatus !== UserAccountStatusType.Confirmed) {
             return;
         }
 

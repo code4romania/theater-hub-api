@@ -9,7 +9,8 @@ import { Experience }              from "../models/Experience";
 import { IAuthenticationService,
          IUserService }            from "../services";
 import { Validators }              from "../utils";
-import { SocialMediaCategoryType } from "../enums";
+import { SocialMediaCategoryType,
+           UserAccountStatusType } from "../enums";
 import { IUserRoutesValidators }   from "./IUserRoutesValidators";
 const { check }                    = require("express-validator/check");
 
@@ -37,7 +38,7 @@ export class UserRoutesValidators implements IUserRoutesValidators {
                           .isEmail().withMessage("E-mail must be valid")
                           .custom((value: string) => {
                               return this._userService.getByEmail(value).then((user: User) => {
-                                if (user) {
+                                if (user && user.AccountSettings.AccountStatus !== UserAccountStatusType.Registered) {
                                     return Promise.reject("E-mail already in use");
                                 }
                               });
