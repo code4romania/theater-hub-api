@@ -1,13 +1,15 @@
 import { Container }                                                                      from "inversify";
 import { TYPES }                                                                          from "../types/custom-types";
-import { IAuthenticationController, IMessagesController, IProjectsController,
-    IUsersController, IWishesController, AuthenticationController, MessagesController,
+import { IApplicationDataController, IAuthenticationController, IMessagesController,
+    IProjectsController, IUsersController, IWishesController, ApplicationDataController,
+    AuthenticationController, MessagesController,
     ProjectsController, UsersController, WishesController }                               from "../controllers";
 import { IAuthenticationRoutesValidators, AuthenticationRoutesValidators,
          IProjectRoutesValidators, ProjectRoutesValidators,
          IUserRoutesValidators, UserRoutesValidators }                                    from "../validators";
-import { IMessageService, IProjectService, ISkillService, IUserService, IWishService,
-    IEmailService, MessageService, ProjectService, SkillService, UserService,
+import { IApplicationDataService, IMessageService, IProjectService, ISkillService,
+    IUserService, IWishService, IEmailService, ApplicationDataService, MessageService,
+    ProjectService, SkillService, UserService,
     WishService, EmailService, IAuthenticationService, AuthenticationService }            from "../services";
 import { IAwardRepository, IEducationRepository, IEntityCategoryRepository,
     IExperienceRepository, IMessageRepository, IProfessionalSkillRepository,
@@ -21,6 +23,7 @@ import { IAwardRepository, IEducationRepository, IEntityCategoryRepository,
 
 const container = new Container();
 
+container.bind<IApplicationDataController>(TYPES.ApplicationDataController).to(ApplicationDataController);
 container.bind<IAuthenticationController>(TYPES.AuthenticationController).to(AuthenticationController);
 container.bind<IMessagesController>(TYPES.MessagesController).to(MessagesController);
 container.bind<IProjectsController>(TYPES.ProjectsController).to(ProjectsController);
@@ -31,6 +34,7 @@ container.bind<IAuthenticationRoutesValidators>(TYPES.AuthenticationRoutesValida
 container.bind<IProjectRoutesValidators>(TYPES.ProjectRoutesValidators).to(ProjectRoutesValidators);
 container.bind<IUserRoutesValidators>(TYPES.UserRoutesValidators).to(UserRoutesValidators);
 
+container.bind<IApplicationDataService>(TYPES.ApplicationDataService).to(ApplicationDataService);
 container.bind<IAuthenticationService>(TYPES.AuthenticationService).to(AuthenticationService);
 container.bind<IMessageService>(TYPES.MessageService).to(MessageService);
 container.bind<IProjectService>(TYPES.ProjectService).to(ProjectService);

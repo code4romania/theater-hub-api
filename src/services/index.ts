@@ -1,4 +1,5 @@
 export * from "./IBaseService";
+export * from "./IApplicationDataService";
 export * from "./IAuthenticationService";
 export * from "./IMessageService";
 export * from "./IProjectService";
@@ -7,6 +8,7 @@ export * from "./IUserService";
 export * from "./IWishService";
 export * from "./IEmailService";
 export * from "./BaseService";
+export * from "./ApplicationDataService";
 export * from "./AuthenticationService";
 export * from "./MessageService";
 export * from "./ProjectService";
