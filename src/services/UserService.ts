@@ -113,7 +113,7 @@ export class UserService extends BaseService<User> implements IUserService {
     public async getMyProfile(email: string): Promise<ProfileDTO> {
         const user: User = await this.getByEmail(email);
 
-        return new ProfileDTO(user);
+        return new ProfileDTO(user, true);
     }
 
     public async deleteMe(email: string): Promise<ProfileDTO> {
@@ -804,6 +804,68 @@ export class UserService extends BaseService<User> implements IUserService {
         dbUserAccountSettings.PhoneNumberVisibility   = settings.PhoneNumberVisibility;
 
         this._userAccountSettingsRepository.update(dbUserAccountSettings);
+    }
+
+    public async getCommunityMemberProfile(email: string, communityMemberID: string): Promise<ProfileDTO> {
+        let me: User;
+        let fullViewingRights: boolean;
+        const viewerIsVisitor: boolean = !email;
+        let communityMember: User;
+
+        try {
+            await this._userRepository.getByID(communityMemberID).then(response => {
+                if (!response) {
+                    throw new Error("Profile is private or does not exist.");
+                }
+
+                communityMember = response;
+            });
+        } catch (error) {
+            return undefined;
+        }
+
+        const communityMemberProfileVisibility: VisibilityType      = communityMember.AccountSettings.ProfileVisibility;
+        const communityMemberEmailVisibility: VisibilityType        = communityMember.AccountSettings.EmailVisibility;
+        const communityMemberBirthDateVisibility: VisibilityType    = communityMember.AccountSettings.BirthDateVisibility;
+        const communityMemberPhoneNumberVisibility: VisibilityType  = communityMember.AccountSettings.PhoneNumberVisibility;
+        const communityMemberProfile: ProfileDTO                    = new ProfileDTO(communityMember);
+
+        // if email is null then the person making the request is a visitor
+        if (!viewerIsVisitor) {
+            me                = await this._userRepository.getByEmail(email);
+            fullViewingRights = me.AccountSettings.Role === UserRoleType.Admin || me.AccountSettings.Role === UserRoleType.SuperAdmin;
+        }
+
+        if (fullViewingRights) {
+            return communityMemberProfile;
+        }
+
+        if ((communityMemberProfileVisibility === VisibilityType.Private) ||
+                                                (communityMemberProfileVisibility === VisibilityType.Community && viewerIsVisitor)) {
+            return undefined;
+        }
+
+        if ((communityMemberEmailVisibility === VisibilityType.Private) ||
+                                                (communityMemberEmailVisibility === VisibilityType.Community && viewerIsVisitor)) {
+            communityMemberProfile.Email = undefined;
+        }
+
+        if ((communityMemberBirthDateVisibility === VisibilityType.Private) ||
+                                                (communityMemberBirthDateVisibility === VisibilityType.Community && viewerIsVisitor)) {
+            communityMemberProfile.BirthDate = undefined;
+        }
+
+        if ((communityMemberPhoneNumberVisibility === VisibilityType.Private) ||
+                                                (communityMemberPhoneNumberVisibility === VisibilityType.Community && viewerIsVisitor)) {
+            communityMemberProfile.PhoneNumber = undefined;
+        }
+
+        communityMemberProfile.ProfileVisibility     = undefined;
+        communityMemberProfile.EmailVisibility       = undefined;
+        communityMemberProfile.BirthDateVisibility   = undefined;
+        communityMemberProfile.PhoneNumberVisibility = undefined;
+
+        return communityMemberProfile;
     }
 
     public async enableByID(id: string): Promise<User> {

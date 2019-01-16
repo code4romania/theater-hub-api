@@ -5,6 +5,7 @@ import { UserRoleType }          from "../enums";
 import { IUserRoutesValidators } from "../validators";
 import { validatorMiddleware,
      authorizationMiddleware,
+     getPrincipalIfRequestHasToken,
      checkUserRoleMiddleware }  from "../middlewares";
 import { Request, Response }     from "express";
 
@@ -73,6 +74,9 @@ export default (app: any) => {
     app.get("/api/users", authorizationMiddleware, (req: Request, res: Response) => usersController.getAll(req, res));
 
     app.get("/api/users/:userID",             (req: Request, res: Response) => usersController.getByID(req, res));
+
+    app.get("/api/users/profile/:userID", getPrincipalIfRequestHasToken,
+                                              (req: Request, res: Response) => usersController.getCommunityMemberProfile(req, res));
 
     app.patch("/api/users/:userID",           (req: Request, res: Response) => usersController.update(req, res));
 

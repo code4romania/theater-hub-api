@@ -50,6 +50,13 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     response.send(profile);
   }
 
+  public async getCommunityMemberProfile(request: Request, response: Response): Promise<void> {
+    const myEmail: string     = request.Principal ? request.Principal.Email : "";
+    const profile: ProfileDTO = await this._userService.getCommunityMemberProfile(myEmail, request.params.userID);
+
+    response.send(profile);
+  }
+
   public async deleteMe(request: Request, response: Response): Promise<void> {
     const profile: ProfileDTO = await this._userService.deleteMe(request.Principal.Email);
 
