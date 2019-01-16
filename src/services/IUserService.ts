@@ -1,20 +1,23 @@
 import { IBaseService }                                                    from "./IBaseService";
 import { Award, Education, Experience, Skill, User, UserImage, UserVideo } from "../models";
 import { ChangePasswordRequestDTO, ChangePasswordResponseDTO,
-        FinishRegistrationResponseDTO, ProfileDTO, RegisterDTO,
+        CreateProfileResponseDTO,
+        FinishRegistrationResponseDTO, MeDTO, ProfileDTO, RegisterDTO,
         ResetPasswordRequestDTO, SettingsDTO, UpdateProfileSection }       from "../dtos";
 
 export interface IUserService extends IBaseService<User> {
 
-    getMe(email: string): Promise<ProfileDTO>;
+    getMe(email: string): Promise<MeDTO>;
+
+    getMyProfile(email: string): Promise<ProfileDTO>;
 
     deleteMe(email: string): Promise<ProfileDTO>;
 
-    updateGeneralInformation(userEmail: string, generalInformationSection: ProfileDTO): Promise<void>;
+    updateGeneralInformation(userEmail: string, generalInformationSection: ProfileDTO): Promise<MeDTO>;
 
-    updateSkills(userEmail: string, skillsSection: UpdateProfileSection<Skill>): Promise<void>;
+    updateSkills(userEmail: string, skillsSection: number[]): Promise<void>;
 
-    updatePhotoGallery(userEmail: string, photoGallerySection: UpdateProfileSection<UserImage>): Promise<void>;
+    updatePhotoGallery(userEmail: string, photoGallerySection: UserImage[]): Promise<void>;
 
     updateVideoGallery(userEmail: string, videoGallerySection: UpdateProfileSection<UserVideo>): Promise<void>;
 
@@ -40,7 +43,7 @@ export interface IUserService extends IBaseService<User> {
 
     changePassword(email: string, changePasswordRequest: ChangePasswordRequestDTO): Promise<ChangePasswordResponseDTO>;
 
-    createProfile(profile: ProfileDTO): Promise<void>;
+    createProfile(profile: ProfileDTO): Promise<CreateProfileResponseDTO>;
 
     getSettings(email: string): Promise<SettingsDTO>;
 

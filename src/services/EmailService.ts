@@ -18,6 +18,7 @@ export class EmailService implements IEmailService {
             host: config.mailer.host,
             port: config.mailer.port,
             secure: config.mailer.secure,
+            service: config.mailer.host,
             auth: {
                 user: config.mailer.user,
                 pass: config.mailer.pass
