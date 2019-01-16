@@ -57,6 +57,30 @@ export function authorizationMiddleware(request: Request, response: Response, ne
     next();
 }
 
+export function getPrincipalIfRequestHasToken(request: Request, response: Response, next: NextFunction) {
+    let token: string = request.headers["authorization"];
+
+    if (!token) {
+        return next();
+    }
+
+    token = token.replace("Bearer ", "");
+
+    jwt.verify(token, config.application.tokenSecret, (err: any, decoded: any) => {
+        if (!err) {
+            request.Principal = {
+                FirstName: decoded.firstName,
+                LastName: decoded.lastName,
+                Email: decoded.email,
+                Role: decoded.role,
+                AccountStatus: decoded.accountStatus
+            };
+        }
+    });
+
+    next();
+}
+
 export function checkUserRoleMiddleware(role: UserRoleType) {
 
     return (request: Request, response: Response, next: NextFunction) => {
