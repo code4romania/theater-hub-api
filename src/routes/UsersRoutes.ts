@@ -17,11 +17,13 @@ export default (app: any) => {
         message: "Welcome to the Theater HUB API!",
     }));
 
-    app.get("/api/users/me",     authorizationMiddleware, (req: Request, res: Response) => usersController.getMe(req, res));
+    app.get("/api/users/me",                authorizationMiddleware, (req: Request, res: Response) => usersController.getMe(req, res));
 
-    app.delete("/api/users/me",  authorizationMiddleware, (req: Request, res: Response) => usersController.deleteMe(req, res));
+    app.get("/api/users/me/profile",        authorizationMiddleware, (req: Request, res: Response) => usersController.getMyProfile(req, res));
 
-    app.post("/api/users/register", userRoutesValidators.getRegisterValidators(), validatorMiddleware,
+    app.delete("/api/users/me",             authorizationMiddleware, (req: Request, res: Response) => usersController.deleteMe(req, res));
+
+    app.post("/api/users/register",         userRoutesValidators.getRegisterValidators(), validatorMiddleware,
                                               (req: Request, res: Response) => usersController.register(req, res));
 
     app.post("/api/users/register/finish", userRoutesValidators.getFinishRegistrationValidators(), validatorMiddleware,
