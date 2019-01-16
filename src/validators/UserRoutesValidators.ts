@@ -12,7 +12,7 @@ import { Validators }              from "../utils";
 import { SocialMediaCategoryType,
            UserAccountStatusType } from "../enums";
 import { IUserRoutesValidators }   from "./IUserRoutesValidators";
-const { check }                    = require("express-validator/check");
+const { body, check }              = require("express-validator/check");
 
 @injectable()
 export class UserRoutesValidators implements IUserRoutesValidators {
@@ -318,7 +318,6 @@ export class UserRoutesValidators implements IUserRoutesValidators {
                               .isLength({ max: 50 }).withMessage("First name should have at most 50 characters"),
             check("LastName").not().isEmpty().withMessage("Last name is required")
                               .isLength({ max: 50 }).withMessage("Last name should have at most 50 characters"),
-
             check("BirthDate").not().isEmpty().withMessage("Birth date is required")
                 .custom((value: string) => {
                     if (!Validators.isValidBirthDate(value)) {
@@ -342,29 +341,29 @@ export class UserRoutesValidators implements IUserRoutesValidators {
 
                 return true;
             }),
-            check("Website").optional().isURL().withMessage("Website must be valid"),
-            check("InstagramLink").optional().custom((value: string) => {
+            check("Website").optional({ nullable: true, checkFalsy: true}).isURL().withMessage("Website must be valid"),
+            check("InstagramLink").optional({ nullable: true, checkFalsy: true}).custom((value: string) => {
                 if (!Validators.isValidSocialMediaURL(value, SocialMediaCategoryType.Instagram)) {
                     throw new Error("Invalid Instagram link");
                 }
 
                 return true;
             }),
-            check("YoutubeLink").optional().custom((value: string) => {
+            check("YoutubeLink").optional({ nullable: true, checkFalsy: true}).custom((value: string) => {
                 if (!Validators.isValidSocialMediaURL(value, SocialMediaCategoryType.Youtube)) {
                     throw new Error("Invalid Youtube link");
                 }
 
                 return true;
             }),
-            check("FacebookLink").optional().custom((value: string) => {
+            check("FacebookLink").optional({ nullable: true, checkFalsy: true}).custom((value: string) => {
                 if (!Validators.isValidSocialMediaURL(value, SocialMediaCategoryType.Facebook)) {
                     throw new Error("Invalid Facebook link");
                 }
 
                 return true;
             }),
-            check("LinkedinLink").optional().custom((value: string) => {
+            check("LinkedinLink").optional({ nullable: true, checkFalsy: true}).custom((value: string) => {
                 if (!Validators.isValidSocialMediaURL(value, SocialMediaCategoryType.Linkedin)) {
                     throw new Error("Invalid Linkedin link");
                 }
@@ -377,14 +376,24 @@ export class UserRoutesValidators implements IUserRoutesValidators {
     public getSkillsValidators() {
 
         return [
-            check("Skills").not().isEmpty().withMessage("Select at least one skill")
+            body().not().isEmpty().withMessage("Select at least one skill")
         ];
     }
 
     public getVideoGalleryValidators() {
 
         return [
-            check("VideoGallery").optional().custom((value: UserVideo[]) => {
+            check("AddedEntities").optional().custom((value: UserVideo[]) => {
+                value.forEach(v => {
+                    if (!Validators.isValidSocialMediaURL(v.Video, SocialMediaCategoryType.Youtube | SocialMediaCategoryType.Vimeo)) {
+                        throw new Error("Video link is not a valid Youtube or Vimeo link");
+                    }
+                });
+
+
+                return true;
+            }),
+            check("UpdatedEntities").optional().custom((value: UserVideo[]) => {
                 value.forEach(v => {
                     if (!Validators.isValidSocialMediaURL(v.Video, SocialMediaCategoryType.Youtube | SocialMediaCategoryType.Vimeo)) {
                         throw new Error("Video link is not a valid Youtube or Vimeo link");

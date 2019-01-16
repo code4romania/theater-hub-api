@@ -6,6 +6,8 @@ export interface IUsersController extends IBaseApiController {
 
     getMe(req: Request, res: Response): Promise<void>;
 
+    getMyProfile(req: Request, res: Response): Promise<void>;
+
     deleteMe(req: Request, res: Response): Promise<void>;
 
     updateMyGeneralInformation(req: Request, res: Response): Promise<void>;

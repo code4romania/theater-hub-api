@@ -12,9 +12,10 @@ import { UserRoleType }                from "../enums";
 import { Validators }                  from "../utils";
 import { ChangePasswordRequestDTO,
    ChangePasswordResponseDTO,
+   CreateProfileResponseDTO,
    FinishRegistrationRequestDTO,
    FinishRegistrationResponseDTO,
-   ProfileDTO, RegisterDTO,
+   MeDTO, ProfileDTO, RegisterDTO,
    ResetPasswordRequestDTO,
    SettingsDTO,
    UpdateProfileSection }              from "../dtos";
@@ -38,7 +39,13 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
   }
 
   public async getMe(request: Request, response: Response): Promise<void> {
-    const profile: ProfileDTO = await this._userService.getMe(request.Principal.Email);
+    const me: MeDTO = await this._userService.getMe(request.Principal.Email);
+
+    response.send(me);
+  }
+
+  public async getMyProfile(request: Request, response: Response): Promise<void> {
+    const profile: ProfileDTO = await this._userService.getMyProfile(request.Principal.Email);
 
     response.send(profile);
   }
@@ -56,13 +63,13 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
   }
 
   public async updateMySkills(request: Request, response: Response): Promise<void> {
-    const skillsSection: UpdateProfileSection<Skill> = request.body as  UpdateProfileSection<Skill>;
+    const skillsSection: number[] = request.body as number[];
 
     response.send(await this._userService.updateSkills(request.Principal.Email, skillsSection));
   }
 
   public async updateMyPhotoGallery(request: Request, response: Response): Promise<void> {
-    const photoGallerySection: UpdateProfileSection<UserImage> = request.body as UpdateProfileSection<UserImage>;
+    const photoGallerySection: UserImage[] = request.body as UserImage[];
 
     response.send(await this._userService.updatePhotoGallery(request.Principal.Email, photoGallerySection));
   }
@@ -139,9 +146,9 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     const profileDTO: ProfileDTO = request.body as ProfileDTO;
     profileDTO.Email             = request.Principal.Email;
 
-    await this._userService.createProfile(profileDTO);
+    const createProfileResponse: CreateProfileResponseDTO = await this._userService.createProfile(profileDTO);
 
-    response.sendStatus(200);
+    response.send(createProfileResponse);
   }
 
   public async generateResume(request: Request, response: Response): Promise<void> {

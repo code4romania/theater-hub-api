@@ -9,21 +9,36 @@ export class ProfileDTO {
         this.Email        = user.Email;
         this.FirstName    = user.Professional.FirstName;
         this.LastName     = user.Professional.LastName;
-        this.ProfileImage = user.ProfileImage;
+
+        const profileImage = user.ProfileImage || user.PhotoGallery.find(p => p.IsProfileImage);
+
+        if (profileImage) {
+            this.ProfileImage = {
+                ...profileImage,
+                Image: profileImage.Image.toString()
+            };
+        }
+
         this.BirthDate    = user.BirthDate;
         this.PhoneNumber  = user.PhoneNumber;
         this.Description  = user.Description;
         this.Website      = user.Website;
 
         if (user.Professional.Skills) {
-            this.Skills = user.Professional.Skills.map(s => s.Skill.Name);
+            this.Skills = user.Professional.Skills.map(s => s.Skill.ID.toString());
         }
 
-        this.PhotoGallery   = user.PhotoGallery;
+        this.PhotoGallery   = user.PhotoGallery.filter(p => !p.IsProfileImage).map(p => {
+
+            return {
+                ...p,
+                Image: p.Image.toString()
+            };
+        });
         this.VideoGallery   = user.VideoGallery;
-        this.Awards         = user.Awards;
-        this.Experience     = user.Professional.Experience;
-        this.Education      = user.Professional.Education;
+        this.Awards         = user.Awards.sort((a1, a2) => a1.Date.getTime() > a2.Date.getTime() ? -1 : 1);
+        this.Experience     = user.Professional.Experience.sort((e1, e2) => e1.StartDate.getTime() > e2.StartDate.getTime() ? -1 : 1);
+        this.Education      = user.Professional.Education.sort((e1, e2) => e1.StartDate.getTime() > e2.StartDate.getTime() ? -1 : 1);
 
         for (const item of user.SocialMedia) {
             switch (item.SocialMediaCategoryID) {

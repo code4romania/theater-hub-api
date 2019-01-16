@@ -19,6 +19,7 @@ import chalk              from "chalk";
 import { createConnection, Connection } from "typeorm";
 const expressValidator   = require("express-validator");
 const fs                 = require("fs");
+const config             = require("./config/env").getConfig();
 
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
@@ -82,9 +83,10 @@ createConnection().then(async (connection: Connection) => {
     next();
   });
   app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "*");
-    res.header("Access-Control-Allow-Methods", "GET,PATCH,POST,PUT,DELETE");
+    res.header("Access-Control-Allow-Origin", config.client.baseURL);
+    res.header("Access-Control-Allow-Headers", "authorization, content-type");
+    res.header("Access-Control-Allow-Methods", "GET, PATCH, POST, PUT, DELETE, OPTIONS");
+    res.header("Access-Control-Allow-Credentials", "true");
 
     next();
   });

@@ -4,6 +4,4 @@ export class AuthenticationResponseDTO {
 
     public Token: string;
 
-    public ProfileImage: string;
-
 }
