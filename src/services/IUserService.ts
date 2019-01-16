@@ -49,6 +49,8 @@ export interface IUserService extends IBaseService<User> {
 
     updateSettings(email: string, settings: SettingsDTO): Promise<void>;
 
+    getCommunityMemberProfile(email: string, communityMemberID: string): Promise<ProfileDTO>;
+
     enableByID(id: string): Promise<User>;
 
     disableByID(id: string): Promise<User>;

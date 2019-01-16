@@ -4,7 +4,11 @@ import { SocialMediaCategoryType, VisibilityType }    from "../../enums";
 
 export class ProfileDTO {
 
-    public constructor(user: User) {
+    public constructor(user: User, includeID: boolean = false) {
+
+        if (includeID) {
+            this.ID = user.ID;
+        }
 
         this.Email        = user.Email;
         this.FirstName    = user.Professional.FirstName;
@@ -63,6 +67,8 @@ export class ProfileDTO {
         this.PhoneNumberVisibility = user.AccountSettings.PhoneNumberVisibility;
 
     }
+
+    public ID?: string;
 
     public Email?: string;
 
