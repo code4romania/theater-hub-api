@@ -1,4 +1,4 @@
-import { User }                                from "../../models";
+import { User, UserImage }                     from "../../models";
 import { UserAccountStatusType, UserRoleType } from "../../enums";
 
 export class MeDTO {
@@ -8,7 +8,14 @@ export class MeDTO {
         this.FirstName      = user.Professional.FirstName;
         this.LastName       = user.Professional.LastName;
         this.Email          = user.Email;
-        this.ProfileImage   = user.ProfileImage ? user.ProfileImage.Image.toString() : "";
+
+        if (user.ProfileImage) {
+            this.ProfileImage       = {
+                ...user.ProfileImage,
+                Image: user.ProfileImage.Image.toString()
+            };
+        }
+
         this.Role           = user.AccountSettings.Role;
         this.AccountStatus  = user.AccountSettings.AccountStatus;
     }
@@ -19,7 +26,7 @@ export class MeDTO {
 
     public Email: string;
 
-    public ProfileImage: string;
+    public ProfileImage: UserImage;
 
     public Role: UserRoleType;
 
