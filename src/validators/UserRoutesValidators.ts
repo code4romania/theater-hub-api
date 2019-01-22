@@ -149,7 +149,7 @@ export class UserRoutesValidators implements IUserRoutesValidators {
                     const isPasswordCorrect: boolean = await this._authenticationService.areValidCredentials(req.Principal.Email, value);
 
                     if (!isPasswordCorrect) {
-                       return Promise.reject("Credentials are invalid");
+                       return Promise.reject("Password is invalid");
                    }
 
                     return true;

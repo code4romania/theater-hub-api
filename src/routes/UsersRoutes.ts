@@ -69,14 +69,17 @@ export default (app: any) => {
 
     app.patch("/api/users/settings",   authorizationMiddleware, (req: Request, res: Response) => usersController.updateSettings(req, res));
 
+    app.get("/api/users/community", getPrincipalIfRequestHasToken,
+                                             (req: Request, res: Response) => usersController.getCommunityMembers(req, res));
+
+    app.get("/api/users/profile/:userID", getPrincipalIfRequestHasToken,
+                                              (req: Request, res: Response) => usersController.getCommunityMemberProfile(req, res));
+
     app.post("/api/users",                    (req: Request, res: Response) => usersController.create(req, res));
 
     app.get("/api/users", authorizationMiddleware, (req: Request, res: Response) => usersController.getAll(req, res));
 
     app.get("/api/users/:userID",             (req: Request, res: Response) => usersController.getByID(req, res));
-
-    app.get("/api/users/profile/:userID", getPrincipalIfRequestHasToken,
-                                              (req: Request, res: Response) => usersController.getCommunityMemberProfile(req, res));
 
     app.patch("/api/users/:userID",           (req: Request, res: Response) => usersController.update(req, res));
 

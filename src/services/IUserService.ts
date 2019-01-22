@@ -2,7 +2,9 @@ import { IBaseService }                                                    from 
 import { Award, Education, Experience, Skill, User, UserImage, UserVideo } from "../models";
 import { ChangePasswordRequestDTO, ChangePasswordResponseDTO,
         CreateProfileResponseDTO,
-        FinishRegistrationResponseDTO, MeDTO, ProfileDTO, RegisterDTO,
+        FinishRegistrationResponseDTO,
+        GetCommunityMembersRequest, GetCommunityResponse,
+        MeDTO, ProfileDTO, RegisterDTO,
         ResetPasswordRequestDTO, SettingsDTO, UpdateProfileSection }       from "../dtos";
 
 export interface IUserService extends IBaseService<User> {
@@ -48,6 +50,8 @@ export interface IUserService extends IBaseService<User> {
     getSettings(email: string): Promise<SettingsDTO>;
 
     updateSettings(email: string, settings: SettingsDTO): Promise<void>;
+
+    getCommunityMembers(request: GetCommunityMembersRequest): Promise<GetCommunityResponse>;
 
     getCommunityMemberProfile(email: string, communityMemberID: string): Promise<ProfileDTO>;
 
