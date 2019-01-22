@@ -32,12 +32,15 @@ import { ChangePasswordResponseDTO,
     CreateProfileResponseDTO,
     CreateAccountEmailDTO,
     FinishRegistrationResponseDTO,
+    GetCommunityMembersRequest,
+    GetCommunityResponse,
     ResetPasswordEmailDTO, MeDTO, ProfileDTO,
     RegisterDTO, ResetPasswordRequestDTO,
     SettingsDTO, UpdateProfileSection }        from "../dtos";
 import { EntityCategoryType }                  from "../enums/EntityCategoryType";
 import { ProfileSectionType }                  from "../enums/ProfileSectionType";
 import { SocialMediaCategoryType }             from "../enums/SocialMediaCategoryType";
+import { SortOrientationType }                 from "../enums/SortOrientationType";
 import { UserAccountStatusType }               from "../enums/UserAccountStatusType";
 import { UserRoleType }                        from "../enums/UserRoleType";
 import { VisibilityType }                      from "../enums/VisibilityType";
@@ -230,7 +233,7 @@ export class UserService extends BaseService<User> implements IUserService {
             FirstName: generalInformationSection.FirstName,
             LastName: generalInformationSection.LastName,
             Email: userEmail,
-            ProfileImage: generalInformationSection.ProfileImage.Image,
+            ProfileImage: generalInformationSection.ProfileImage,
             Role: dbUser.AccountSettings.Role,
             AccountStatus: dbUser.AccountSettings.AccountStatus
         } as MeDTO;
@@ -804,6 +807,51 @@ export class UserService extends BaseService<User> implements IUserService {
         dbUserAccountSettings.PhoneNumberVisibility   = settings.PhoneNumberVisibility;
 
         this._userAccountSettingsRepository.update(dbUserAccountSettings);
+    }
+
+    public async getCommunityMembers(request: GetCommunityMembersRequest): Promise<GetCommunityResponse> {
+
+        let me: User;
+        let fullViewingRights: boolean;
+        const viewerIsVisitor: boolean  = !request.MyEmail;
+        const searchTerm: string        = `%${request.SearchTerm.toLowerCase()}%`;
+        const sortOrientation: string   = request.SortOrientation === SortOrientationType.ASC ? "ASC" : "DESC";
+
+        let selectedUsers: User[] = await this._userRepository
+                        .runCreateQueryBuilder()
+                        .select("user")
+                        .from(User, "user")
+                        .leftJoinAndSelect("user.ProfileImage", "profileImage")
+                        .innerJoinAndSelect("user.Professional", "professional")
+                        .innerJoinAndSelect("user.AccountSettings", "accountSettings")
+                        .innerJoinAndSelect("professional.Skills", "skills")
+                        .where("LOWER(user.Name) like :searchTerm", { searchTerm: searchTerm })
+                        .orderBy("LOWER(user.Name)", sortOrientation)
+                        .getMany();
+
+        // if email is null then the person making the request is a visitor
+        if (!viewerIsVisitor) {
+            me                = await this._userRepository.getByEmail(request.MyEmail);
+            fullViewingRights = me.AccountSettings.Role === UserRoleType.Admin || me.AccountSettings.Role === UserRoleType.SuperAdmin;
+            selectedUsers     = selectedUsers.filter(u => u.ID !== me.ID
+                                                    && u.AccountSettings.ProfileVisibility !== VisibilityType.Private);
+        } else {
+            selectedUsers = selectedUsers.filter(u => u.AccountSettings.ProfileVisibility === VisibilityType.Everyone);
+        }
+
+        let communitySize: number       = 0;
+
+        // filter users by skills
+        if (request.SkillIDs.length !== 0) {
+            selectedUsers = selectedUsers.filter(u => _.difference(request.SkillIDs, u.Professional.Skills.map(s => s.SkillID)).length === 0);
+        }
+
+        communitySize = selectedUsers.length;
+
+        selectedUsers = selectedUsers.splice(request.Page * request.PageSize, request.PageSize);
+
+        return new GetCommunityResponse(selectedUsers, communitySize);
+
     }
 
     public async getCommunityMemberProfile(email: string, communityMemberID: string): Promise<ProfileDTO> {

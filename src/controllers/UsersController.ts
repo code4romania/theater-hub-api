@@ -15,6 +15,8 @@ import { ChangePasswordRequestDTO,
    CreateProfileResponseDTO,
    FinishRegistrationRequestDTO,
    FinishRegistrationResponseDTO,
+   GetCommunityMembersRequest,
+   GetCommunityResponse,
    MeDTO, ProfileDTO, RegisterDTO,
    ResetPasswordRequestDTO,
    SettingsDTO,
@@ -48,6 +50,23 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     const profile: ProfileDTO = await this._userService.getMyProfile(request.Principal.Email);
 
     response.send(profile);
+  }
+
+  public async getCommunityMembers(request: Request, response: Response): Promise<void> {
+    const myEmail: string           = request.Principal ? request.Principal.Email : "";
+    const searchTerm: string        = request.query.searchTerm;
+    const sortOrientation: string   = request.query.sortOrientation;
+    const skillsLiteral: string     = request.query.skills;
+    const page: number              = request.query.page;
+    const pageSize: number          = request.query.pageSize;
+
+    const getCommunityMembersRequest: GetCommunityMembersRequest =
+            new GetCommunityMembersRequest(myEmail, searchTerm, sortOrientation, skillsLiteral, page, pageSize);
+
+    const community: GetCommunityResponse
+                  = await this._userService.getCommunityMembers(getCommunityMembersRequest);
+
+    response.send(community);
   }
 
   public async getCommunityMemberProfile(request: Request, response: Response): Promise<void> {
