@@ -29,7 +29,7 @@ export class User extends BaseEntity {
   @Column("varchar")
   PasswordHash: string;
 
-  @OneToOne(type => UserImage, { cascade: true, eager: true, onDelete: "CASCADE" })
+  @OneToOne(type => UserImage, { cascade: true, eager: true })
   @JoinColumn({ name: "ProfileImageID" })
   ProfileImage: UserImage;
 
