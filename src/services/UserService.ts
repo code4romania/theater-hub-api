@@ -571,9 +571,15 @@ export class UserService extends BaseService<User> implements IUserService {
         const dbUser: User       = await this._userRepository.getByEmail(email);
         const saltRounds: number = 10;
         const passwordSalt       = bcrypt.genSaltSync(saltRounds);
-        dbUser.PasswordHash      = bcrypt.hashSync(password, passwordSalt);
 
-        this.update(dbUser);
+        this._userRepository
+            .runCreateQueryBuilder()
+            .update(User)
+            .set({
+                PasswordHash: bcrypt.hashSync(password, passwordSalt)
+            })
+            .where("Email = :email", { email })
+            .execute();
 
         if (generateToken) {
 
