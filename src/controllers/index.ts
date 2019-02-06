@@ -1,4 +1,5 @@
 export * from "./IBaseApiController";
+export * from "./IAdministrationController";
 export * from "./IApplicationDataController";
 export * from "./IAuthenticationController";
 export * from "./IAwardsController";
@@ -10,6 +11,7 @@ export * from "./IUsersController";
 export * from "./IUserVideosController";
 export * from "./IWishesController";
 export * from "./BaseApiController";
+export * from "./AdministrationController";
 export * from "./ApplicationDataController";
 export * from "./AuthenticationController";
 export * from "./AwardsController";

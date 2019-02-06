@@ -5,6 +5,7 @@
   "license": "MPL-2.0",
   "scripts": {
     "start": "npm run build && npm run watch",
+    "start-aws": "node dist/server.js",
     "dev": "SET NODE_ENV=development && npm run start",
     "prod": "SET NODE_ENV=production && npm run start",
     "build": "npm run build-ts && npm run tslint && npm run copy-static-assets",

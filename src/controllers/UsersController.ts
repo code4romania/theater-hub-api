@@ -1,13 +1,10 @@
 import { inject, injectable }          from "inversify";
 import { Request, Response }           from "express";
-import chalk                           from "chalk";
-import * as uuid                       from "uuid/v4";
-import { Application }                 from "express";
 import { TYPES }                       from "../types";
 import { User }                        from "../models/User";
 import { IUsersController }            from "./IUsersController";
 import { BaseApiController }           from "./BaseApiController";
-import { IUserService, IEmailService } from "../services";
+import { IUserService }                from "../services";
 import { UserRoleType }                from "../enums";
 import { Validators }                  from "../utils";
 import { ChangePasswordRequestDTO,
@@ -19,11 +16,11 @@ import { ChangePasswordRequestDTO,
    GetCommunityResponse,
    MeDTO, ProfileDTO, RegisterDTO,
    ResetPasswordRequestDTO,
+   SetPasswordRequestDTO,
    SettingsDTO,
    UpdateProfileSection }              from "../dtos";
 import { Award, Education,
-  Experience, Skill,
-  UserImage, UserVideo }               from "../models";
+  Experience, UserImage, UserVideo }   from "../models";
 const fs                               = require("fs");
 const path                             = require("path");
 const pdf                              = require("html-pdf");
@@ -32,12 +29,10 @@ const pdf                              = require("html-pdf");
 export class UsersController extends BaseApiController<User> implements IUsersController {
 
   private readonly _userService: IUserService;
-  private readonly _emailService: IEmailService;
 
-  constructor(@inject(TYPES.UserService) userService: IUserService, @inject(TYPES.EmailService) emailService: IEmailService) {
+  constructor(@inject(TYPES.UserService) userService: IUserService) {
     super(userService);
     this._userService  = userService;
-    this._emailService = emailService;
   }
 
   public async getMe(request: Request, response: Response): Promise<void> {
@@ -153,6 +148,15 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     const resetPasswordRequest: ResetPasswordRequestDTO = request.body as ResetPasswordRequestDTO;
 
     await this._userService.resetPassword(resetPasswordRequest);
+
+    response.sendStatus(200);
+  }
+
+  public async setPassword(request: Request, response: Response): Promise<void> {
+
+    const setPasswordRequest: SetPasswordRequestDTO = request.body as SetPasswordRequestDTO;
+
+    await this._userService.setPassword(setPasswordRequest);
 
     response.sendStatus(200);
   }
@@ -302,48 +306,6 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     }
 
     user = await this._userService.deleteByID(request.params.userID);
-
-    response.send(user);
-  }
-
-  public async enable(request: Request, response: Response): Promise<User> {
-
-    if (!request.params.userID || !Validators.isValidUUID(request.params.userID)) {
-      response.status(400).json("Incorrect id.");
-      response.end();
-      return;
-    }
-
-    let user: User = await this._userService.getByID(request.params.userID);
-
-    if (!user) {
-      response.status(404).json("User not found.");
-      response.end();
-      return;
-    }
-
-    user = await this._userService.enableByID(request.params.userID);
-
-    response.send(user);
-  }
-
-  public async disable(request: Request, response: Response): Promise<User> {
-
-    if (!request.params.userID || !Validators.isValidUUID(request.params.userID)) {
-      response.status(400).json("Incorrect id.");
-      response.end();
-      return;
-    }
-
-    let user: User = await this._userService.getByID(request.params.userID);
-
-    if (!user) {
-      response.status(404).json("User not found.");
-      response.end();
-      return;
-    }
-
-    user = await this._userService.disableByID(request.params.userID);
 
     response.send(user);
   }

@@ -5,7 +5,8 @@ import { ChangePasswordRequestDTO, ChangePasswordResponseDTO,
         FinishRegistrationResponseDTO,
         GetCommunityMembersRequest, GetCommunityResponse,
         MeDTO, ProfileDTO, RegisterDTO,
-        ResetPasswordRequestDTO, SettingsDTO, UpdateProfileSection }       from "../dtos";
+        ResetPasswordRequestDTO, SetPasswordRequestDTO,
+        SettingsDTO, UpdateProfileSection }                                 from "../dtos";
 
 export interface IUserService extends IBaseService<User> {
 
@@ -43,6 +44,8 @@ export interface IUserService extends IBaseService<User> {
 
     resetPassword(resetPasswordRequest: ResetPasswordRequestDTO): Promise<void>;
 
+    setPassword(setPasswordRequestDTO: SetPasswordRequestDTO): Promise<void>;
+
     changePassword(email: string, changePasswordRequest: ChangePasswordRequestDTO): Promise<ChangePasswordResponseDTO>;
 
     createProfile(profile: ProfileDTO): Promise<CreateProfileResponseDTO>;
@@ -54,9 +57,5 @@ export interface IUserService extends IBaseService<User> {
     getCommunityMembers(request: GetCommunityMembersRequest): Promise<GetCommunityResponse>;
 
     getCommunityMemberProfile(email: string, communityMemberID: string): Promise<ProfileDTO>;
-
-    enableByID(id: string): Promise<User>;
-
-    disableByID(id: string): Promise<User>;
 
 }
