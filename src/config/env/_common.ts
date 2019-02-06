@@ -8,7 +8,8 @@ export const commonConfig = {
         baseURL: "http://localhost:3000",
         endpoints: {
             createProfileResource: "create-profile",
-            resetPasswordResource: "reset-password"
+            resetPasswordResource: "reset-password",
+            setPasswordResource: "set-password"
         }
     },
     facebook: {

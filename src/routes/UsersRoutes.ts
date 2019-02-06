@@ -36,6 +36,9 @@ export default (app: any) => {
     app.post("/api/users/password/reset", userRoutesValidators.getResetPasswordValidators(), validatorMiddleware,
                                               (req: Request, res: Response) => usersController.resetPassword(req, res));
 
+    app.post("/api/users/password/set", userRoutesValidators.getSetPasswordValidators(),
+                                              (req: Request, res: Response) => usersController.setPassword(req, res));
+
     app.post("/api/users/password/change", authorizationMiddleware, userRoutesValidators.getChangePasswordValidators(), validatorMiddleware,
                                               (req: Request, res: Response) => usersController.changePassword(req, res));
 
@@ -84,11 +87,5 @@ export default (app: any) => {
     app.patch("/api/users/:userID",           (req: Request, res: Response) => usersController.update(req, res));
 
     app.delete("/api/users/:userID",          (req: Request, res: Response) => usersController.delete(req, res));
-
-    app.patch("/api/users/enable/:userID", authorizationMiddleware, checkUserRoleMiddleware(UserRoleType.Admin),
-                                                                (req: Request, res: Response) => usersController.enable(req, res));
-
-    app.patch("/api/users/disable/:userID", authorizationMiddleware, checkUserRoleMiddleware(UserRoleType.Admin),
-                                                                (req: Request, res: Response) => usersController.disable(req, res));
 
 };

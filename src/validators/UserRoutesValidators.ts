@@ -136,6 +136,35 @@ export class UserRoutesValidators implements IUserRoutesValidators {
         ];
     }
 
+    public getSetPasswordValidators() {
+
+        return [
+           check("Password").not().isEmpty().withMessage("Current password is required")
+               .custom(async (value: string, { req }: any) => {
+
+                    if (!Validators.isValidPassword(value)) {
+                       return Promise.reject("Password must be between 7 and 50 characters long and include upper and lowercase characters");
+                   }
+
+                    const isPasswordCorrect: boolean = await this._authenticationService.areValidCredentials(req.Principal.Email, value);
+
+                    if (!isPasswordCorrect) {
+                       return Promise.reject("Password is invalid");
+                   }
+
+                    return true;
+               }),
+            check("ConfirmNewPassword").not().isEmpty().withMessage("Confirm new password is required")
+                .custom((value: string, { req }: any) => {
+                    if (value !== req.body.NewPassword) {
+                        throw new Error("Confirm new password must match the new password");
+                    }
+
+                        return true;
+                })
+        ];
+    }
+
     public getChangePasswordValidators() {
 
         return [

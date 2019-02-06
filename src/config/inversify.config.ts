@@ -1,6 +1,7 @@
 import { Container }                                                                      from "inversify";
 import { TYPES }                                                                          from "../types/custom-types";
-import { IApplicationDataController, IAuthenticationController,
+import { IAdministrationController, AdministrationController,
+    IApplicationDataController, IAuthenticationController,
     IAwardsController, IEducationController, IExperienceController,
     IMessagesController, IProjectsController, IUsersController, IUserVideosController,
     IWishesController, ApplicationDataController, AuthenticationController,
@@ -11,10 +12,12 @@ import { IAuthenticationRoutesValidators, AuthenticationRoutesValidators,
          IEntitiesValidators, EntitiesValidators,
          IProjectRoutesValidators, ProjectRoutesValidators,
          IUserRoutesValidators, UserRoutesValidators }                                    from "../validators";
-import { IApplicationDataService, IAwardService, IEducationService, IExperienceService,
+import { IAdministrationService, IApplicationDataService, IAwardService,
+    IEducationService, IExperienceService,
     IMessageService, IProjectService, ISkillService,
     IUserService, IUserVideoService, IWishService, IEmailService,
-    ApplicationDataService, AwardService, EducationService, ExperienceService,
+    AdministrationService, ApplicationDataService, AwardService,
+    EducationService, ExperienceService,
     MessageService, ProjectService, SkillService, UserService, UserVideoService,
     WishService, EmailService, IAuthenticationService, AuthenticationService }            from "../services";
 import { IAwardRepository, IEducationRepository, IEntityCategoryRepository,
@@ -30,6 +33,7 @@ import { IAwardRepository, IEducationRepository, IEntityCategoryRepository,
 
 const container = new Container();
 
+container.bind<IAdministrationController>(TYPES.AdministrationController).to(AdministrationController);
 container.bind<IApplicationDataController>(TYPES.ApplicationDataController).to(ApplicationDataController);
 container.bind<IAuthenticationController>(TYPES.AuthenticationController).to(AuthenticationController);
 container.bind<IAwardsController>(TYPES.AwardsController).to(AwardsController);
@@ -46,6 +50,7 @@ container.bind<IEntitiesValidators>(TYPES.EntitiesValidators).to(EntitiesValidat
 container.bind<IProjectRoutesValidators>(TYPES.ProjectRoutesValidators).to(ProjectRoutesValidators);
 container.bind<IUserRoutesValidators>(TYPES.UserRoutesValidators).to(UserRoutesValidators);
 
+container.bind<IAdministrationService>(TYPES.AdministrationService).to(AdministrationService);
 container.bind<IApplicationDataService>(TYPES.ApplicationDataService).to(ApplicationDataService);
 container.bind<IAuthenticationService>(TYPES.AuthenticationService).to(AuthenticationService);
 container.bind<IAwardService>(TYPES.AwardService).to(AwardService);

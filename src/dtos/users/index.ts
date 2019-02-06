@@ -12,6 +12,7 @@ export * from "./ProfileDTO";
 export * from "./RegisterDTO";
 export * from "./ResetPasswordEmailDTO";
 export * from "./ResetPasswordRequestDTO";
+export * from "./SetPasswordRequestDTO";
 export * from "./SettingsDTO";
 export * from "./UpdateProfileSection";
 export * from "./UserDTO";

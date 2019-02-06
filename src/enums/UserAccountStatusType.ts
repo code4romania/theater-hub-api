@@ -1,7 +1,8 @@
 export enum UserAccountStatusType {
-    Registered   = 0,
-    Confirmed    = 1,
-    Enabled      = 2,
-    Disabled     = 3,
-    Deleted      = 4 // for soft deletes
+    Managed      = 0,
+    Registered   = 1,
+    Confirmed    = 2,
+    Enabled      = 3,
+    Disabled     = 4,
+    Deleted      = 5 // for soft deletes
 }
