@@ -4,5 +4,6 @@ export * from "./SocialMediaCategoryType";
 export * from "./SortOrientationType";
 export * from "./UserAccountStatusType";
 export * from "./UserRoleType";
+export * from "./UserSortCriterion";
 export * from "./VisibilityType";
 export * from "./WishCategoryType";

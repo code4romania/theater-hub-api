@@ -1,6 +1,5 @@
 import { Request, Response }    from "express";
 import { IBaseApiController }   from "./IBaseApiController";
-import { User }                 from "../models/User";
 
 export interface IUsersController extends IBaseApiController {
 
@@ -32,6 +31,8 @@ export interface IUsersController extends IBaseApiController {
 
     resetPassword(req: Request, res: Response): Promise<void>;
 
+    setPassword(req: Request, res: Response): Promise<void>;
+
     changePassword(req: Request, res: Response): Promise<void>;
 
     createProfile(req: Request, res: Response): Promise<void>;
@@ -45,9 +46,5 @@ export interface IUsersController extends IBaseApiController {
     getCommunityMembers(req: Request, res: Response): Promise<void>;
 
     getCommunityMemberProfile(req: Request, res: Response): Promise<void>;
-
-    enable(req: Request, res: Response): Promise<User>;
-
-    disable(req: Request, res: Response): Promise<User>;
 
 }

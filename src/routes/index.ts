@@ -1,3 +1,4 @@
+import AdministrationRoutes    from "./AdministrationRoutes";
 import ApplicationDataRoutes   from "./ApplicationDataRoutes";
 import AuthenticationRoutes    from "./AuthenticationRoutes";
 import AwardsRoutes            from "./AwardsRoutes";
@@ -10,6 +11,7 @@ import UserVideosRoutes        from "./UserVideosRoutes";
 import WishesRoutes            from "./WishesRoutes";
 
 module.exports = (app: any) => {
+    AdministrationRoutes(app);
     ApplicationDataRoutes(app);
     AuthenticationRoutes(app);
     AwardsRoutes(app);

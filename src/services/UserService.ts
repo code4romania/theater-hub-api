@@ -35,7 +35,9 @@ import { ChangePasswordResponseDTO,
     GetCommunityMembersRequest,
     GetCommunityResponse,
     ResetPasswordEmailDTO, MeDTO, ProfileDTO,
-    RegisterDTO, ResetPasswordRequestDTO,
+    RegisterDTO,
+    ResetPasswordRequestDTO,
+    SetPasswordRequestDTO,
     SettingsDTO, UpdateProfileSection }        from "../dtos";
 import { EntityCategoryType }                  from "../enums/EntityCategoryType";
 import { ProfileSectionType }                  from "../enums/ProfileSectionType";
@@ -471,10 +473,10 @@ export class UserService extends BaseService<User> implements IUserService {
             EntityCategory:         EntityCategoryType.Professional,
             AccountStatus:          UserAccountStatusType.Registered,
             Role:                   UserRoleType.User,
-            ProfileVisibility:      VisibilityType.Everyone,
-            EmailVisibility:        VisibilityType.Everyone,
-            BirthDateVisibility:    VisibilityType.Everyone,
-            PhoneNumberVisibility:  VisibilityType.Everyone
+            ProfileVisibility:      VisibilityType.Private,
+            EmailVisibility:        VisibilityType.Private,
+            BirthDateVisibility:    VisibilityType.Private,
+            PhoneNumberVisibility:  VisibilityType.Private
         } as UserAccountSettings;
 
         user.Professional  = {
@@ -483,7 +485,7 @@ export class UserService extends BaseService<User> implements IUserService {
         } as Professional;
 
         const createAccountEmailDTO: CreateAccountEmailDTO = {
-              UserEmaiAddress:      register.Email,
+              UserEmailAddress:     register.Email,
               UserFullName:         `${register.FirstName} ${register.LastName}`,
               UserRegistrationID:   registrationID
         } as CreateAccountEmailDTO;
@@ -566,9 +568,10 @@ export class UserService extends BaseService<User> implements IUserService {
         return isResetForgottenPasswordIDCorrect;
     }
 
-    public async newPassword(email: string, password: string, generateToken: boolean = false) {
+    public async newPassword(password: string, generateToken: boolean = false, email?: string, user?: User) {
 
-        const dbUser: User       = await this._userRepository.getByEmail(email);
+        email = email || user.Email;
+
         const saltRounds: number = 10;
         const passwordSalt       = bcrypt.genSaltSync(saltRounds);
 
@@ -583,12 +586,16 @@ export class UserService extends BaseService<User> implements IUserService {
 
         if (generateToken) {
 
+            if (!user) {
+                user = await this._userRepository.getByEmail(email);
+            }
+
             return jwt.sign({
-                firstName: dbUser.Professional.FirstName,
-                lastName: dbUser.Professional.LastName,
+                firstName: user.Professional.FirstName,
+                lastName: user.Professional.LastName,
                 email,
-                role: dbUser.AccountSettings.Role,
-                accountStatus: dbUser.AccountSettings.AccountStatus
+                role: user.AccountSettings.Role,
+                accountStatus: user.AccountSettings.AccountStatus
             }, config.application.tokenSecret);
         }
 
@@ -596,12 +603,31 @@ export class UserService extends BaseService<User> implements IUserService {
 
     public async resetPassword(resetPasswordRequest: ResetPasswordRequestDTO): Promise<void> {
 
-        this.newPassword(resetPasswordRequest.Email, resetPasswordRequest.Password);
+        this.newPassword(resetPasswordRequest.Password, false, resetPasswordRequest.Email);
+    }
+
+    public async setPassword(setPasswordRequestDTO: SetPasswordRequestDTO): Promise<void> {
+
+        const dbUser: User = await this._userRepository.getByEmail(setPasswordRequestDTO.Email);
+
+        if (dbUser.AccountSettings.AccountStatus !== UserAccountStatusType.Managed) {
+            throw new Error("Can't set the password");
+        }
+
+        if (!bcrypt.compareSync(setPasswordRequestDTO.RegistrationID, dbUser.AccountSettings.RegistrationIDHash)) {
+            throw new Error("Incorrect request.");
+        }
+
+        this.newPassword(setPasswordRequestDTO.Password, false, setPasswordRequestDTO.Email, dbUser);
+
+        dbUser.AccountSettings.AccountStatus = UserAccountStatusType.Registered;
+        this._userAccountSettingsRepository.update(dbUser.AccountSettings);
+
     }
 
     public async changePassword(email: string, changePasswordRequest: ChangePasswordRequestDTO): Promise<ChangePasswordResponseDTO> {
 
-        const token: string = await this.newPassword(email, changePasswordRequest.NewPassword, true);
+        const token: string = await this.newPassword(changePasswordRequest.NewPassword, true, email);
 
         const response: ChangePasswordResponseDTO = {
             Token: token
@@ -920,30 +946,6 @@ export class UserService extends BaseService<User> implements IUserService {
         communityMemberProfile.PhoneNumberVisibility = undefined;
 
         return communityMemberProfile;
-    }
-
-    public async enableByID(id: string): Promise<User> {
-        const user: User = await this._userRepository.getByID(id);
-
-        if (user.AccountSettings.AccountStatus === UserAccountStatusType.Enabled) {
-            return user;
-        }
-
-        user.AccountSettings.AccountStatus = UserAccountStatusType.Enabled;
-
-        return this.update(user);
-    }
-
-    public async disableByID(id: string): Promise<User> {
-        const user: User = await this._userRepository.getByID(id);
-
-        if (user.AccountSettings.AccountStatus === UserAccountStatusType.Disabled) {
-            return user;
-        }
-
-        user.AccountSettings.AccountStatus = UserAccountStatusType.Disabled;
-
-        return this.update(user);
     }
 
 }
