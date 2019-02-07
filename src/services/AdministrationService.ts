@@ -213,7 +213,7 @@ export class AdministrationService implements IAdministrationService {
             SenderFullName:         adminUser.Name,
             ReceiverEmailAddress:   dbUser.Email,
             ReceiverFullName:       dbUser.Name,
-            Message:                updateUserAccountStatusDTO.Message
+            Message:                updateUserAccountStatusDTO.Message || ""
         };
 
         await this._emailService.sendAdminEnableUserEmail(adminUpdateUserEmailDTO);
@@ -243,7 +243,7 @@ export class AdministrationService implements IAdministrationService {
             SenderFullName:         adminUser.Name,
             ReceiverEmailAddress:   dbUser.Email,
             ReceiverFullName:       dbUser.Name,
-            Message:                updateUserAccountStatusDTO.Message
+            Message:                updateUserAccountStatusDTO.Message || ""
         };
 
         await this._emailService.sendAdminDisableUserEmail(adminUpdateUserEmailDTO);
@@ -266,7 +266,7 @@ export class AdministrationService implements IAdministrationService {
             SenderFullName:         adminUser.Name,
             ReceiverEmailAddress:   dbUser.Email,
             ReceiverFullName:       dbUser.Name,
-            Message:                updateUserAccountStatusDTO.Message
+            Message:                updateUserAccountStatusDTO.Message || ""
         };
 
         await this._emailService.sendAdminDeleteUserEmail(adminUpdateUserEmailDTO);
