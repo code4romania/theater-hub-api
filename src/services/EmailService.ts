@@ -81,8 +81,9 @@ export class EmailService implements IEmailService {
 
         let enableUserHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails", "AdminEnableUser.html"), "utf8");
         enableUserHTML             = enableUserHTML.replace("{0}", model.ReceiverFullName);
-        enableUserHTML             = enableUserHTML.replace(/{1}/g, model.SenderEmailAddres);
-        enableUserHTML             = enableUserHTML.replace("{2}", model.Message);
+        enableUserHTML             = enableUserHTML.replace("{1}", model.SenderEmailAddres);
+        enableUserHTML             = enableUserHTML.replace("{2}", model.SenderEmailAddres);
+        enableUserHTML             = enableUserHTML.replace("{3}", model.Message);
 
         const mailOptions = {
             from: `${config.application.name} <${config.application.email}>`,
@@ -101,16 +102,17 @@ export class EmailService implements IEmailService {
 
     public async sendAdminDisableUserEmail(model: AdminUpdateUserEmailDTO): Promise<void> {
 
-        let enableUserHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails", "AdminDisableUser.html"), "utf8");
-        enableUserHTML             = enableUserHTML.replace("{0}", model.ReceiverFullName);
-        enableUserHTML             = enableUserHTML.replace(/{1}/g, model.SenderEmailAddres);
-        enableUserHTML             = enableUserHTML.replace("{2}", model.Message);
+        let disableUserHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails", "AdminDisableUser.html"), "utf8");
+        disableUserHTML             = disableUserHTML.replace("{0}", model.ReceiverFullName);
+        disableUserHTML             = disableUserHTML.replace("{1}", model.SenderEmailAddres);
+        disableUserHTML             = disableUserHTML.replace("{2}", model.SenderEmailAddres);
+        disableUserHTML             = disableUserHTML.replace("{3}", model.Message);
 
         const mailOptions = {
             from: `${config.application.name} <${config.application.email}>`,
             to: model.ReceiverEmailAddress,
             subject: `${config.application.name} account disabled`,
-            html: enableUserHTML
+            html: disableUserHTML
         };
 
         this._transporter.sendMail(mailOptions, (error: any, info: any) => {
@@ -123,16 +125,17 @@ export class EmailService implements IEmailService {
 
     public async sendAdminDeleteUserEmail(model: AdminUpdateUserEmailDTO): Promise<void> {
 
-        let enableUserHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails", "AdminDeleteUser.html"), "utf8");
-        enableUserHTML             = enableUserHTML.replace("{0}", model.ReceiverFullName);
-        enableUserHTML             = enableUserHTML.replace(/{1}/g, model.SenderEmailAddres);
-        enableUserHTML             = enableUserHTML.replace("{2}", model.Message);
+        let deleteUserHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails", "AdminDeleteUser.html"), "utf8");
+        deleteUserHTML             = deleteUserHTML.replace("{0}", model.ReceiverFullName);
+        deleteUserHTML             = deleteUserHTML.replace("{1}", model.SenderEmailAddres);
+        deleteUserHTML             = deleteUserHTML.replace("{2}", model.SenderEmailAddres);
+        deleteUserHTML             = deleteUserHTML.replace("{3}", model.Message);
 
         const mailOptions = {
             from: `${config.application.name} <${config.application.email}>`,
             to: model.ReceiverEmailAddress,
             subject: `${config.application.name} account deleted`,
-            html: enableUserHTML
+            html: deleteUserHTML
         };
 
         this._transporter.sendMail(mailOptions, (error: any, info: any) => {
