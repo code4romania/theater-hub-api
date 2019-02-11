@@ -1,4 +1,4 @@
-export * from "./AdminAddManagedUserEmailDTO";
+export * from "./AdminInviteManagedUserEmailDTO";
 export * from "./AdminUpdateUserEmailDTO";
 export * from "./DashboardUser";
 export * from "./GetUsersRequestDTO";

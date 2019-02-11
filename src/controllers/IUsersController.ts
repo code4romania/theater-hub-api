@@ -25,6 +25,8 @@ export interface IUsersController extends IBaseApiController {
 
     register(req: Request, res: Response): Promise<void>;
 
+    managedUserRegister(req: Request, res: Response): Promise<void>;
+
     finishRegistration(req: Request, res: Response): Promise<void>;
 
     forgotPassword(req: Request, res: Response): Promise<void>;

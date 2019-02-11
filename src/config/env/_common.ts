@@ -9,7 +9,7 @@ export const commonConfig = {
         endpoints: {
             createProfileResource: "create-profile",
             resetPasswordResource: "reset-password",
-            setPasswordResource: "set-password"
+            managedUserRegisterResource: "managed-user-signup"
         }
     },
     facebook: {

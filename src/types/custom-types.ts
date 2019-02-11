@@ -21,6 +21,7 @@ const TYPES = {
     UsersController: Symbol("UsersController"),
     UserVideosController: Symbol("UserVideosController"),
     WishesController: Symbol("WishesController"),
+    AdministrationRoutesValidators: Symbol("AdministrationRoutesValidators"),
     AuthenticationRoutesValidators: Symbol("AuthenticationRoutesValidators"),
     EntitiesValidators: Symbol("EntitiesValidators"),
     ProjectRoutesValidators: Symbol("ProjectRoutesValidators"),

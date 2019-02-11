@@ -3,6 +3,8 @@ export interface IUserRoutesValidators {
 
     getRegisterValidators(): any;
 
+    getManagedUserRegisterValidators(): any;
+
     getFinishRegistrationValidators(): any;
 
     getForgotPasswordValidators(): any;

@@ -7,7 +7,6 @@ import { authorizationMiddleware,
 import { Request, Response }               from "express";
 import * as passport                       from "passport";
 
-
 export default (app: any) => {
 
     const authenticationController: IAuthenticationController               = container.get<IAuthenticationController>(TYPES.AuthenticationController);

@@ -14,6 +14,8 @@ import { ChangePasswordRequestDTO,
    FinishRegistrationResponseDTO,
    GetCommunityMembersRequest,
    GetCommunityResponse,
+   ManagedUserRegistrationRequestDTO,
+   ManagedUserRegistrationResponseDTO,
    MeDTO, ProfileDTO, RegisterDTO,
    ResetPasswordRequestDTO,
    SetPasswordRequestDTO,
@@ -125,6 +127,15 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     await this._userService.register(register);
 
     response.sendStatus(200);
+  }
+
+  public async managedUserRegister(request: Request, response: Response): Promise<void> {
+    const managedUserRegistrationRequestDTO: ManagedUserRegistrationRequestDTO = request.body as ManagedUserRegistrationRequestDTO;
+
+    const managedUserRegistrationResponseDTO: ManagedUserRegistrationResponseDTO =
+                                        await this._userService.managedUserRegistration(managedUserRegistrationRequestDTO);
+
+    response.send(managedUserRegistrationResponseDTO);
   }
 
   public async finishRegistration(request: Request, response: Response): Promise<void> {

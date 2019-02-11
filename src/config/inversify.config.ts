@@ -8,7 +8,8 @@ import { IAdministrationController, AdministrationController,
     AwardsController, EducationController, ExperienceController,
     MessagesController,  ProjectsController, UsersController,
     UserVideosController, WishesController }                                             from "../controllers";
-import { IAuthenticationRoutesValidators, AuthenticationRoutesValidators,
+import { IAdministrationRoutesValidators, AdministrationRoutesValidators,
+         IAuthenticationRoutesValidators, AuthenticationRoutesValidators,
          IEntitiesValidators, EntitiesValidators,
          IProjectRoutesValidators, ProjectRoutesValidators,
          IUserRoutesValidators, UserRoutesValidators }                                    from "../validators";
@@ -45,6 +46,7 @@ container.bind<IUsersController>(TYPES.UsersController).to(UsersController);
 container.bind<IUserVideosController>(TYPES.UserVideosController).to(UserVideosController);
 container.bind<IWishesController>(TYPES.WishesController).to(WishesController);
 
+container.bind<IAdministrationRoutesValidators>(TYPES.AdministrationRoutesValidators).to(AdministrationRoutesValidators);
 container.bind<IAuthenticationRoutesValidators>(TYPES.AuthenticationRoutesValidators).to(AuthenticationRoutesValidators);
 container.bind<IEntitiesValidators>(TYPES.EntitiesValidators).to(EntitiesValidators);
 container.bind<IProjectRoutesValidators>(TYPES.ProjectRoutesValidators).to(ProjectRoutesValidators);

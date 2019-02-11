@@ -4,7 +4,7 @@ export interface IAdministrationController {
 
     getUsers(req: Request, res: Response): Promise<void>;
 
-    addUser(req: Request, res: Response): Promise<void>;
+    inviteUser(req: Request, res: Response): Promise<void>;
 
     enableUser(req: Request, res: Response): Promise<void>;
 

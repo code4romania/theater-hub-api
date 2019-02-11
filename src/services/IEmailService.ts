@@ -1,4 +1,4 @@
-import { AdminAddManagedUserEmailDTO, AdminUpdateUserEmailDTO, CreateAccountEmailDTO, ResetPasswordEmailDTO } from "../dtos";
+import { AdminInviteManagedUserEmailDTO, AdminUpdateUserEmailDTO, CreateAccountEmailDTO, ResetPasswordEmailDTO } from "../dtos";
 
 export interface IEmailService  {
 
@@ -10,7 +10,7 @@ export interface IEmailService  {
 
     sendAdminDeleteUserEmail(model: AdminUpdateUserEmailDTO): Promise<void>;
 
-    sendAdminAddManagedUserEmail(model: AdminAddManagedUserEmailDTO): Promise<void>;
+    sendAdminInviteManagedUserEmail(model: AdminInviteManagedUserEmailDTO): Promise<void>;
 
     sendResetPasswordEmail(model: ResetPasswordEmailDTO): Promise<void>;
 

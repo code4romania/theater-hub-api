@@ -27,6 +27,9 @@ export default (app: any) => {
     app.post("/api/users/register",         userRoutesValidators.getRegisterValidators(), validatorMiddleware,
                                               (req: Request, res: Response) => usersController.register(req, res));
 
+    app.post("/api/users/register/managed", userRoutesValidators.getManagedUserRegisterValidators(), validatorMiddleware,
+                                              (req: Request, res: Response) => usersController.managedUserRegister(req, res));
+
     app.post("/api/users/register/finish", userRoutesValidators.getFinishRegistrationValidators(), validatorMiddleware,
                                               (req: Request, res: Response) => usersController.finishRegistration(req, res));
 
