@@ -7,6 +7,8 @@ export * from "./FinishRegistrationResponseDTO";
 export * from "./FinishRegistrationRequestDTO";
 export * from "./GetCommunityMembersRequest";
 export * from "./GetCommunityResponse";
+export * from "./ManagedUserRegistrationRequestDTO";
+export * from "./ManagedUserRegistrationResponseDTO";
 export * from "./MeDTO";
 export * from "./ProfileDTO";
 export * from "./RegisterDTO";

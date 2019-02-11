@@ -8,7 +8,7 @@ export interface IAdministrationService {
 
     getUsers(getUsersRequestDTO: GetUsersRequestDTO): Promise<GetUsersResponseDTO>;
 
-    addUser(adminEmail: string, managedUser: ManagedUserDTO): Promise<User>;
+    inviteUser(adminEmail: string, managedUser: ManagedUserDTO): Promise<User>;
 
     enableUser(adminEmail: string, userID: string, updateUserAccountStatusDTO: UpdateUserAccountStatusDTO): Promise<void>;
 

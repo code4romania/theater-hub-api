@@ -4,6 +4,8 @@ import { ChangePasswordRequestDTO, ChangePasswordResponseDTO,
         CreateProfileResponseDTO,
         FinishRegistrationResponseDTO,
         GetCommunityMembersRequest, GetCommunityResponse,
+        ManagedUserRegistrationRequestDTO,
+        ManagedUserRegistrationResponseDTO,
         MeDTO, ProfileDTO, RegisterDTO,
         ResetPasswordRequestDTO, SetPasswordRequestDTO,
         SettingsDTO, UpdateProfileSection }                                 from "../dtos";
@@ -33,6 +35,8 @@ export interface IUserService extends IBaseService<User> {
     getByEmail(email: string): Promise<User>;
 
     register(register: RegisterDTO): Promise<User>;
+
+    managedUserRegistration(request: ManagedUserRegistrationRequestDTO): Promise<ManagedUserRegistrationResponseDTO>;
 
     isValidRegistrationID(email: string, registrationID: string): Promise<boolean>;
 

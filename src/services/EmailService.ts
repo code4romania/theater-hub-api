@@ -1,10 +1,12 @@
 import { injectable }              from "inversify";
+import * as _                      from "lodash";
 import { IEmailService }           from "./IEmailService";
 import {
-        AdminAddManagedUserEmailDTO,
+        AdminInviteManagedUserEmailDTO,
         AdminUpdateUserEmailDTO,
         CreateAccountEmailDTO,
         ResetPasswordEmailDTO }    from "../dtos";
+import { UserRoleType }            from "../enums";
 const config                       = require("../config/env").getConfig();
 const nodemailer                   = require("nodemailer");
 const fs                           = require("fs");
@@ -51,22 +53,21 @@ export class EmailService implements IEmailService {
         });
     }
 
-    public async sendAdminAddManagedUserEmail(model: AdminAddManagedUserEmailDTO): Promise<void> {
+    public async sendAdminInviteManagedUserEmail(model: AdminInviteManagedUserEmailDTO): Promise<void> {
 
-        let addManagedUserHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails", "AdminAddUser.html"), "utf8");
-        addManagedUserHTML             = addManagedUserHTML.replace("{0}", model.ReceiverFullName);
-        addManagedUserHTML             = addManagedUserHTML.replace("{1}", model.SenderFullName);
-        addManagedUserHTML             = addManagedUserHTML.replace("{2}", model.ReceiverRole);
-        addManagedUserHTML             = addManagedUserHTML.replace(/{senderEmailAddres}/g, model.SenderEmailAddres);
+        let inviteManagedUserHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails", "AdminInviteUser.html"), "utf8");
+        inviteManagedUserHTML             = inviteManagedUserHTML.replace("{0}", (_.invert(UserRoleType))[model.ReceiverRole].toLowerCase());
+        inviteManagedUserHTML             = inviteManagedUserHTML.replace("{1}", model.SenderEmailAddres);
+        inviteManagedUserHTML             = inviteManagedUserHTML.replace("{2}", model.SenderEmailAddres);
 
-        addManagedUserHTML             = addManagedUserHTML.replace("{3}",
-            `${config.client.baseURL}/${config.client.endpoints.setPasswordResource}/?registrationID=${model.RegistrationID}&email=${model.ReceiverEmailAddress}`);
+        inviteManagedUserHTML             = inviteManagedUserHTML.replace("{3}",
+            `${config.client.baseURL}/${config.client.endpoints.managedUserRegisterResource}/?registrationID=${model.RegistrationID}&email=${model.ReceiverEmailAddress}`);
 
         const mailOptions = {
             from: `${config.application.name} <${config.application.email}>`,
             to: model.ReceiverEmailAddress,
             subject: `${config.application.name} registration`,
-            html: addManagedUserHTML
+            html: inviteManagedUserHTML
         };
 
         this._transporter.sendMail(mailOptions, (error: any, info: any) => {
