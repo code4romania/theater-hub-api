@@ -69,6 +69,57 @@ export class UserRoutesValidators implements IUserRoutesValidators {
         ];
     }
 
+    public getManagedUserRegisterValidators() {
+
+        return [
+            check("FirstName").not().isEmpty().withMessage("First name is required")
+                              .isLength({ max: 50 }).withMessage("First name should have at most 50 characters"),
+            check("LastName").not().isEmpty().withMessage("Last name is required")
+                              .isLength({ max: 50 }).withMessage("Last name should have at most 50 characters"),
+            check("Email").not().isEmpty().withMessage("E-mail is required")
+                          .isLength({ max: 100 }).withMessage("E-mail should have at most 100 characters")
+                          .isEmail().withMessage("E-mail must be valid")
+                          .custom((value: string) => {
+                              return this._userService.getByEmail(value).then((user: User) => {
+                                if (user && user.AccountSettings.AccountStatus !== UserAccountStatusType.Managed) {
+                                    return Promise.reject("E-mail already in use");
+                                }
+                              });
+                          }),
+            check("Password").not().isEmpty().withMessage("Password is required")
+                            .custom((value: string) => {
+                                if (!Validators.isValidPassword(value)) {
+                                    throw new Error("Password must be between 7 and 50 characters long and include upper and lowercase characters");
+                                }
+
+                                return true;
+                            }),
+            check("ConfirmPassword").not().isEmpty().withMessage("Confirm password is required")
+                .custom((value: string, { req }: any) => {
+                    if (value !== req.body.Password) {
+                        throw new Error("Confirm password must match the password");
+                    }
+
+                    return true;
+                }),
+            check("AgreeToTerms").custom((value: boolean) => {
+                if (!value) {
+                    throw new Error("You have to agree to the Terms of use and Privacy Policy");
+                }
+
+                return true;
+            }),
+            check("RegistrationID").not().isEmpty().withMessage("Registration ID is required")
+                .custom(async (value: string, { req }: any) => {
+                    const isValidRegistrationID: boolean = await this._userService.isValidRegistrationID(req.body.Email, value);
+
+                    if (!isValidRegistrationID) {
+                        return Promise.reject("Invalid registration ID");
+                    }
+                })
+        ];
+    }
+
     public getFinishRegistrationValidators() {
 
         return [

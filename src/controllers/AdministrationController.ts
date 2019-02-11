@@ -34,12 +34,12 @@ export class AdministrationController implements IAdministrationController {
         response.send(getUsersResponse);
     }
 
-    public async addUser(request: Request, response: Response): Promise<void> {
+    public async inviteUser(request: Request, response: Response): Promise<void> {
         const user: ManagedUserDTO = request.body as ManagedUserDTO;
 
-        const addedUser: User = await this._administrationService.addUser(request.Principal.Email, user);
+        const invitedUser: User = await this._administrationService.inviteUser(request.Principal.Email, user);
 
-        response.send(addedUser);
+        response.send(invitedUser);
     }
 
     public async enableUser(request: Request, response: Response): Promise<void> {

@@ -34,7 +34,10 @@ import { ChangePasswordResponseDTO,
     FinishRegistrationResponseDTO,
     GetCommunityMembersRequest,
     GetCommunityResponse,
-    ResetPasswordEmailDTO, MeDTO, ProfileDTO,
+    ResetPasswordEmailDTO,
+    ManagedUserRegistrationRequestDTO,
+    ManagedUserRegistrationResponseDTO,
+    MeDTO, ProfileDTO,
     RegisterDTO,
     ResetPasswordRequestDTO,
     SetPasswordRequestDTO,
@@ -495,12 +498,61 @@ export class UserService extends BaseService<User> implements IUserService {
         return this.create(user);
     }
 
+    public async managedUserRegistration(request: ManagedUserRegistrationRequestDTO): Promise<ManagedUserRegistrationResponseDTO> {
+
+        const dbUser: User = await this.getByEmail(request.Email);
+
+        const saltRounds: number = 10;
+
+        // TODO: refactor to make hashing the password async
+        const passwordSalt           = bcrypt.genSaltSync(saltRounds);
+        const passwordHash           = bcrypt.hashSync(request.Password, passwordSalt);
+
+        dbUser.Name         = `${request.FirstName} ${request.LastName}`;
+        dbUser.PasswordHash = passwordHash;
+        this._userRepository
+            .runCreateQueryBuilder()
+            .update(User)
+            .set({
+                Name: `${request.FirstName} ${request.LastName}`,
+                PasswordHash: passwordHash
+            })
+            .where("Email = :email", { email: request.Email })
+            .execute();
+
+        this._professionalRepository
+            .runCreateQueryBuilder()
+            .update(Professional)
+            .set({
+                FirstName: request.FirstName,
+                LastName: request.LastName
+            })
+            .where("ID = :ID", { ID: dbUser.Professional.ID })
+            .execute();
+
+        const dbUserAccountSettings         = await this._userAccountSettingsRepository.getByID(dbUser.AccountSettings.ID);
+        dbUserAccountSettings.AccountStatus = UserAccountStatusType.Confirmed;
+        await this._userAccountSettingsRepository.update(dbUserAccountSettings);
+
+        return {
+            Role: dbUserAccountSettings.Role,
+            Token: jwt.sign({
+                firstName: dbUser.Professional.FirstName,
+                lastName: dbUser.Professional.LastName,
+                email: request.Email,
+                role: dbUserAccountSettings.Role,
+                accountStatus: dbUserAccountSettings.AccountStatus
+            }, config.application.tokenSecret)
+        } as ManagedUserRegistrationResponseDTO;
+    }
+
     public async isValidRegistrationID(email: string, registrationID: string): Promise<boolean> {
 
         const dbUser: User = await this._userRepository.getByEmail(email);
 
         if (!dbUser ||
-            (dbUser.AccountSettings.AccountStatus !== UserAccountStatusType.Registered
+            (dbUser.AccountSettings.AccountStatus !== UserAccountStatusType.Managed &&
+                dbUser.AccountSettings.AccountStatus !== UserAccountStatusType.Registered
                                     && dbUser.AccountSettings.AccountStatus !== UserAccountStatusType.Confirmed)) {
             return false;
         }

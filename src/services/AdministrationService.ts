@@ -8,7 +8,7 @@ import { IUserAccountSettingsRepository,
     IUserRepository }                       from "../repositories";
 import { Professional, User,
     UserAccountSettings }                   from "../models";
-import { AdminAddManagedUserEmailDTO,
+import { AdminInviteManagedUserEmailDTO,
         AdminUpdateUserEmailDTO,
         GetUsersRequestDTO,
         GetUsersResponseDTO,
@@ -23,7 +23,7 @@ import { EntityCategoryType,
 @injectable()
 export class AdministrationService implements IAdministrationService {
 
-    private readonly _userSevice: IUserService;
+    private readonly _userService: IUserService;
     private readonly _emailService: IEmailService;
     private readonly _userAccountSettingsRepository: IUserAccountSettingsRepository;
     private readonly _userRepository: IUserRepository;
@@ -33,7 +33,7 @@ export class AdministrationService implements IAdministrationService {
         @inject(TYPES.UserAccountSettingsRepository) userAccountSettingsRepository: IUserAccountSettingsRepository,
         @inject(TYPES.UserRepository) userRepository: IUserRepository) {
 
-        this._userSevice                    = userService;
+        this._userService                   = userService;
         this._emailService                  = emailService;
         this._userAccountSettingsRepository = userAccountSettingsRepository;
         this._userRepository                = userRepository;
@@ -41,7 +41,7 @@ export class AdministrationService implements IAdministrationService {
 
     public async getUsers(request: GetUsersRequestDTO): Promise<GetUsersResponseDTO> {
 
-        const adminUser: User = await this._userSevice.getByEmail(request.MyEmail);
+        const adminUser: User = await this._userService.getByEmail(request.MyEmail);
 
         this.checkIsAdminUser(adminUser);
 
@@ -126,21 +126,15 @@ export class AdministrationService implements IAdministrationService {
 
     }
 
-    public async addUser(email: string, managedUser: ManagedUserDTO): Promise<User> {
-        const adminUser: User   = await this._userSevice.getByEmail(email);
-        const dbUser: User      = await this._userSevice.getByEmail(managedUser.Email);
+    public async inviteUser(email: string, managedUser: ManagedUserDTO): Promise<User> {
+        const adminUser: User   = await this._userService.getByEmail(email);
+        const dbUser: User      = await this._userService.getByEmail(managedUser.Email);
 
         this.checkIsAdminUser(adminUser);
 
-        if (adminUser.AccountSettings.Role === UserRoleType.Admin && managedUser.Role !== UserRoleType.User) {
-            throw new Error("Insufficient permissions.");
-        }
-
-        if (dbUser && dbUser.AccountSettings.AccountStatus !== UserAccountStatusType.Managed) {
-            throw new Error("E-mail already in use");
-        } else if (!!dbUser) {
+        if (dbUser && dbUser.AccountSettings.AccountStatus === UserAccountStatusType.Managed) {
             // Delete previous unfinished registration attempt.
-            this._userSevice.deleteByID(dbUser.ID);
+            this._userService.deleteByID(dbUser.ID);
         }
 
         const saltRounds: number     = 10;
@@ -150,7 +144,7 @@ export class AdministrationService implements IAdministrationService {
 
         const user: User = {
             Email:              managedUser.Email,
-            Name:               `${managedUser.FirstName} ${managedUser.LastName}`,
+            Name:               "",
             PasswordHash:       ""
         } as User;
 
@@ -165,33 +159,30 @@ export class AdministrationService implements IAdministrationService {
             PhoneNumberVisibility:  VisibilityType.Private
         } as UserAccountSettings;
 
-        if (managedUser.Role === UserRoleType.User) {
-            user.Professional  = {
-                FirstName: managedUser.FirstName,
-                LastName:  managedUser.LastName
-            } as Professional;
-        }
+        user.Professional  = {
+            FirstName: "",
+            LastName:  ""
+        } as Professional;
 
-        await this._userSevice.create(user);
+        await this._userService.create(user);
 
-        const addManagedUserEmailDTO: AdminAddManagedUserEmailDTO = {
+        const inviteManagedUserEmailDTO: AdminInviteManagedUserEmailDTO = {
             SenderEmailAddres:      adminUser.Email,
             SenderFullName:         adminUser.Name,
             ReceiverEmailAddress:   managedUser.Email,
-            ReceiverFullName:       `${managedUser.FirstName} ${managedUser.LastName}`,
             ReceiverRole:           user.AccountSettings.Role.toString(),
             RegistrationID:         registrationID
         };
 
-        await this._emailService.sendAdminAddManagedUserEmail(addManagedUserEmailDTO);
+        await this._emailService.sendAdminInviteManagedUserEmail(inviteManagedUserEmailDTO);
 
         return user;
 
     }
 
     public async enableUser(adminEmail: string, userID: string, updateUserAccountStatusDTO: UpdateUserAccountStatusDTO): Promise<void> {
-        const adminUser: User   = await this._userSevice.getByEmail(adminEmail);
-        const dbUser: User      = await this._userSevice.getByID(userID);
+        const adminUser: User   = await this._userService.getByEmail(adminEmail);
+        const dbUser: User      = await this._userService.getByID(userID);
 
         this.checkIsAdminUser(adminUser);
 
@@ -220,8 +211,8 @@ export class AdministrationService implements IAdministrationService {
     }
 
     public async disableUser(adminEmail: string, userID: string, updateUserAccountStatusDTO: UpdateUserAccountStatusDTO): Promise<void> {
-        const adminUser: User   = await this._userSevice.getByEmail(adminEmail);
-        const dbUser: User      = await this._userSevice.getByID(userID);
+        const adminUser: User   = await this._userService.getByEmail(adminEmail);
+        const dbUser: User      = await this._userService.getByID(userID);
 
         this.checkIsAdminUser(adminUser);
 
@@ -250,8 +241,8 @@ export class AdministrationService implements IAdministrationService {
     }
 
     public async deleteUser(adminEmail: string, userID: string, updateUserAccountStatusDTO: UpdateUserAccountStatusDTO): Promise<User> {
-        const adminUser: User   = await this._userSevice.getByEmail(adminEmail);
-        const dbUser: User      = await this._userSevice.getByID(userID);
+        const adminUser: User   = await this._userService.getByEmail(adminEmail);
+        const dbUser: User      = await this._userService.getByID(userID);
 
         this.checkIsAdminUser(adminUser);
 
@@ -259,7 +250,7 @@ export class AdministrationService implements IAdministrationService {
             throw new Error("Insufficient permissions.");
         }
 
-        await this._userSevice.deleteByID(userID);
+        await this._userService.deleteByID(userID);
 
         const adminUpdateUserEmailDTO: AdminUpdateUserEmailDTO = {
             SenderEmailAddres:      adminUser.Email,
