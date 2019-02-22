@@ -46,6 +46,7 @@ import { EntityCategoryType }                  from "../enums/EntityCategoryType
 import { ProfileSectionType }                  from "../enums/ProfileSectionType";
 import { SocialMediaCategoryType }             from "../enums/SocialMediaCategoryType";
 import { SortOrientationType }                 from "../enums/SortOrientationType";
+import { UserAccountProviderType }             from "../enums/UserAccountProviderType";
 import { UserAccountStatusType }               from "../enums/UserAccountStatusType";
 import { UserRoleType }                        from "../enums/UserRoleType";
 import { VisibilityType }                      from "../enums/VisibilityType";
@@ -400,6 +401,7 @@ export class UserService extends BaseService<User> implements IUserService {
         experienceSection.RemovedEntities.forEach(id => {
             this._experienceRepository.deleteByID(id);
         });
+
     }
 
     public async updateEducation(userEmail: string, educationSection: UpdateProfileSection<Education>): Promise<void> {
@@ -445,7 +447,7 @@ export class UserService extends BaseService<User> implements IUserService {
         return this._userRepository.getByEmail(email);
     }
 
-    public async register(register: RegisterDTO): Promise<User> {
+    public async register(register: RegisterDTO, accountProvider: UserAccountProviderType): Promise<User> {
 
         const dbUser: User = await this.getByEmail(register.Email);
 
@@ -456,11 +458,16 @@ export class UserService extends BaseService<User> implements IUserService {
             this.deleteByID(dbUser.ID);
         }
 
-        const saltRounds: number = 10;
+        const saltRounds: number              = 10;
+        let passwordHash                      = "";
+        const isLocalAccountProvider: boolean = accountProvider === UserAccountProviderType.Local;
 
-        // TODO: refactor to make hashing the password async
-        const passwordSalt           = bcrypt.genSaltSync(saltRounds);
-        const passwordHash           = bcrypt.hashSync(register.Password, passwordSalt);
+        if (isLocalAccountProvider) {
+            // TODO: refactor to make hashing the password async
+            const passwordSalt           = bcrypt.genSaltSync(saltRounds);
+            passwordHash                 = bcrypt.hashSync(register.Password, passwordSalt);
+        }
+
         const registrationID: string = uuidv4();
         const registrationIDSalt     = bcrypt.genSaltSync(saltRounds);
         const registrationIDHash     = bcrypt.hashSync(registrationID, registrationIDSalt);
@@ -474,7 +481,8 @@ export class UserService extends BaseService<User> implements IUserService {
         user.AccountSettings = {
             RegistrationIDHash:     registrationIDHash,
             EntityCategory:         EntityCategoryType.Professional,
-            AccountStatus:          UserAccountStatusType.Registered,
+            AccountProvider:        accountProvider,
+            AccountStatus:          isLocalAccountProvider ? UserAccountStatusType.Registered : UserAccountStatusType.Confirmed,
             Role:                   UserRoleType.User,
             ProfileVisibility:      VisibilityType.Private,
             EmailVisibility:        VisibilityType.Private,
@@ -487,15 +495,18 @@ export class UserService extends BaseService<User> implements IUserService {
             LastName:  register.LastName
         } as Professional;
 
-        const createAccountEmailDTO: CreateAccountEmailDTO = {
-              UserEmailAddress:     register.Email,
-              UserFullName:         `${register.FirstName} ${register.LastName}`,
-              UserRegistrationID:   registrationID
-        } as CreateAccountEmailDTO;
+        if (isLocalAccountProvider) {
+            const createAccountEmailDTO: CreateAccountEmailDTO = {
+                  UserEmailAddress:     register.Email,
+                  UserFullName:         `${register.FirstName} ${register.LastName}`,
+                  UserRegistrationID:   registrationID
+            } as CreateAccountEmailDTO;
 
-        this._emailService.sendCreateAccountEmail(createAccountEmailDTO);
+            this._emailService.sendCreateAccountEmail(createAccountEmailDTO);
+        }
 
         return this.create(user);
+
     }
 
     public async managedUserRegistration(request: ManagedUserRegistrationRequestDTO): Promise<ManagedUserRegistrationResponseDTO> {
@@ -909,7 +920,7 @@ export class UserService extends BaseService<User> implements IUserService {
                         .innerJoinAndSelect("user.Professional", "professional")
                         .innerJoinAndSelect("user.AccountSettings", "accountSettings")
                         .innerJoinAndSelect("professional.Skills", "skills")
-                        .where("LOWER(user.Name) like :searchTerm", { searchTerm: searchTerm })
+                        .where("LOWER(user.Name) like :searchTerm AND accountSettings.AccountStatus <> :disabledStatus", { searchTerm: searchTerm, disabledStatus: UserAccountStatusType.Disabled })
                         .orderBy("LOWER(user.Name)", sortOrientation)
                         .getMany();
 
@@ -968,8 +979,16 @@ export class UserService extends BaseService<User> implements IUserService {
             fullViewingRights = me.AccountSettings.Role === UserRoleType.Admin || me.AccountSettings.Role === UserRoleType.SuperAdmin;
         }
 
+        if (communityMember.AccountSettings.Role === UserRoleType.Admin && me.AccountSettings.Role !== UserRoleType.SuperAdmin) {
+            return undefined;
+        }
+
         if (fullViewingRights) {
             return communityMemberProfile;
+        }
+
+        if (communityMember.AccountSettings.AccountStatus === UserAccountStatusType.Disabled) {
+            return undefined;
         }
 
         if ((communityMemberProfileVisibility === VisibilityType.Private) ||

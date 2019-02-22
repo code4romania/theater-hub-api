@@ -1,6 +1,6 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class SeedMigration1544546506716 implements MigrationInterface {
+export class SeedMigration1550838231645 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.query(`INSERT INTO "EntityCategory"("ID", "Name", "ParentID") VALUES (0, 'Professional', null)`);
@@ -23,11 +23,16 @@ export class SeedMigration1544546506716 implements MigrationInterface {
         await queryRunner.query(`INSERT INTO "SocialMediaCategory"("ID", "Name") VALUES (3, 'Linkedin')`);
         await queryRunner.query(`INSERT INTO "SocialMediaCategory"("ID", "Name") VALUES (4, 'Vimeo')`);
 
-        await queryRunner.query(`INSERT INTO "UserAccountStatus"("ID", "Name") VALUES (0, 'Registered')`);
-        await queryRunner.query(`INSERT INTO "UserAccountStatus"("ID", "Name") VALUES (1, 'Confirmed')`);
-        await queryRunner.query(`INSERT INTO "UserAccountStatus"("ID", "Name") VALUES (2, 'Enabled')`);
-        await queryRunner.query(`INSERT INTO "UserAccountStatus"("ID", "Name") VALUES (3, 'Disabled')`);
-        await queryRunner.query(`INSERT INTO "UserAccountStatus"("ID", "Name") VALUES (4, 'Deleted')`);
+        await queryRunner.query(`INSERT INTO "UserAccountProvider"("ID", "Name") VALUES (0, 'Local')`);
+        await queryRunner.query(`INSERT INTO "UserAccountProvider"("ID", "Name") VALUES (1, 'Facebook')`);
+        await queryRunner.query(`INSERT INTO "UserAccountProvider"("ID", "Name") VALUES (2, 'Google')`);
+
+        await queryRunner.query(`INSERT INTO "UserAccountStatus"("ID", "Name") VALUES (0, 'Managed')`);
+        await queryRunner.query(`INSERT INTO "UserAccountStatus"("ID", "Name") VALUES (1, 'Registered')`);
+        await queryRunner.query(`INSERT INTO "UserAccountStatus"("ID", "Name") VALUES (2, 'Confirmed')`);
+        await queryRunner.query(`INSERT INTO "UserAccountStatus"("ID", "Name") VALUES (3, 'Enabled')`);
+        await queryRunner.query(`INSERT INTO "UserAccountStatus"("ID", "Name") VALUES (4, 'Disabled')`);
+        await queryRunner.query(`INSERT INTO "UserAccountStatus"("ID", "Name") VALUES (5, 'Deleted')`);
 
         await queryRunner.query(`INSERT INTO "UserRole"("ID", "Name") VALUES (0, 'User')`);
         await queryRunner.query(`INSERT INTO "UserRole"("ID", "Name") VALUES (1, 'Admin')`);

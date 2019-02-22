@@ -12,4 +12,5 @@ export class RegisterDTO {
     public ConfirmPassword: string;
 
     public AgreeToTerms: boolean;
+
 }
