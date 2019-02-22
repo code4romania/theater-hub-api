@@ -16,6 +16,7 @@ import { AdminInviteManagedUserEmailDTO,
         UpdateUserAccountStatusDTO }        from "../dtos";
 import { EntityCategoryType,
     SortOrientationType,
+    UserAccountProviderType,
     UserAccountStatusType,
     UserRoleType, UserSortCriterion,
     VisibilityType }                        from "../enums";
@@ -151,6 +152,7 @@ export class AdministrationService implements IAdministrationService {
         user.AccountSettings = {
             RegistrationIDHash:     registrationIDHash,
             EntityCategory:         EntityCategoryType.Professional,
+            AccountProvider:        UserAccountProviderType.Local,
             AccountStatus:          UserAccountStatusType.Managed,
             Role:                   managedUser.Role,
             ProfileVisibility:      VisibilityType.Private,

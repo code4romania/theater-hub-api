@@ -2,6 +2,7 @@ export * from "./EntityCategoryType";
 export * from "./ProfileSectionType";
 export * from "./SocialMediaCategoryType";
 export * from "./SortOrientationType";
+export * from "./UserAccountProviderType";
 export * from "./UserAccountStatusType";
 export * from "./UserRoleType";
 export * from "./UserSortCriterion";

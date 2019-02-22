@@ -4,6 +4,11 @@ import { UserRoleType }                    from "../enums";
 const config                               = require("../config/env").getConfig();
 const jwt                                  = require("jsonwebtoken");
 
+export function setOriginMiddleware(request: Request, response: Response, next: NextFunction) {
+    request.headers.origin = config.application.baseURL;
+    next();
+}
+
 export function validatorMiddleware(request: Request, response: Response, next: NextFunction) {
     const errors = validationResult(request);
 

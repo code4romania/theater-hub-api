@@ -5,7 +5,8 @@ import { User }                        from "../models/User";
 import { IUsersController }            from "./IUsersController";
 import { BaseApiController }           from "./BaseApiController";
 import { IUserService }                from "../services";
-import { UserRoleType }                from "../enums";
+import { UserAccountProviderType,
+        UserRoleType, }                from "../enums";
 import { Validators }                  from "../utils";
 import { ChangePasswordRequestDTO,
    ChangePasswordResponseDTO,
@@ -124,7 +125,7 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
   public async register(request: Request, response: Response): Promise<void> {
     const register: RegisterDTO = request.body as RegisterDTO;
 
-    await this._userService.register(register);
+    await this._userService.register(register, UserAccountProviderType.Local);
 
     response.sendStatus(200);
   }
