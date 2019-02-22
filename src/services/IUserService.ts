@@ -9,6 +9,7 @@ import { ChangePasswordRequestDTO, ChangePasswordResponseDTO,
         MeDTO, ProfileDTO, RegisterDTO,
         ResetPasswordRequestDTO, SetPasswordRequestDTO,
         SettingsDTO, UpdateProfileSection }                                 from "../dtos";
+import { UserAccountProviderType }                                          from "../enums/UserAccountProviderType";
 
 export interface IUserService extends IBaseService<User> {
 
@@ -34,7 +35,7 @@ export interface IUserService extends IBaseService<User> {
 
     getByEmail(email: string): Promise<User>;
 
-    register(register: RegisterDTO): Promise<User>;
+    register(register: RegisterDTO, accountProvider: UserAccountProviderType): Promise<User>;
 
     managedUserRegistration(request: ManagedUserRegistrationRequestDTO): Promise<ManagedUserRegistrationResponseDTO>;
 

@@ -1,50 +1,35 @@
-import * as passport from "passport";
-import * as request from "request";
-import * as passportLocal from "passport-local";
-import * as passportFacebook from "passport-facebook";
-import * as _ from "lodash";
+import * as passport                from "passport";
+import * as request                 from "request";
+import * as passportLocal           from "passport-local";
+import * as passportFacebook        from "passport-facebook";
+import * as passportGoogle          from "passport-google-oauth2";
+import * as _                       from "lodash";
+import { container }                from "../config/inversify.config";
+import { Request, Response,
+               NextFunction }       from "express";
+import { TYPES }                    from "../types/custom-types";
+import { IUserService }             from "../services";
+import { Container }                from "inversify";
+import { RegisterDTO }              from "../dtos";
+import { User }                     from "../models";
+import { UserAccountProviderType }  from "../enums/UserAccountProviderType";
 
-// import { User, UserType } from '../models/User';
-// import { default as User } from "../models/User";
-import * as Config from "./env";
-import { Request, Response, NextFunction } from "express";
-
-const User: any = {};
+const config                     = require("./env").getConfig();
 
 const LocalStrategy      = passportLocal.Strategy;
 const FacebookStrategy   = passportFacebook.Strategy;
-const GoogleStrategy     = passportFacebook.Strategy;
+const GoogleStrategy     = passportGoogle.Strategy;
 
 passport.serializeUser<any, any>((user, done) => {
-  done(undefined, user.id);
+  done(undefined, user.ID);
 });
 
-passport.deserializeUser((id, done) => {
-  User.findById(id, (err: any, user: any) => {
-    done(err, user);
-  });
+passport.deserializeUser(async (id: string, done) => {
+  const userService: IUserService  = container.get<IUserService>(TYPES.UserService);
+  const dbUser: User               = await userService.getByID(id);
+
+  done(undefined, dbUser);
 });
-
-
-/**
- * Sign in using Email and Password.
- */
-passport.use(new LocalStrategy({ usernameField: "email" }, (email, password, done) => {
-  User.findOne({ email: email.toLowerCase() }, (err: any, user: any) => {
-    if (err) { return done(err); }
-    if (!user) {
-      return done(undefined, false, { message: `Email ${email} not found.` });
-    }
-    user.comparePassword(password, (err: Error, isMatch: boolean) => {
-      if (err) { return done(err); }
-      if (isMatch) {
-        return done(undefined, user);
-      }
-      return done(undefined, false, { message: "Invalid email or password." });
-    });
-  });
-}));
-
 
 /**
  * OAuth Strategy Overview
@@ -61,69 +46,47 @@ passport.use(new LocalStrategy({ usernameField: "email" }, (email, password, don
  *       - Else create a new account.
  */
 
+const strategyHandler = async (request: any, accessToken: any, refreshToken: any, profile: any, done: any, accountProvider: UserAccountProviderType) => {
+  const firstName: string = profile.name.givenName;
+  const lastName: string  = profile.name.familyName;
+  const email: string     = profile.email || profile.emails[0].value;
+
+  const userService: IUserService  = container.get<IUserService>(TYPES.UserService);
+  let dbUser: User                 = await userService.getByEmail(email);
+
+  if (!dbUser) {
+    const registerDTO: RegisterDTO = {
+      FirstName: firstName,
+      LastName: lastName,
+      Email: email
+    } as RegisterDTO;
+
+    dbUser = await userService.register(registerDTO, accountProvider);
+  }
+
+  done(undefined, dbUser);
+};
+
+/**
+ * Sign in with Google.
+ */
+passport.use(new GoogleStrategy({
+    clientID: config.google.app_id,
+    clientSecret: config.google.app_secret,
+    callbackURL: config.google.callback_url,
+    passReqToCallback: true
+  }, (request: any, accessToken: any, refreshToken: any, profile: any, done: any) => strategyHandler(request, accessToken, refreshToken, profile, done, UserAccountProviderType.Google)));
 
 /**
  * Sign in with Facebook.
  */
-// passport.use(new FacebookStrategy({
-//   // clientID: process.env.FACEBOOK_ID,
-//   // clientSecret: process.env.FACEBOOK_SECRET,
-//   // callbackURL: "/auth/facebook/callback",
-//   clientID: Config.developmentConfig.facebook.app_id,
-//   clientSecret: Config.developmentConfig.facebook.app_secret,
-//   callbackURL: Config.developmentConfig.facebook.callback_url,
-//   profileFields: ["name", "email", "link", "locale", "timezone"],
-//   passReqToCallback: true
-// }, (req: any, accessToken, refreshToken, profile, done) => {
-//   if (req.user) {
-//     User.findOne({ facebook: profile.id }, (err: any, existingUser: any) => {
-//       if (err) { return done(err); }
-//       if (existingUser) {
-//         req.flash("errors", { msg: "There is already a Facebook account that belongs to you. Sign in with that account or delete it, then link it with your current account." });
-//         done(err);
-//       } else {
-//         User.findById(req.user.id, (err: any, user: any) => {
-//           if (err) { return done(err); }
-//           user.facebook = profile.id;
-//           user.tokens.push({ kind: "facebook", accessToken });
-//           user.profile.name = user.profile.name || `${profile.name.givenName} ${profile.name.familyName}`;
-//           user.profile.gender = user.profile.gender || profile._json.gender;
-//           user.profile.picture = user.profile.picture || `https://graph.facebook.com/${profile.id}/picture?type=large`;
-//           user.save((err: Error) => {
-//             req.flash("info", { msg: "Facebook account has been linked." });
-//             done(err, user);
-//           });
-//         });
-//       }
-//     });
-//   } else {
-//     User.findOne({ facebook: profile.id }, (err: any, existingUser: any) => {
-//       if (err) { return done(err); }
-//       if (existingUser) {
-//         return done(undefined, existingUser);
-//       }
-//       User.findOne({ email: profile._json.email }, (err: any, existingEmailUser: any) => {
-//         if (err) { return done(err); }
-//         if (existingEmailUser) {
-//           req.flash("errors", { msg: "There is already an account using this email address. Sign in to that account and link it with Facebook manually from Account Settings." });
-//           done(err);
-//         } else {
-//           const user: any = new User();
-//           user.email = profile._json.email;
-//           user.facebook = profile.id;
-//           user.tokens.push({ kind: "facebook", accessToken });
-//           user.profile.name = `${profile.name.givenName} ${profile.name.familyName}`;
-//           user.profile.gender = profile._json.gender;
-//           user.profile.picture = `https://graph.facebook.com/${profile.id}/picture?type=large`;
-//           user.profile.location = (profile._json.location) ? profile._json.location.name : "";
-//           user.save((err: Error) => {
-//             done(err, user);
-//           });
-//         }
-//       });
-//     });
-//   }
-// }));
+passport.use(new FacebookStrategy({
+    clientID: config.facebook.app_id,
+    clientSecret: config.facebook.app_secret,
+    callbackURL: config.facebook.callback_url,
+    profileFields: ["name", "email", "link", "locale", "timezone"],
+    passReqToCallback: true
+  }, (request: any, accessToken: any, refreshToken: any, profile: any, done: any) => strategyHandler(request, accessToken, refreshToken, profile, done, UserAccountProviderType.Facebook)));
 
 /**
  * Login Required middleware.

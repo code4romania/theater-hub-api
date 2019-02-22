@@ -1,6 +1,6 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class InitialMigration1544546480657 implements MigrationInterface {
+export class InitialMigration1550838213695 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.query(`CREATE TABLE "UserImage" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "Image" bytea NOT NULL, "IsProfileImage" boolean NOT NULL, "UserID" uuid, CONSTRAINT "PK_a7b8f73d33c3a99ca1b1145eeb6" PRIMARY KEY ("ID"))`);
@@ -21,10 +21,11 @@ export class InitialMigration1544546480657 implements MigrationInterface {
         await queryRunner.query(`CREATE TABLE "ProfessionalSkill" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ProfessionalID" uuid NOT NULL, "SkillID" integer NOT NULL, CONSTRAINT "PK_b9f93025c8891c9dbdfc43204fd" PRIMARY KEY ("ProfessionalID", "SkillID"))`);
         await queryRunner.query(`CREATE TABLE "Professional" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "FirstName" character varying(100) NOT NULL, "LastName" character varying(100) NOT NULL, "UserID" uuid, CONSTRAINT "REL_8ed7e58c98b95d0ae3cffaab4f" UNIQUE ("UserID"), CONSTRAINT "PK_454aa355f9b9ff32a15fc74c8e6" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "Sponsor" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "UserID" uuid, CONSTRAINT "REL_6d3abbf9e41a3a1e50ec9dd00c" UNIQUE ("UserID"), CONSTRAINT "PK_1b604b98ed2989dcd065cff247e" PRIMARY KEY ("ID"))`);
-        await queryRunner.query(`CREATE TABLE "UserAccountSettings" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "RegistrationIDHash" character varying NOT NULL, "ResetForgottenPasswordIDHash" character varying, "ResetForgottenPasswordExpiration" TIMESTAMP WITH TIME ZONE, "AccountStatus" integer NOT NULL, "Role" integer NOT NULL, "EntityCategory" integer NOT NULL, "ProfileVisibility" integer NOT NULL, "EmailVisibility" integer NOT NULL, "BirthDateVisibility" integer NOT NULL, "PhoneNumberVisibility" integer NOT NULL, "UserID" uuid, CONSTRAINT "REL_5a7eb571f0bc1e9de185a6b63d" UNIQUE ("UserID"), CONSTRAINT "PK_9272ecdde0da589d97ea1d2e95d" PRIMARY KEY ("ID"))`);
+        await queryRunner.query(`CREATE TABLE "UserAccountSettings" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "RegistrationIDHash" character varying NOT NULL, "ResetForgottenPasswordIDHash" character varying, "ResetForgottenPasswordExpiration" TIMESTAMP WITH TIME ZONE, "AccountProvider" integer NOT NULL, "AccountStatus" integer NOT NULL, "Role" integer NOT NULL, "EntityCategory" integer NOT NULL, "ProfileVisibility" integer NOT NULL, "EmailVisibility" integer NOT NULL, "BirthDateVisibility" integer NOT NULL, "PhoneNumberVisibility" integer NOT NULL, "UserID" uuid, CONSTRAINT "REL_5a7eb571f0bc1e9de185a6b63d" UNIQUE ("UserID"), CONSTRAINT "PK_9272ecdde0da589d97ea1d2e95d" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "User" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "Name" character varying NOT NULL, "Email" character varying(100) NOT NULL, "PasswordHash" character varying NOT NULL, "Description" character varying, "BirthDate" TIMESTAMP WITH TIME ZONE, "PhoneNumber" character varying, "Website" character varying, "ProfileImageID" uuid, CONSTRAINT "REL_6b519da47b33fb18d9db02d97e" UNIQUE ("ProfileImageID"), CONSTRAINT "PK_7c38bb872c3c617c80a311b81d0" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "Award" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "Title" character varying(100) NOT NULL, "Issuer" character varying(100) NOT NULL, "Description" character varying NOT NULL, "Date" TIMESTAMP WITH TIME ZONE NOT NULL, "UserID" uuid, CONSTRAINT "PK_a6d1e5342f5d7b7633c7b50286a" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "EntityCategory" ("ID" integer NOT NULL, "Name" character varying(100) NOT NULL, "ParentID" integer, CONSTRAINT "PK_029cde6c720b2d2a0c8a8383f22" PRIMARY KEY ("ID"))`);
+        await queryRunner.query(`CREATE TABLE "UserAccountProvider" ("ID" integer NOT NULL, "Name" character varying(100) NOT NULL, CONSTRAINT "PK_43e9fba091dc9110517dc37e5d9" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "UserAccountStatus" ("ID" integer NOT NULL, "Name" character varying(100) NOT NULL, CONSTRAINT "PK_00e661e287613a84e9146e1791f" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "UserRole" ("ID" integer NOT NULL, "Name" character varying(100) NOT NULL, CONSTRAINT "PK_446ad4edcf7f1eb13f071de48ed" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "Visibility" ("ID" integer NOT NULL, "Name" character varying(100) NOT NULL, CONSTRAINT "PK_db05b52391276c3e8ee31926c74" PRIMARY KEY ("ID"))`);
@@ -51,7 +52,7 @@ export class InitialMigration1544546480657 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "Professional" ADD CONSTRAINT "FK_8ed7e58c98b95d0ae3cffaab4ff" FOREIGN KEY ("UserID") REFERENCES "User"("ID") ON DELETE CASCADE`);
         await queryRunner.query(`ALTER TABLE "Sponsor" ADD CONSTRAINT "FK_6d3abbf9e41a3a1e50ec9dd00cf" FOREIGN KEY ("UserID") REFERENCES "User"("ID")`);
         await queryRunner.query(`ALTER TABLE "UserAccountSettings" ADD CONSTRAINT "FK_5a7eb571f0bc1e9de185a6b63df" FOREIGN KEY ("UserID") REFERENCES "User"("ID") ON DELETE CASCADE`);
-        await queryRunner.query(`ALTER TABLE "User" ADD CONSTRAINT "FK_6b519da47b33fb18d9db02d97e1" FOREIGN KEY ("ProfileImageID") REFERENCES "UserImage"("ID") ON DELETE CASCADE`);
+        await queryRunner.query(`ALTER TABLE "User" ADD CONSTRAINT "FK_6b519da47b33fb18d9db02d97e1" FOREIGN KEY ("ProfileImageID") REFERENCES "UserImage"("ID")`);
         await queryRunner.query(`ALTER TABLE "Award" ADD CONSTRAINT "FK_6b7da3cd0a55b599e7467d6f151" FOREIGN KEY ("UserID") REFERENCES "User"("ID") ON DELETE CASCADE`);
         await queryRunner.query(`ALTER TABLE "EntityCategory" ADD CONSTRAINT "FK_99e5a7e8a2d8d92733ff7b77016" FOREIGN KEY ("ParentID") REFERENCES "EntityCategory"("ID")`);
     }
@@ -86,6 +87,7 @@ export class InitialMigration1544546480657 implements MigrationInterface {
         await queryRunner.query(`DROP TABLE "Visibility"`);
         await queryRunner.query(`DROP TABLE "UserRole"`);
         await queryRunner.query(`DROP TABLE "UserAccountStatus"`);
+        await queryRunner.query(`DROP TABLE "UserAccountProvider"`);
         await queryRunner.query(`DROP TABLE "EntityCategory"`);
         await queryRunner.query(`DROP TABLE "Award"`);
         await queryRunner.query(`DROP TABLE "User"`);

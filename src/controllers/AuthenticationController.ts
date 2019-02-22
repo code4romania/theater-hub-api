@@ -6,6 +6,7 @@ import { IAuthenticationController }                           from "./IAuthenti
 import { IAuthenticationService, IUserService }                from "../services";
 import { AuthenticationRequestDTO, AuthenticationResponseDTO,
                                  CheckUserPasswordRequestDTO } from "../dtos";
+const config = require("../config/env").getConfig();
 
 @injectable()
 export class AuthenticationController implements IAuthenticationController {
@@ -26,6 +27,30 @@ export class AuthenticationController implements IAuthenticationController {
         const authenticationResponse: AuthenticationResponseDTO = await this._authenticationService.authenticate(authenticationRequestDTO);
 
         response.send(authenticationResponse);
+    }
+
+    public async facebookAuthenticate(request: Request, response: Response): Promise<void> {
+
+        const authenticationRequestDTO: AuthenticationRequestDTO = {
+            Email: request.user.Email,
+            Password: request.user.Password
+        } as AuthenticationRequestDTO;
+
+        const authenticationResponse: AuthenticationResponseDTO = await this._authenticationService.authenticate(authenticationRequestDTO);
+
+        response.redirect(`${config.client.baseURL}/${config.client.endpoints.loginResource}?token=${authenticationResponse.Token}`);
+    }
+
+    public async googleAuthenticate(request: Request, response: Response): Promise<void> {
+
+        const authenticationRequestDTO: AuthenticationRequestDTO = {
+            Email: request.user.Email,
+            Password: request.user.Password
+        } as AuthenticationRequestDTO;
+
+        const authenticationResponse: AuthenticationResponseDTO = await this._authenticationService.authenticate(authenticationRequestDTO);
+
+        response.redirect(`${config.client.baseURL}/${config.client.endpoints.loginResource}?token=${authenticationResponse.Token}`);
     }
 
     public async checkUserPassword(request: Request, response: Response): Promise<void> {

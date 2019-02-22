@@ -14,6 +14,7 @@ export * from "./Skill";
 export * from "./SocialMediaCategory";
 export * from "./Sponsor";
 export * from "./User";
+export * from "./UserAccountProvider";
 export * from "./UserAccountSettings";
 export * from "./UserAccountStatus";
 export * from "./UserImage";

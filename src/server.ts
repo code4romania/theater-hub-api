@@ -99,31 +99,18 @@ createConnection().then(async (connection: Connection) => {
   require("./routes")(app);
 
   /**
-   * OAuth authentication routes. (Sign in)
-   */
-  app.get("/auth/facebook", passport.authenticate("facebook", { scope: ["email", "public_profile"] }));
-  app.get("/auth/facebook/callback", passport.authenticate("facebook", { failureRedirect: "/login" }), (req, res) => {
-    res.redirect(req.session.returnTo || "/");
-  });
-
-  /**
    * Error Handler. Provides full stack - remove for production
    */
   app.use(errorHandler());
 
-  // const httpsOptions = {
-  //   key: fs.readFileSync(path.join(process.cwd(), "certificate", "server.key"), "utf8"),
-  //   cert: fs.readFileSync(path.join(process.cwd(), "certificate", "server.cert"), "utf8")
-  // };
+  const httpsOptions = {
+    key: fs.readFileSync(path.join(process.cwd(), "certificate", "key.pem"), "utf8"),
+    cert: fs.readFileSync(path.join(process.cwd(), "certificate", "cert.pem"), "utf8")
+  };
 
-  // const httpsServer = https.createServer(httpsOptions, app);
-
-
-  /**
-   * Start Express server.
-   */
-  app.listen(443, () => {
+  const httpsServer = https.createServer(httpsOptions, app).listen(443, () => {
     console.log(("  App is running at https://localhost:%d in %s mode"), app.get("port"), app.get("env"));
     console.log("  Press CTRL-C to stop\n");
   });
+
 }).catch(error => console.log("TypeORM connection error: ", error));
