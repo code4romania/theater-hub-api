@@ -1,8 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import { validationResult }                from "express-validator/check";
-import { UserRoleType }                    from "../enums";
+import { LocaleType, UserRoleType }        from "../enums";
+import { ILocalizationService }            from "../services";
+import { container }                       from "../config/inversify.config";
+import { TYPES }                           from "../types/custom-types";
 const config                               = require("../config/env").getConfig();
 const jwt                                  = require("jsonwebtoken");
+
+const localizationService: ILocalizationService = container.get<ILocalizationService>(TYPES.LocalizationService);
 
 export function setOriginMiddleware(request: Request, response: Response, next: NextFunction) {
     request.headers.origin = config.application.baseURL;
@@ -33,9 +38,10 @@ export function authorizationMiddleware(request: Request, response: Response, ne
     let token: string = request.headers["authorization"];
 
     if (!token) {
+
         return response.status(401).json({ errors: [{
             field:   "token",
-            message: "Token is invalid"
+            message: localizationService.getText("validation.user.token.invalid", request.Locale)
         }]});
     }
 
@@ -43,9 +49,10 @@ export function authorizationMiddleware(request: Request, response: Response, ne
 
     jwt.verify(token, config.application.tokenSecret, (err: any, decoded: any) => {
         if (err) {
+
             return response.status(401).json({ errors: {
                 field:   "token",
-                message: "Token is invalid"
+                message: localizationService.getText("validation.user.token.invalid", request.Locale)
             }});
         }
 
@@ -86,11 +93,22 @@ export function getPrincipalIfRequestHasToken(request: Request, response: Respon
     next();
 }
 
+export function getAcceptedLocale(request: Request, response: Response, next: NextFunction) {
+
+    if (request.headers["accept-language"]) {
+        request.Locale = (<any>LocaleType)[request.headers["accept-language"].toUpperCase()];
+    } else {
+        request.Locale = LocaleType.RO;
+    }
+
+    next();
+}
+
 export function checkUserRoleMiddleware(role: UserRoleType) {
 
     return (request: Request, response: Response, next: NextFunction) => {
         if (!request.Principal || request.Principal.Role !== role) {
-            return response.status(401).json("Permission denied.");
+            return response.status(401).json(localizationService.getText("validation.user.permission-denied", request.Locale));
         }
 
         next();

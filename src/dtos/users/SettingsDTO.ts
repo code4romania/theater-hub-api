@@ -1,4 +1,4 @@
-import { VisibilityType }    from "../../enums";
+import { VisibilityType, LocaleType }    from "../../enums";
 
 export class SettingsDTO {
 
@@ -9,5 +9,7 @@ export class SettingsDTO {
     public BirthDateVisibility?: VisibilityType;
 
     public PhoneNumberVisibility?: VisibilityType;
+
+    public Locale: LocaleType;
 
 }

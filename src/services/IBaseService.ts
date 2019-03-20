@@ -1,3 +1,5 @@
+import { LocaleType } from "../enums";
+
 export interface IBaseService<T> {
 
     create(entity: T): Promise<T>;
@@ -11,5 +13,7 @@ export interface IBaseService<T> {
     delete(entity: T): Promise<T>;
 
     deleteByID(id: string): Promise<T>;
+
+    setLocale(locale: LocaleType): void;
 
 }

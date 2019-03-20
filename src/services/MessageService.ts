@@ -1,18 +1,17 @@
-import { inject, injectable }  from "inversify";
-import { TYPES }               from "../types";
-import { IMessageService }     from "./IMessageService";
-import { BaseService }         from "./BaseService";
-import { Message }             from "../models/Message";
-import { IMessageRepository }  from "../repositories";
+import { inject, injectable }   from "inversify";
+import { TYPES }                from "../types";
+import { ILocalizationService } from "./ILocalizationService";
+import { IMessageService }      from "./IMessageService";
+import { BaseService }          from "./BaseService";
+import { Message }              from "../models/Message";
+import { IMessageRepository }   from "../repositories";
 
 @injectable()
 export class MessageService extends BaseService<Message> implements IMessageService {
 
-    private readonly _messageRepository: IMessageRepository;
-
-    constructor(@inject(TYPES.MessageRepository) messageRepository: IMessageRepository) {
-        super(messageRepository);
-        this._messageRepository = messageRepository;
+    constructor(@inject(TYPES.MessageRepository) messageRepository: IMessageRepository,
+                    @inject(TYPES.LocalizationService) localizationService: ILocalizationService) {
+        super(messageRepository, localizationService);
     }
 
 }

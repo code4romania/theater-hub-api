@@ -6,7 +6,7 @@ import { IUserRoutesValidators } from "../validators";
 import { validatorMiddleware,
      authorizationMiddleware,
      getPrincipalIfRequestHasToken,
-     checkUserRoleMiddleware }  from "../middlewares";
+     checkUserRoleMiddleware }   from "../middlewares";
 import { Request, Response }     from "express";
 
 export default (app: any) => {
@@ -24,8 +24,7 @@ export default (app: any) => {
 
     app.delete("/api/users/me",             authorizationMiddleware, (req: Request, res: Response) => usersController.deleteMe(req, res));
 
-    app.post("/api/users/register",         userRoutesValidators.getRegisterValidators(), validatorMiddleware,
-                                              (req: Request, res: Response) => usersController.register(req, res));
+    app.post("/api/users/register",         (req: Request, res: Response) => usersController.register(req, res));
 
     app.post("/api/users/register/managed", userRoutesValidators.getManagedUserRegisterValidators(), validatorMiddleware,
                                               (req: Request, res: Response) => usersController.managedUserRegister(req, res));
@@ -38,9 +37,6 @@ export default (app: any) => {
 
     app.post("/api/users/password/reset", userRoutesValidators.getResetPasswordValidators(), validatorMiddleware,
                                               (req: Request, res: Response) => usersController.resetPassword(req, res));
-
-    app.post("/api/users/password/set", userRoutesValidators.getSetPasswordValidators(),
-                                              (req: Request, res: Response) => usersController.setPassword(req, res));
 
     app.post("/api/users/password/change", authorizationMiddleware, userRoutesValidators.getChangePasswordValidators(), validatorMiddleware,
                                               (req: Request, res: Response) => usersController.changePassword(req, res));

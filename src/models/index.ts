@@ -5,6 +5,7 @@ export * from "./Education";
 export * from "./EntityCategory";
 export * from "./Experience";
 export * from "./Institution";
+export * from "./Locale";
 export * from "./Message";
 export * from "./Professional";
 export * from "./ProfessionalInstitution";

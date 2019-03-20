@@ -1,7 +1,7 @@
 
 export interface IUserRoutesValidators {
 
-    getRegisterValidators(): any;
+    getRegisterValidators(req: any): any;
 
     getManagedUserRegisterValidators(): any;
 
@@ -10,8 +10,6 @@ export interface IUserRoutesValidators {
     getForgotPasswordValidators(): any;
 
     getResetPasswordValidators(): any;
-
-    getSetPasswordValidators(): any;
 
     getChangePasswordValidators(): any;
 

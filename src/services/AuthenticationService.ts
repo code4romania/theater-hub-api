@@ -29,7 +29,8 @@ export class AuthenticationService implements IAuthenticationService {
                     email: request.Email,
                     role: user.AccountSettings.Role,
                     accountStatus: user.AccountSettings.AccountStatus
-                }, config.application.tokenSecret)
+                }, config.application.tokenSecret),
+            Locale: user.AccountSettings.Locale
         };
 
         return response;
