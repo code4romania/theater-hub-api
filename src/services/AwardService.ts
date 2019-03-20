@@ -1,9 +1,10 @@
-import { inject, injectable }  from "inversify";
-import { TYPES }               from "../types";
-import { IAwardService }       from "./IAwardService";
-import { IUserService }        from "./IUserService";
-import { BaseService }         from "./BaseService";
-import { Award }               from "../models/Award";
+import { inject, injectable }   from "inversify";
+import { TYPES }                from "../types";
+import { IAwardService }        from "./IAwardService";
+import { ILocalizationService } from "./ILocalizationService";
+import { IUserService }         from "./IUserService";
+import { BaseService }          from "./BaseService";
+import { Award }                from "../models/Award";
 import { User }                 from "../models/User";
 import { CreateAwardDTO,
     UpdateAwardDTO }            from "../dtos";
@@ -12,14 +13,13 @@ import { IAwardRepository }     from "../repositories";
 @injectable()
 export class AwardService extends BaseService<Award> implements IAwardService {
 
-    private readonly _awardRepository: IAwardRepository;
     private readonly _userService: IUserService;
 
     constructor(@inject(TYPES.AwardRepository) awardRepository: IAwardRepository,
-                                    @inject(TYPES.UserService) userService: IUserService) {
-        super(awardRepository);
-        this._awardRepository = awardRepository;
-        this._userService     = userService;
+                        @inject(TYPES.LocalizationService) localizationService: ILocalizationService,
+                        @inject(TYPES.UserService) userService: IUserService) {
+        super(awardRepository, localizationService);
+        this._userService = userService;
     }
 
     public async createAward(email: string, createAwardDTO: CreateAwardDTO): Promise<Award> {
@@ -33,15 +33,15 @@ export class AwardService extends BaseService<Award> implements IAwardService {
             User: dbUser
         } as Award;
 
-        return this._awardRepository.insert(award);
+        return this._repository.insert(award);
     }
 
     public async updateAward(email: string, updateAwardDTO: UpdateAwardDTO): Promise<Award> {
         const dbUser: User = await this._userService.getByEmail(email);
-        const dbAward: Award = await this._awardRepository.getByID(updateAwardDTO.ID);
+        const dbAward: Award = await this._repository.getByID(updateAwardDTO.ID);
 
         if (!dbAward || !dbUser.Awards.find(a => a.ID === dbAward.ID)) {
-            throw new Error("Award does not exist!");
+            throw new Error(this._localizationService.getText("validation.award.non-existent"));
         }
 
         dbAward.Title          = updateAwardDTO.Title;
@@ -49,17 +49,17 @@ export class AwardService extends BaseService<Award> implements IAwardService {
         dbAward.Description    = updateAwardDTO.Description;
         dbAward.Date           = updateAwardDTO.Date;
 
-        return this._awardRepository.update(dbAward);
+        return this._repository.update(dbAward);
     }
 
     public async deleteAwardByID(email: string, awardID: string): Promise<Award> {
         const dbUser: User = await this._userService.getByEmail(email);
 
         if (!dbUser.Awards.find(a => a.ID === awardID)) {
-            throw new Error("Award does not exist!");
+            throw new Error(this._localizationService.getText("validation.award.non-existent"));
         }
 
-        return this._awardRepository.deleteByID(awardID);
+        return this._repository.deleteByID(awardID);
     }
 
 }

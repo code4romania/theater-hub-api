@@ -7,7 +7,7 @@ import { ChangePasswordRequestDTO, ChangePasswordResponseDTO,
         ManagedUserRegistrationRequestDTO,
         ManagedUserRegistrationResponseDTO,
         MeDTO, ProfileDTO, RegisterDTO,
-        ResetPasswordRequestDTO, SetPasswordRequestDTO,
+        ResetPasswordRequestDTO,
         SettingsDTO, UpdateProfileSection }                                 from "../dtos";
 import { UserAccountProviderType }                                          from "../enums/UserAccountProviderType";
 
@@ -48,8 +48,6 @@ export interface IUserService extends IBaseService<User> {
     isValidResetForgottenPasswordID(email: string, resetForgottenPasswordID: string): Promise<boolean>;
 
     resetPassword(resetPasswordRequest: ResetPasswordRequestDTO): Promise<void>;
-
-    setPassword(setPasswordRequestDTO: SetPasswordRequestDTO): Promise<void>;
 
     changePassword(email: string, changePasswordRequest: ChangePasswordRequestDTO): Promise<ChangePasswordResponseDTO>;
 

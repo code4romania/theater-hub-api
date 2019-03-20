@@ -4,9 +4,11 @@ import { TYPES }                       from "../types";
 import { User }                        from "../models/User";
 import { IUsersController }            from "./IUsersController";
 import { BaseApiController }           from "./BaseApiController";
-import { IUserService }                from "../services";
-import { UserAccountProviderType,
-        UserRoleType, }                from "../enums";
+import { ILocalizationService,
+         IUserService }                from "../services";
+import { LocaleType,
+        UserAccountProviderType,
+        UserRoleType }                 from "../enums";
 import { Validators }                  from "../utils";
 import { ChangePasswordRequestDTO,
    ChangePasswordResponseDTO,
@@ -19,7 +21,6 @@ import { ChangePasswordRequestDTO,
    ManagedUserRegistrationResponseDTO,
    MeDTO, ProfileDTO, RegisterDTO,
    ResetPasswordRequestDTO,
-   SetPasswordRequestDTO,
    SettingsDTO,
    UpdateProfileSection }              from "../dtos";
 import { Award, Education,
@@ -32,10 +33,13 @@ const pdf                              = require("html-pdf");
 export class UsersController extends BaseApiController<User> implements IUsersController {
 
   private readonly _userService: IUserService;
+  private readonly _localizationService: ILocalizationService;
 
-  constructor(@inject(TYPES.UserService) userService: IUserService) {
+  constructor(@inject(TYPES.UserService) userService: IUserService,
+            @inject(TYPES.LocalizationService) localizationService: ILocalizationService) {
     super(userService);
-    this._userService  = userService;
+    this._userService           = userService;
+    this._localizationService   = localizationService;
   }
 
   public async getMe(request: Request, response: Response): Promise<void> {
@@ -68,6 +72,7 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
   }
 
   public async getCommunityMemberProfile(request: Request, response: Response): Promise<void> {
+    this._userService.setLocale(request.Locale);
     const myEmail: string     = request.Principal ? request.Principal.Email : "";
     const profile: ProfileDTO = await this._userService.getCommunityMemberProfile(myEmail, request.params.userID);
 
@@ -88,6 +93,8 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
 
   public async updateMySkills(request: Request, response: Response): Promise<void> {
     const skillsSection: number[] = request.body as number[];
+
+    this._userService.setLocale(request.Locale);
 
     response.send(await this._userService.updateSkills(request.Principal.Email, skillsSection));
   }
@@ -125,6 +132,8 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
   public async register(request: Request, response: Response): Promise<void> {
     const register: RegisterDTO = request.body as RegisterDTO;
 
+    this._userService.setLocale(request.Locale);
+
     await this._userService.register(register, UserAccountProviderType.Local);
 
     response.sendStatus(200);
@@ -160,15 +169,6 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     const resetPasswordRequest: ResetPasswordRequestDTO = request.body as ResetPasswordRequestDTO;
 
     await this._userService.resetPassword(resetPasswordRequest);
-
-    response.sendStatus(200);
-  }
-
-  public async setPassword(request: Request, response: Response): Promise<void> {
-
-    const setPasswordRequest: SetPasswordRequestDTO = request.body as SetPasswordRequestDTO;
-
-    await this._userService.setPassword(setPasswordRequest);
 
     response.sendStatus(200);
   }
@@ -226,7 +226,7 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
       Role:      UserRoleType.User
     };
 
-    const errorMessage = this.isUserValid(user);
+    const errorMessage = this.isUserValid(user, true, request.Locale);
 
     if (errorMessage) {
       response.status(400).json(errorMessage);
@@ -237,7 +237,7 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     const dbUser = await this._userService.getByEmail(user.Email);
 
     if (dbUser) {
-      response.status(400).json("This email address is already taken.");
+      response.status(400).json(this._localizationService.getText("validation.email.in-use", request.Locale));
       response.end();
       return;
     }
@@ -257,7 +257,7 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
   public async getByID(request: Request, response: Response): Promise<void> {
 
     if (!request.params.userID || !Validators.isValidUUID(request.params.userID)) {
-      response.status(400).json("Incorrect id.");
+      response.status(400).json(this._localizationService.getText("validation.user.id.invalid", request.Locale));
       response.end();
       return;
     }
@@ -265,7 +265,7 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     const user: User = await this._userService.getByID(request.params.userID);
 
     if (!user) {
-      response.status(404).json("User not found.");
+      response.status(404).json(this._localizationService.getText("validation.user.not-found", request.Locale));
       response.end();
       return;
     }
@@ -276,12 +276,12 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
   public async update(request: Request, response: Response): Promise<void> {
 
     if (!request.params.userID || !Validators.isValidUUID(request.params.userID)) {
-      response.status(400).json("Incorrect id.");
+      response.status(400).json(this._localizationService.getText("validation.user.id.invalid", request.Locale));
       response.end();
       return;
     }
 
-    const errorMessage = this.isUserValid(request.body, false);
+    const errorMessage = this.isUserValid(request.body, false, request.Locale);
 
     if (errorMessage) {
       response.status(400).json(errorMessage);
@@ -292,7 +292,7 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     let user: User = await this._userService.getByID(request.params.userID);
 
     if (!user) {
-      response.status(404).json("User not found.");
+      response.status(404).json(this._localizationService.getText("validation.user.not-found", request.Locale));
       response.end();
       return;
     }
@@ -312,7 +312,7 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     let user: User = await this._userService.getByID(request.params.userID);
 
     if (!user) {
-      response.status(404).json("User not found.");
+      response.status(404).json(this._localizationService.getText("validation.user.not-found", request.Locale));
       response.end();
       return;
     }
@@ -322,14 +322,16 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     response.send(user);
   }
 
-  private isUserValid(user: User, checkEmail: boolean = true): string {
+  private isUserValid(user: User, checkEmail: boolean = true, locale: LocaleType): string {
+
+    this._localizationService.setLocale(locale);
 
     if ((user.Email || checkEmail) && !Validators.isValidEmail(user.Email)) {
-      return "Incorrect email!";
+      return this._localizationService.getText("validation.email.invalid");
     }
 
     if (user.PhoneNumber && !Validators.isValidPhoneNumber(user.PhoneNumber)) {
-      return "Incorrect phone number!";
+      return this._localizationService.getText("validation.phone-number.invalid");
     }
 
     return;

@@ -33,12 +33,16 @@ export class EducationController extends BaseApiController<Education> implements
     public async update(request: Request, response: Response): Promise<void> {
         const updateEducationDTO: UpdateEducationDTO = request.body as UpdateEducationDTO;
 
+        this._educationService.setLocale(request.Locale);
+
         const educationStep = await this._educationService.updateEducationStep(request.Principal.Email, updateEducationDTO);
 
         response.send(new EducationStepDTO(educationStep));
     }
 
     public async deleteByID(request: Request, response: Response): Promise<void> {
+
+        this._educationService.setLocale(request.Locale);
 
         const educationStep = await this._educationService.deleteEducationStepByID(request.Principal.Email, request.params.educationID);
 

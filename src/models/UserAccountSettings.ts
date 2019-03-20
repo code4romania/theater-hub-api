@@ -7,6 +7,7 @@ import { UserAccountStatusType }                      from "../enums/UserAccount
 import { UserRoleType }                               from "../enums/UserRoleType";
 import { VisibilityType }                             from "../enums/VisibilityType";
 import { EntityCategoryType }                         from "../enums/EntityCategoryType";
+import { LocaleType }                                 from "../enums/LocaleType";
 
 
 @Entity("UserAccountSettings")
@@ -47,6 +48,9 @@ export class UserAccountSettings extends BaseEntity {
 
     @Column()
     PhoneNumberVisibility: VisibilityType;
+
+    @Column()
+    Locale: LocaleType;
 
     @OneToOne(type => User, user => user.AccountSettings, { onDelete: "CASCADE" })
     @JoinColumn({ name: "UserID" })

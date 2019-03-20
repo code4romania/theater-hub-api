@@ -25,6 +25,8 @@ export class AdministrationController implements IAdministrationController {
         const page: number              = request.query.page;
         const pageSize: number          = request.query.pageSize;
 
+        this._administrationService.setLocale(request.Locale);
+
         const getUsersRequest: GetUsersRequestDTO =
             new GetUsersRequestDTO(request.Principal.Email, searchTerm, sortOrientation, sortCriterion, page, pageSize);
 
@@ -37,6 +39,8 @@ export class AdministrationController implements IAdministrationController {
     public async inviteUser(request: Request, response: Response): Promise<void> {
         const user: ManagedUserDTO = request.body as ManagedUserDTO;
 
+        this._administrationService.setLocale(request.Locale);
+
         const invitedUser: User = await this._administrationService.inviteUser(request.Principal.Email, user);
 
         response.send(invitedUser);
@@ -44,6 +48,8 @@ export class AdministrationController implements IAdministrationController {
 
     public async enableUser(request: Request, response: Response): Promise<void> {
         const updateUserAccountStatusDTO: UpdateUserAccountStatusDTO = request.body as UpdateUserAccountStatusDTO;
+
+        this._administrationService.setLocale(request.Locale);
 
         await this._administrationService.enableUser(request.Principal.Email, request.params.userID, updateUserAccountStatusDTO);
 
@@ -53,6 +59,8 @@ export class AdministrationController implements IAdministrationController {
     public async disableUser(request: Request, response: Response): Promise<void> {
         const updateUserAccountStatusDTO: UpdateUserAccountStatusDTO = request.body as UpdateUserAccountStatusDTO;
 
+        this._administrationService.setLocale(request.Locale);
+
         await this._administrationService.disableUser(request.Principal.Email, request.params.userID, updateUserAccountStatusDTO);
 
         response.sendStatus(200);
@@ -60,6 +68,8 @@ export class AdministrationController implements IAdministrationController {
 
     public async deleteUser(request: Request, response: Response): Promise<void> {
         const updateUserAccountStatusDTO: UpdateUserAccountStatusDTO = request.body as UpdateUserAccountStatusDTO;
+
+        this._administrationService.setLocale(request.Locale);
 
         await this._administrationService.deleteUser(request.Principal.Email, request.params.userID, updateUserAccountStatusDTO);
 

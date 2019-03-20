@@ -3,7 +3,8 @@ const bcrypt                                = require("bcrypt");
 const uuidv4                                = require("uuid/v4");
 import { TYPES }                            from "../types";
 import { IAdministrationService,
-    IEmailService, IUserService }           from ".";
+    IEmailService,
+    ILocalizationService, IUserService }    from ".";
 import { IUserAccountSettingsRepository,
     IUserRepository }                       from "../repositories";
 import { Professional, User,
@@ -15,6 +16,7 @@ import { AdminInviteManagedUserEmailDTO,
         ManagedUserDTO,
         UpdateUserAccountStatusDTO }        from "../dtos";
 import { EntityCategoryType,
+    LocaleType,
     SortOrientationType,
     UserAccountProviderType,
     UserAccountStatusType,
@@ -28,14 +30,17 @@ export class AdministrationService implements IAdministrationService {
     private readonly _emailService: IEmailService;
     private readonly _userAccountSettingsRepository: IUserAccountSettingsRepository;
     private readonly _userRepository: IUserRepository;
+    private readonly _localizationService: ILocalizationService;
 
     constructor(@inject(TYPES.UserService) userService: IUserService,
         @inject(TYPES.EmailService) emailService: IEmailService,
+        @inject(TYPES.LocalizationService) localizationService: ILocalizationService,
         @inject(TYPES.UserAccountSettingsRepository) userAccountSettingsRepository: IUserAccountSettingsRepository,
         @inject(TYPES.UserRepository) userRepository: IUserRepository) {
 
         this._userService                   = userService;
         this._emailService                  = emailService;
+        this._localizationService           = localizationService;
         this._userAccountSettingsRepository = userAccountSettingsRepository;
         this._userRepository                = userRepository;
     }
@@ -158,7 +163,8 @@ export class AdministrationService implements IAdministrationService {
             ProfileVisibility:      VisibilityType.Private,
             EmailVisibility:        VisibilityType.Private,
             BirthDateVisibility:    VisibilityType.Private,
-            PhoneNumberVisibility:  VisibilityType.Private
+            PhoneNumberVisibility:  VisibilityType.Private,
+            Locale:                 managedUser.Locale
         } as UserAccountSettings;
 
         user.Professional  = {
@@ -169,12 +175,14 @@ export class AdministrationService implements IAdministrationService {
         await this._userService.create(user);
 
         const inviteManagedUserEmailDTO: AdminInviteManagedUserEmailDTO = {
-            SenderEmailAddres:      adminUser.Email,
+            SenderEmailAddress:     adminUser.Email,
             SenderFullName:         adminUser.Name,
             ReceiverEmailAddress:   managedUser.Email,
             ReceiverRole:           user.AccountSettings.Role.toString(),
             RegistrationID:         registrationID
         };
+
+        this._emailService.setLocale(managedUser.Locale || adminUser.AccountSettings.Locale);
 
         await this._emailService.sendAdminInviteManagedUserEmail(inviteManagedUserEmailDTO);
 
@@ -189,7 +197,7 @@ export class AdministrationService implements IAdministrationService {
         this.checkIsAdminUser(adminUser);
 
         if (adminUser.AccountSettings.Role <= dbUser.AccountSettings.Role) {
-            throw new Error("Insufficient permissions.");
+            throw new Error(this._localizationService.getText("validation.permissions.insufficient-permissions"));
         }
 
         if (dbUser.AccountSettings.AccountStatus !== UserAccountStatusType.Disabled) {
@@ -202,12 +210,14 @@ export class AdministrationService implements IAdministrationService {
         await this._userAccountSettingsRepository.update(dbUserAccountSettings);
 
         const adminUpdateUserEmailDTO: AdminUpdateUserEmailDTO = {
-            SenderEmailAddres:      adminUser.Email,
+            SenderEmailAddress:     adminUser.Email,
             SenderFullName:         adminUser.Name,
             ReceiverEmailAddress:   dbUser.Email,
             ReceiverFullName:       dbUser.Name,
             Message:                updateUserAccountStatusDTO.Message || ""
         };
+
+        this._emailService.setLocale(dbUser.AccountSettings.Locale);
 
         await this._emailService.sendAdminEnableUserEmail(adminUpdateUserEmailDTO);
     }
@@ -219,7 +229,7 @@ export class AdministrationService implements IAdministrationService {
         this.checkIsAdminUser(adminUser);
 
         if (adminUser.AccountSettings.Role <= dbUser.AccountSettings.Role) {
-            throw new Error("Insufficient permissions.");
+            throw new Error(this._localizationService.getText("validation.permissions.insufficient-permissions"));
         }
 
         if (dbUser.AccountSettings.AccountStatus !== UserAccountStatusType.Enabled) {
@@ -232,12 +242,14 @@ export class AdministrationService implements IAdministrationService {
         await this._userAccountSettingsRepository.update(dbUserAccountSettings);
 
         const adminUpdateUserEmailDTO: AdminUpdateUserEmailDTO = {
-            SenderEmailAddres:      adminUser.Email,
+            SenderEmailAddress:     adminUser.Email,
             SenderFullName:         adminUser.Name,
             ReceiverEmailAddress:   dbUser.Email,
             ReceiverFullName:       dbUser.Name,
             Message:                updateUserAccountStatusDTO.Message || ""
         };
+
+        this._emailService.setLocale(dbUser.AccountSettings.Locale);
 
         await this._emailService.sendAdminDisableUserEmail(adminUpdateUserEmailDTO);
     }
@@ -249,18 +261,20 @@ export class AdministrationService implements IAdministrationService {
         this.checkIsAdminUser(adminUser);
 
         if (adminUser.AccountSettings.Role <= dbUser.AccountSettings.Role) {
-            throw new Error("Insufficient permissions.");
+            throw new Error(this._localizationService.getText("validation.permissions.insufficient-permissions"));
         }
 
         await this._userService.deleteByID(userID);
 
         const adminUpdateUserEmailDTO: AdminUpdateUserEmailDTO = {
-            SenderEmailAddres:      adminUser.Email,
+            SenderEmailAddress:     adminUser.Email,
             SenderFullName:         adminUser.Name,
             ReceiverEmailAddress:   dbUser.Email,
             ReceiverFullName:       dbUser.Name,
             Message:                updateUserAccountStatusDTO.Message || ""
         };
+
+        this._emailService.setLocale(dbUser.AccountSettings.Locale);
 
         await this._emailService.sendAdminDeleteUserEmail(adminUpdateUserEmailDTO);
 
@@ -270,8 +284,12 @@ export class AdministrationService implements IAdministrationService {
     public checkIsAdminUser(user: User) {
 
         if (!user || user.AccountSettings.Role === UserRoleType.User) {
-            throw new Error("Invalid admin account");
+            throw new Error(this._localizationService.getText("validation.permissions.not-admin"));
         }
+    }
+
+    public setLocale(locale: LocaleType): void {
+        this._localizationService.setLocale(locale);
     }
 
 }

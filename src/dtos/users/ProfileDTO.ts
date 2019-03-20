@@ -1,6 +1,7 @@
 import { Award, Experience, Education,
                  User, UserImage, UserVideo }         from "../../models";
-import { SocialMediaCategoryType, VisibilityType }    from "../../enums";
+import { SocialMediaCategoryType,
+                      VisibilityType, LocaleType }    from "../../enums";
 
 export class ProfileDTO {
 
@@ -66,6 +67,7 @@ export class ProfileDTO {
         this.BirthDateVisibility   = user.AccountSettings.BirthDateVisibility;
         this.PhoneNumberVisibility = user.AccountSettings.PhoneNumberVisibility;
 
+        this.Locale                = user.AccountSettings.Locale;
     }
 
     public ID?: string;
@@ -137,5 +139,9 @@ export class ProfileDTO {
     public BirthDateVisibility?: VisibilityType;
 
     public PhoneNumberVisibility?: VisibilityType;
+
+    // Locale
+
+    public Locale: LocaleType;
 
 }

@@ -1,7 +1,7 @@
 
 export class AdminUpdateUserEmailDTO {
 
-    public SenderEmailAddres: string;
+    public SenderEmailAddress: string;
 
     public SenderFullName: string;
 

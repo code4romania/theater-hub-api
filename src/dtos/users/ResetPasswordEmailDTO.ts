@@ -1,3 +1,4 @@
+import { LocaleType } from "../../enums";
 
 export class ResetPasswordEmailDTO {
 
@@ -6,4 +7,5 @@ export class ResetPasswordEmailDTO {
     public UserFullName: string;
 
     public UserResetForgottenPasswordID: string;
+
 }

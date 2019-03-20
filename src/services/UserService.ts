@@ -3,7 +3,7 @@ import * as _                                  from "lodash";
 import * as moment                             from "moment";
 import { TYPES }                               from "../types";
 import { IUserService, IEmailService,
-                       ISkillService }         from "../services";
+    ILocalizationService, ISkillService }      from "../services";
 import { BaseService }                         from "./BaseService";
 import { Award }                               from "../models/Award";
 import { Education }                           from "../models/Education";
@@ -40,7 +40,6 @@ import { ChangePasswordResponseDTO,
     MeDTO, ProfileDTO,
     RegisterDTO,
     ResetPasswordRequestDTO,
-    SetPasswordRequestDTO,
     SettingsDTO, UpdateProfileSection }        from "../dtos";
 import { EntityCategoryType }                  from "../enums/EntityCategoryType";
 import { ProfileSectionType }                  from "../enums/ProfileSectionType";
@@ -69,8 +68,8 @@ export class UserService extends BaseService<User> implements IUserService {
     private readonly _userRepository: IUserRepository;
     private readonly _userSocialMediaRepository: IUserSocialMediaRepository;
     private readonly _userVideoRepository: IUserVideoRepository;
-    private readonly _skillService: ISkillService;
     private readonly _emailService: IEmailService;
+    private readonly _skillService: ISkillService;
 
     constructor(
         @inject(TYPES.AwardRepository) awardRepository: IAwardRepository,
@@ -84,10 +83,11 @@ export class UserService extends BaseService<User> implements IUserService {
         @inject(TYPES.UserRepository) userRepository: IUserRepository,
         @inject(TYPES.UserSocialMediaRepository) userSocialMediaRepository: IUserSocialMediaRepository,
         @inject(TYPES.UserVideoRepository)  userVideoRepository: IUserVideoRepository,
-        @inject(TYPES.SkillService) skillService: ISkillService,
-        @inject(TYPES.EmailService) emailService: IEmailService
+        @inject(TYPES.EmailService) emailService: IEmailService,
+        @inject(TYPES.LocalizationService) localizationService: ILocalizationService,
+        @inject(TYPES.SkillService) skillService: ISkillService
     ) {
-        super(userRepository);
+        super(userRepository, localizationService);
         this._awardRepository                 = awardRepository;
         this._educationRepository             = educationRepository;
         this._entityCategoryRepository        = entityCategoryRepository;
@@ -99,8 +99,8 @@ export class UserService extends BaseService<User> implements IUserService {
         this._userRepository                  = userRepository;
         this._userSocialMediaRepository       = userSocialMediaRepository;
         this._userVideoRepository             = userVideoRepository;
-        this._skillService                    = skillService;
         this._emailService                    = emailService;
+        this._skillService                    = skillService;
     }
 
     public async deleteByID(id: string): Promise<User> {
@@ -255,7 +255,7 @@ export class UserService extends BaseService<User> implements IUserService {
         const resultingSkillIDs: number[]    = _.union(dbSkillsIDs, addedEntitiesIDs).filter(id => removedEntitiesIDs.indexOf(id) === -1);
 
         if (resultingSkillIDs.length === 0) {
-            throw new Error("Select at least one skill");
+            throw new Error(this._localizationService.getText("validation.skills.required"));
         }
 
         addedEntitiesIDs.forEach(id => {
@@ -452,7 +452,7 @@ export class UserService extends BaseService<User> implements IUserService {
         const dbUser: User = await this.getByEmail(register.Email);
 
         if (dbUser && dbUser.AccountSettings.AccountStatus !== UserAccountStatusType.Registered) {
-            throw new Error("E-mail already in use");
+            throw new Error(this._localizationService.getText("validation.email.in-use"));
         } else if (!!dbUser) {
             // Delete previous unfinished registration attempt.
             this.deleteByID(dbUser.ID);
@@ -487,7 +487,8 @@ export class UserService extends BaseService<User> implements IUserService {
             ProfileVisibility:      VisibilityType.Private,
             EmailVisibility:        VisibilityType.Private,
             BirthDateVisibility:    VisibilityType.Private,
-            PhoneNumberVisibility:  VisibilityType.Private
+            PhoneNumberVisibility:  VisibilityType.Private,
+            Locale:                 this._localizationService.getLocale()
         } as UserAccountSettings;
 
         user.Professional  = {
@@ -501,6 +502,8 @@ export class UserService extends BaseService<User> implements IUserService {
                   UserFullName:         `${register.FirstName} ${register.LastName}`,
                   UserRegistrationID:   registrationID
             } as CreateAccountEmailDTO;
+
+            this._emailService.setLocale(this._localizationService.getLocale());
 
             this._emailService.sendCreateAccountEmail(createAccountEmailDTO);
         }
@@ -615,6 +618,8 @@ export class UserService extends BaseService<User> implements IUserService {
             UserResetForgottenPasswordID: resetForgottenPasswordID
         } as ResetPasswordEmailDTO;
 
+        this._emailService.setLocale(this._localizationService.getLocale());
+
         this._emailService.sendResetPasswordEmail(resetPasswordEmailModel);
     }
 
@@ -667,25 +672,6 @@ export class UserService extends BaseService<User> implements IUserService {
     public async resetPassword(resetPasswordRequest: ResetPasswordRequestDTO): Promise<void> {
 
         this.newPassword(resetPasswordRequest.Password, false, resetPasswordRequest.Email);
-    }
-
-    public async setPassword(setPasswordRequestDTO: SetPasswordRequestDTO): Promise<void> {
-
-        const dbUser: User = await this._userRepository.getByEmail(setPasswordRequestDTO.Email);
-
-        if (dbUser.AccountSettings.AccountStatus !== UserAccountStatusType.Managed) {
-            throw new Error("Can't set the password");
-        }
-
-        if (!bcrypt.compareSync(setPasswordRequestDTO.RegistrationID, dbUser.AccountSettings.RegistrationIDHash)) {
-            throw new Error("Incorrect request.");
-        }
-
-        this.newPassword(setPasswordRequestDTO.Password, false, setPasswordRequestDTO.Email, dbUser);
-
-        dbUser.AccountSettings.AccountStatus = UserAccountStatusType.Registered;
-        this._userAccountSettingsRepository.update(dbUser.AccountSettings);
-
     }
 
     public async changePassword(email: string, changePasswordRequest: ChangePasswordRequestDTO): Promise<ChangePasswordResponseDTO> {
@@ -861,6 +847,8 @@ export class UserService extends BaseService<User> implements IUserService {
         user.AccountSettings.BirthDateVisibility     = profile.BirthDateVisibility;
         user.AccountSettings.PhoneNumberVisibility   = profile.PhoneNumberVisibility;
 
+        user.AccountSettings.Locale                  = profile.Locale;
+
         user.AccountSettings.AccountStatus  = UserAccountStatusType.Enabled;
 
         this.update(user);
@@ -873,10 +861,12 @@ export class UserService extends BaseService<User> implements IUserService {
                 role: user.AccountSettings.Role,
                 accountStatus: user.AccountSettings.AccountStatus
             }, config.application.tokenSecret),
-            Me: new MeDTO(user)
+            Me: new MeDTO(user),
+            Locale: profile.Locale
         };
 
         return response;
+
     }
 
     public async getSettings(email: string): Promise<SettingsDTO> {
@@ -886,7 +876,8 @@ export class UserService extends BaseService<User> implements IUserService {
             ProfileVisibility: dbUser.AccountSettings.ProfileVisibility,
             EmailVisibility: dbUser.AccountSettings.EmailVisibility,
             BirthDateVisibility: dbUser.AccountSettings.BirthDateVisibility,
-            PhoneNumberVisibility: dbUser.AccountSettings.PhoneNumberVisibility
+            PhoneNumberVisibility: dbUser.AccountSettings.PhoneNumberVisibility,
+            Locale: dbUser.AccountSettings.Locale
         } as SettingsDTO;
 
         return settings;
@@ -900,6 +891,7 @@ export class UserService extends BaseService<User> implements IUserService {
         dbUserAccountSettings.EmailVisibility         = settings.EmailVisibility;
         dbUserAccountSettings.BirthDateVisibility     = settings.BirthDateVisibility;
         dbUserAccountSettings.PhoneNumberVisibility   = settings.PhoneNumberVisibility;
+        dbUserAccountSettings.Locale                  = settings.Locale;
 
         this._userAccountSettingsRepository.update(dbUserAccountSettings);
     }
@@ -958,7 +950,7 @@ export class UserService extends BaseService<User> implements IUserService {
         try {
             await this._userRepository.getByID(communityMemberID).then(response => {
                 if (!response) {
-                    throw new Error("Profile is private or does not exist.");
+                    throw new Error(this._localizationService.getText("validation.user.non-existent-profile"));
                 }
 
                 communityMember = response;

@@ -7,6 +7,7 @@ import { Award }                   from "../models/Award";
 import { Education }               from "../models/Education";
 import { Experience }              from "../models/Experience";
 import { IAuthenticationService,
+         ILocalizationService,
          IUserService }            from "../services";
 import { Validators }              from "../utils";
 import { SocialMediaCategoryType,
@@ -19,102 +20,143 @@ export class UserRoutesValidators implements IUserRoutesValidators {
 
     private readonly _authenticationService: IAuthenticationService;
     private readonly _userService: IUserService;
+    private readonly _localizationService: ILocalizationService;
 
     constructor(@inject(TYPES.AuthenticationService) authenticationService: IAuthenticationService,
-                                                        @inject(TYPES.UserService) userService: IUserService) {
+                @inject(TYPES.UserService) userService: IUserService,
+                @inject(TYPES.LocalizationService) localizationService: ILocalizationService) {
         this._authenticationService = authenticationService;
         this._userService           = userService;
+        this._localizationService   = localizationService;
     }
 
     public getRegisterValidators() {
 
         return [
-            check("FirstName").not().isEmpty().withMessage("First name is required")
-                              .isLength({ max: 50 }).withMessage("First name should have at most 50 characters"),
-            check("LastName").not().isEmpty().withMessage("Last name is required")
-                              .isLength({ max: 50 }).withMessage("Last name should have at most 50 characters"),
-            check("Email").not().isEmpty().withMessage("E-mail is required")
-                          .isLength({ max: 100 }).withMessage("E-mail should have at most 100 characters")
-                          .isEmail().withMessage("E-mail must be valid")
-                          .custom((value: string) => {
-                              return this._userService.getByEmail(value).then((user: User) => {
-                                if (user && user.AccountSettings.AccountStatus !== UserAccountStatusType.Registered) {
-                                    return Promise.reject("E-mail already in use");
-                                }
-                              });
-                          }),
-            check("Password").not().isEmpty().withMessage("Password is required")
-                            .custom((value: string) => {
-                                if (!Validators.isValidPassword(value)) {
-                                    throw new Error("Password must be between 7 and 50 characters long and include upper and lowercase characters");
-                                }
-
-                                return true;
-                            }),
-            check("ConfirmPassword").not().isEmpty().withMessage("Confirm password is required")
-                .custom((value: string, { req }: any) => {
-                    if (value !== req.body.Password) {
-                        throw new Error("Confirm password must match the password");
-                    }
-
-                    return true;
+            check("FirstName").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.first-name.required", req.Locale);
+                })
+                .isLength({ max: 50 }).withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.first-name.length", req.Locale);
                 }),
-            check("AgreeToTerms").custom((value: boolean) => {
-                if (!value) {
-                    throw new Error("You have to agree to the Terms of use and Privacy Policy");
-                }
+            check("LastName").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.last-name.required", req.Locale);
+                })
+                .isLength({ max: 50 }).withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.last-name.length", req.Locale);
+                }),
+            check("Email").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.email.required", req.Locale);
+                })
+                .isLength({ max: 100 }).withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.email.length", req.Locale);
+                })
+                .isEmail().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.email.invalid", req.Locale);
+                })
+                .custom((value: string, { req }: any) => {
+                    return this._userService.getByEmail(value).then((user: User) => {
+                      if (user && user.AccountSettings.AccountStatus !== UserAccountStatusType.Registered) {
+                          return Promise.reject(this._localizationService.getText("validation.email.in-use", req.Locale));
+                      }
+                    });
+                }),
+                check("Password").not().isEmpty().withMessage((value: string, { req }: any) => {
+                        return this._localizationService.getText("validation.password.required", req.Locale);
+                    })
+                    .custom((value: string, { req }: any) => {
+                        if (!Validators.isValidPassword(value)) {
+                            throw new Error(this._localizationService.getText("validation.password.invalid", req.Locale));
+                        }
 
-                return true;
-            })
+                        return true;
+                    }),
+                check("ConfirmPassword").not().isEmpty().withMessage((value: string, { req }: any) => {
+                        return this._localizationService.getText("validation.confirm-password.required", req.Locale);
+                    })
+                    .custom((value: string, { req }: any) => {
+                        if (value !== req.body.Password) {
+                            throw new Error(this._localizationService.getText("validation.confirm-password.invalid", req.Locale));
+                        }
+
+                        return true;
+                    }),
+                    check("AgreeToTerms").custom((value: boolean, { req }: any) => {
+                        if (!value) {
+                            throw new Error(this._localizationService.getText("validation.agree-to-terms.invalid", req.Locale));
+                        }
+
+                        return true;
+                    })
         ];
     }
 
     public getManagedUserRegisterValidators() {
 
         return [
-            check("FirstName").not().isEmpty().withMessage("First name is required")
-                              .isLength({ max: 50 }).withMessage("First name should have at most 50 characters"),
-            check("LastName").not().isEmpty().withMessage("Last name is required")
-                              .isLength({ max: 50 }).withMessage("Last name should have at most 50 characters"),
-            check("Email").not().isEmpty().withMessage("E-mail is required")
-                          .isLength({ max: 100 }).withMessage("E-mail should have at most 100 characters")
-                          .isEmail().withMessage("E-mail must be valid")
-                          .custom((value: string) => {
-                              return this._userService.getByEmail(value).then((user: User) => {
-                                if (user && user.AccountSettings.AccountStatus !== UserAccountStatusType.Managed) {
-                                    return Promise.reject("E-mail already in use");
-                                }
-                              });
-                          }),
-            check("Password").not().isEmpty().withMessage("Password is required")
-                            .custom((value: string) => {
-                                if (!Validators.isValidPassword(value)) {
-                                    throw new Error("Password must be between 7 and 50 characters long and include upper and lowercase characters");
-                                }
-
-                                return true;
-                            }),
-            check("ConfirmPassword").not().isEmpty().withMessage("Confirm password is required")
+            check("FirstName").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.first-name.required", req.Locale);
+                })
+                .isLength({ max: 50 }).withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.first-name.length", req.Locale);
+                }),
+            check("LastName").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.last-name.required", req.Locale);
+                })
+                .isLength({ max: 50 }).withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.last-name.length", req.Locale);
+                }),
+            check("Email").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.email.required", req.Locale);
+                })
+                .isLength({ max: 100 }).withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.email.length", req.Locale);
+                })
+                .isEmail().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.email.invalid", req.Locale);
+                })
                 .custom((value: string, { req }: any) => {
-                    if (value !== req.body.Password) {
-                        throw new Error("Confirm password must match the password");
+                    return this._userService.getByEmail(value).then((user: User) => {
+                        if (user && user.AccountSettings.AccountStatus !== UserAccountStatusType.Managed) {
+                            return Promise.reject(this._localizationService.getText("validation.email.in-use", req.Locale));
+                        }
+                      });
+                }),
+            check("Password").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.password.required", req.Locale);
+                })
+                .custom((value: string, { req }: any) => {
+                    if (!Validators.isValidPassword(value)) {
+                        throw new Error(this._localizationService.getText("validation.password.invalid", req.Locale));
                     }
 
                     return true;
                 }),
-            check("AgreeToTerms").custom((value: boolean) => {
+            check("ConfirmPassword").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.confirm-password.required", req.Locale);
+                })
+                .custom((value: string, { req }: any) => {
+                    if (value !== req.body.Password) {
+                        throw new Error(this._localizationService.getText("validation.confirm-password.invalid", req.Locale));
+                    }
+
+                    return true;
+                }),
+            check("AgreeToTerms").custom((value: boolean, { req }: any) => {
                 if (!value) {
-                    throw new Error("You have to agree to the Terms of use and Privacy Policy");
+                    throw new Error(this._localizationService.getText("validation.agree-to-terms.invalid", req.Locale));
                 }
 
                 return true;
             }),
-            check("RegistrationID").not().isEmpty().withMessage("Registration ID is required")
+            check("RegistrationID").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.registration-id.required", req.Locale);
+                })
                 .custom(async (value: string, { req }: any) => {
                     const isValidRegistrationID: boolean = await this._userService.isValidRegistrationID(req.body.Email, value);
 
                     if (!isValidRegistrationID) {
-                        return Promise.reject("Invalid registration ID");
+                        return Promise.reject(this._localizationService.getText("validation.registration-id.invalid", req.Locale));
                     }
                 })
         ];
@@ -123,13 +165,17 @@ export class UserRoutesValidators implements IUserRoutesValidators {
     public getFinishRegistrationValidators() {
 
         return [
-            check("Email").not().isEmpty().withMessage("E-mail is required"),
-            check("RegistrationID").not().isEmpty().withMessage("Registration ID is required")
+            check("Email").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.email.required", req.Locale);
+                }),
+            check("RegistrationID").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.registration-id.required", req.Locale);
+                })
                 .custom(async (value: string, { req }: any) => {
                     const isValidRegistrationID: boolean = await this._userService.isValidRegistrationID(req.body.Email, value);
 
                     if (!isValidRegistrationID) {
-                        return Promise.reject("Invalid registration ID");
+                        return Promise.reject(this._localizationService.getText("validation.registration-id.invalid", req.Locale));
                     }
                 })
         ];
@@ -138,14 +184,20 @@ export class UserRoutesValidators implements IUserRoutesValidators {
     public getForgotPasswordValidators() {
 
         return [
-            check("Email").not().isEmpty().withMessage("E-mail is required")
-                .isLength({ max: 100 }).withMessage("E-mail should have at most 100 characters")
-                .isEmail().withMessage("E-mail must be valid")
-                .custom(async (value: string) => {
+            check("Email").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.email.required", req.Locale);
+                })
+                .isLength({ max: 100 }).withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.email.length", req.Locale);
+                })
+                .isEmail().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.email.invalid", req.Locale);
+                })
+                .custom(async (value: string, { req }: any) => {
                     const user: User = await this._userService.getByEmail(value);
 
                     if (!user) {
-                        return Promise.reject("The user does not exist");
+                        return Promise.reject(this._localizationService.getText("validation.email.non-existent", req.Locale));
                     }
                 })
         ];
@@ -154,64 +206,48 @@ export class UserRoutesValidators implements IUserRoutesValidators {
     public getResetPasswordValidators() {
 
         return [
-            check("Email").not().isEmpty().withMessage("E-mail is required")
-                .isLength({ max: 100 }).withMessage("E-mail should have at most 100 characters")
-                .isEmail().withMessage("E-mail must be valid"),
-            check("Password").not().isEmpty().withMessage("Password is required")
-                .custom((value: string) => {
+            check("Email").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.email.required", req.Locale);
+                })
+                .isLength({ max: 100 }).withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.email.length", req.Locale);
+                })
+                .isEmail().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.email.invalid", req.Locale);
+                }),
+            check("Password").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.password.required", req.Locale);
+                })
+                .custom((value: string, { req }: any) => {
                     if (!Validators.isValidPassword(value)) {
-                        throw new Error("Password must be between 7 and 50 characters long and include upper and lowercase characters");
+                        throw new Error(this._localizationService.getText("validation.password.invalid", req.Locale));
                     }
 
                     return true;
                 }),
-            check("ConfirmPassword").not().isEmpty().withMessage("Confirm password is required")
+            check("ConfirmPassword").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.confirm-password.required", req.Locale);
+                })
                 .custom((value: string, { req }: any) => {
                     if (value !== req.body.Password) {
-                        throw new Error("Confirm password must match the password");
+                        throw new Error(this._localizationService.getText("validation.confirm-password.invalid", req.Locale));
                     }
 
                     return true;
                 }),
-            check("ResetForgottenPasswordID").not().isEmpty().withMessage("Reset forgotten password ID is required")
+            check("ResetForgottenPasswordID").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.reset-forgotten-password-id.required", req.Locale);
+                })
                 .custom(async (value: string, { req }: any) => {
                     const isValidResetForgottenPasswordID: boolean
                                 = await this._userService.isValidResetForgottenPasswordID(req.body.Email, value);
 
                     if (!isValidResetForgottenPasswordID) {
-                        return Promise.reject("Invalid reset forgotten password ID");
+                        this._localizationService.setLocale(req.Locale);
+                        return Promise.reject(this._localizationService.getText("validation.reset-forgotten-password-id.invalid", req.Locale));
                     }
 
                     return true;
-                })
-        ];
-    }
-
-    public getSetPasswordValidators() {
-
-        return [
-           check("Password").not().isEmpty().withMessage("Current password is required")
-               .custom(async (value: string, { req }: any) => {
-
-                    if (!Validators.isValidPassword(value)) {
-                       return Promise.reject("Password must be between 7 and 50 characters long and include upper and lowercase characters");
-                   }
-
-                    const isPasswordCorrect: boolean = await this._authenticationService.areValidCredentials(req.Principal.Email, value);
-
-                    if (!isPasswordCorrect) {
-                       return Promise.reject("Password is invalid");
-                   }
-
-                    return true;
-               }),
-            check("ConfirmNewPassword").not().isEmpty().withMessage("Confirm new password is required")
-                .custom((value: string, { req }: any) => {
-                    if (value !== req.body.NewPassword) {
-                        throw new Error("Confirm new password must match the new password");
-                    }
-
-                        return true;
                 })
         ];
     }
@@ -219,34 +255,43 @@ export class UserRoutesValidators implements IUserRoutesValidators {
     public getChangePasswordValidators() {
 
         return [
-           check("Password").not().isEmpty().withMessage("Current password is required")
-               .custom(async (value: string, { req }: any) => {
+            check("Password").not().isEmpty().withMessage((value: string, { req }: any) => {
+                return this._localizationService.getText("validation.password.current-password-required", req.Locale);
+            })
+            .custom(async (value: string, { req }: any) => {
+                this._localizationService.setLocale(req.Locale);
+
+                if (!Validators.isValidPassword(value)) {
+                   return Promise.reject(this._localizationService.getText("validation.password.invalid"));
+               }
+
+                const isPasswordCorrect: boolean = await this._authenticationService.areValidCredentials(req.Principal.Email, value);
+
+                if (!isPasswordCorrect) {
+                   return Promise.reject(this._localizationService.getText("validation.password.incorrect"));
+               }
+
+                return true;
+           }),
+           check("NewPassword").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.password.new-password-required", req.Locale);
+                })
+                .custom((value: string, { req }: any) => {
 
                     if (!Validators.isValidPassword(value)) {
-                       return Promise.reject("Password must be between 7 and 50 characters long and include upper and lowercase characters");
-                   }
-
-                    const isPasswordCorrect: boolean = await this._authenticationService.areValidCredentials(req.Principal.Email, value);
-
-                    if (!isPasswordCorrect) {
-                       return Promise.reject("Password is invalid");
-                   }
+                        throw new Error(this._localizationService.getText("validation.password.invalid", req.Locale));
+                    }
 
                     return true;
-               }),
-           check("NewPassword").not().isEmpty().withMessage("New password is required")
-               .custom((value: string) => {
-                   if (!Validators.isValidPassword(value)) {
-                       throw new Error("Password must be between 7 and 50 characters long and include upper and lowercase characters");
-                   }
-
-                    return true;
-               }),
-           check("ConfirmNewPassword").not().isEmpty().withMessage("Confirm new password is required")
+                }),
+           check("ConfirmNewPassword").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.confirm-password.confirm-new-password-required", req.Locale);
+                })
                .custom((value: string, { req }: any) => {
-                   if (value !== req.body.NewPassword) {
-                       throw new Error("Confirm new password must match the new password");
-                   }
+
+                    if (value !== req.body.NewPassword) {
+                        throw new Error(this._localizationService.getText("validation.confirm-password.confirm-new-password-invalid", req.Locale));
+                    }
 
                     return true;
                })
@@ -256,42 +301,52 @@ export class UserRoutesValidators implements IUserRoutesValidators {
     public getCreateProfile() {
 
         return [
-            check("BirthDate").not().isEmpty().withMessage("Birth date is required")
-                .custom((value: string) => {
+            check("BirthDate").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.date-of-birth.required", req.Locale);
+                })
+                .custom((value: string, { req }: any) => {
                     if (!Validators.isValidBirthDate(value)) {
-                        throw new Error("You must be at least 18 years old");
+
+                        throw new Error(this._localizationService.getText("validation.date-of-birth.invalid", req.Locale));
                     }
 
                     return true;
                 }),
-            check("PhoneNumber").not().isEmpty().withMessage("Phone number is required")
-                .custom((value: string) => {
+            check("PhoneNumber").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.phone-number.required", req.Locale);
+                })
+                .custom((value: string, { req }: any) => {
                     if (!Validators.isValidPhoneNumber(value)) {
-                        throw new Error("Phone number must be valid");
+
+                        throw new Error(this._localizationService.getText("validation.phone-number.invalid", req.Locale));
                     }
 
                     return true;
                 }),
-            check("Description").optional().custom((value: string) => {
+            check("Description").optional().custom((value: string, { req }: any) => {
                 if (value.length > 500) {
-                    throw new Error("Description's maximum length is of 500 characters");
+                    throw new Error(this._localizationService.getText("validation.description.length", req.Locale));
                 }
 
                 return true;
             }),
-            check("Website").optional({ nullable: true, checkFalsy: true}).isURL().withMessage("Website must be valid"),
-            check("Skills").not().isEmpty().withMessage("Select at least one skill"),
-            check("VideoGallery").optional().custom((value: UserVideo[]) => {
+            check("Website").optional({ nullable: true, checkFalsy: true}).isURL().withMessage((value: string, { req }: any) => {
+                return this._localizationService.getText("validation.website.invalid", req.Locale);
+            }),
+            check("Skills").not().isEmpty().withMessage((value: string, { req }: any) => {
+                return this._localizationService.getText("validation.skills.required", req.Locale);
+            }),
+            check("VideoGallery").optional().custom((value: UserVideo[], { req }: any) => {
                 value.forEach(v => {
                     if (!Validators.isValidSocialMediaURL(v.Video, SocialMediaCategoryType.Youtube | SocialMediaCategoryType.Vimeo )) {
-                        throw new Error("Video link is not a valid Youtube or Vimeo link");
+                        throw new Error(this._localizationService.getText("validation.video.invalid", req.Locale));
                     }
-                });
 
+                });
 
                 return true;
             }),
-            check("Awards").optional().custom((value: Award[]) => {
+            check("Awards").optional().custom((value: Award[], { req }: any) => {
                 let isInvalidAwardTitle: boolean   = false;
                 let isInvalidAwardIssuer: boolean  = false;
 
@@ -304,17 +359,19 @@ export class UserRoutesValidators implements IUserRoutesValidators {
                     }
                 }
 
+                this._localizationService.setLocale(req.Locale);
+
                 if (isInvalidAwardTitle && isInvalidAwardIssuer) {
-                    throw new Error("Award title and issuer are required");
+                    throw new Error(this._localizationService.getText("validation.award.fileds-required"));
                 } else if (isInvalidAwardTitle) {
-                    throw new Error("Award title is required");
+                    throw new Error(this._localizationService.getText("validation.award.title.required"));
                 } else if (isInvalidAwardIssuer) {
-                    throw new Error("Award issuer is required");
+                    throw new Error(this._localizationService.getText("validation.award.issuer.required"));
                 }
 
                 return true;
             }),
-            check("Experience").optional().custom((value: Experience[]) => {
+            check("Experience").optional().custom((value: Experience[], { req }: any) => {
                 let isInvalidExperiencePosition: boolean   = false;
                 let isInvalidExperienceEmployer: boolean   = false;
 
@@ -327,17 +384,19 @@ export class UserRoutesValidators implements IUserRoutesValidators {
                     }
                 }
 
+                this._localizationService.setLocale(req.Locale);
+
                 if (isInvalidExperiencePosition && isInvalidExperienceEmployer) {
-                    throw new Error("Experience position and employer name are required");
+                    throw new Error(this._localizationService.getText("validation.experience.fileds-required"));
                 } else if (isInvalidExperiencePosition) {
-                    throw new Error("Experience position is required");
+                    throw new Error(this._localizationService.getText("validation.experience.position.required"));
                 } else if (isInvalidExperienceEmployer) {
-                    throw new Error("Experience employer name is required");
+                    throw new Error(this._localizationService.getText("validation.experience.employer.required"));
                 }
 
                 return true;
             }),
-            check("Education").optional().custom((value: Education[]) => {
+            check("Education").optional().custom((value: Education[], { req }: any) => {
                 let isInvalidEducationTitle: boolean             = false;
                 let isInvalidEducationInstitutionName: boolean   = false;
 
@@ -350,40 +409,42 @@ export class UserRoutesValidators implements IUserRoutesValidators {
                     }
                 }
 
+                this._localizationService.setLocale(req.Locale);
+
                 if (isInvalidEducationTitle && isInvalidEducationInstitutionName) {
-                    throw new Error("Education title and institution name are required");
+                    throw new Error(this._localizationService.getText("validation.education.fileds-required"));
                 } else if (isInvalidEducationTitle) {
-                    throw new Error("Education title is required");
+                    throw new Error(this._localizationService.getText("validation.education.title.required"));
                 } else if (isInvalidEducationInstitutionName) {
-                    throw new Error("Education institution name is required");
+                    throw new Error(this._localizationService.getText("validation.education.institution.required"));
                 }
 
                 return true;
             }),
-            check("InstagramLink").optional({ nullable: true, checkFalsy: true}).custom((value: string) => {
+            check("InstagramLink").optional({ nullable: true, checkFalsy: true}).custom((value: string, { req }: any) => {
                 if (!Validators.isValidSocialMediaURL(value, SocialMediaCategoryType.Instagram)) {
-                    throw new Error("Invalid Instagram link");
+                    throw new Error(this._localizationService.getText("validation.instagram.invalid", req.Locale));
                 }
 
                 return true;
             }),
-            check("YoutubeLink").optional({ nullable: true, checkFalsy: true}).custom((value: string) => {
+            check("YoutubeLink").optional({ nullable: true, checkFalsy: true}).custom((value: string, { req }: any) => {
                 if (!Validators.isValidSocialMediaURL(value, SocialMediaCategoryType.Youtube)) {
-                    throw new Error("Invalid Youtube link");
+                    throw new Error(this._localizationService.getText("validation.youtube.invalid", req.Locale));
                 }
 
                 return true;
             }),
-            check("FacebookLink").optional({ nullable: true, checkFalsy: true}).custom((value: string) => {
+            check("FacebookLink").optional({ nullable: true, checkFalsy: true}).custom((value: string, { req }: any) => {
                 if (!Validators.isValidSocialMediaURL(value, SocialMediaCategoryType.Facebook)) {
-                    throw new Error("Invalid Facebook link");
+                    throw new Error(this._localizationService.getText("validation.facebook.invalid", req.Locale));
                 }
 
                 return true;
             }),
-            check("LinkedinLink").optional({ nullable: true, checkFalsy: true}).custom((value: string) => {
+            check("LinkedinLink").optional({ nullable: true, checkFalsy: true}).custom((value: string, { req }: any) => {
                 if (!Validators.isValidSocialMediaURL(value, SocialMediaCategoryType.Linkedin)) {
-                    throw new Error("Invalid Linkedin link");
+                    throw new Error(this._localizationService.getText("validation.linkedin.invalid", req.Locale));
                 }
 
                 return true;
@@ -394,58 +455,72 @@ export class UserRoutesValidators implements IUserRoutesValidators {
     public getGeneralInformationValidators() {
 
         return [
-            check("FirstName").not().isEmpty().withMessage("First name is required")
-                              .isLength({ max: 50 }).withMessage("First name should have at most 50 characters"),
-            check("LastName").not().isEmpty().withMessage("Last name is required")
-                              .isLength({ max: 50 }).withMessage("Last name should have at most 50 characters"),
-            check("BirthDate").not().isEmpty().withMessage("Birth date is required")
-                .custom((value: string) => {
+            check("FirstName").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.first-name.required", req.Locale);
+                })
+                .isLength({ max: 50 }).withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.first-name.length", req.Locale);
+                }),
+            check("LastName").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.last-name.required", req.Locale);
+                })
+                .isLength({ max: 50 }).withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.last-name.length", req.Locale);
+                }),
+            check("BirthDate").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.date-of-birth.required", req.Locale);
+                })
+                .custom((value: string, { req }: any) => {
                     if (!Validators.isValidBirthDate(value)) {
-                        throw new Error("You must be at least 18 years old");
+                        throw new Error(this._localizationService.getText("validation.date-of-birth.invalid", req.Locale));
                     }
 
                     return true;
                 }),
-            check("PhoneNumber").not().isEmpty().withMessage("Phone number is required")
-                .custom((value: string) => {
+            check("PhoneNumber").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.phone-number.required", req.Locale);
+                })
+                .custom((value: string, { req }: any) => {
                     if (!Validators.isValidPhoneNumber(value)) {
-                        throw new Error("Phone number must be valid");
+                        throw new Error(this._localizationService.getText("validation.phone-number.invalid", req.Locale));
                     }
 
                     return true;
                 }),
-            check("Description").optional().custom((value: string) => {
+            check("Description").optional().custom((value: string, { req }: any) => {
                 if (value.length > 500) {
-                    throw new Error("Description's maximum length is of 500 characters");
+                    throw new Error(this._localizationService.getText("validation.description.length", req.Locale));
                 }
 
                 return true;
             }),
-            check("Website").optional({ nullable: true, checkFalsy: true}).isURL().withMessage("Website must be valid"),
-            check("InstagramLink").optional({ nullable: true, checkFalsy: true}).custom((value: string) => {
+            check("Website").optional({ nullable: true, checkFalsy: true}).isURL().withMessage((value: string, { req }: any) => {
+                return this._localizationService.getText("validation.website.invalid", req.Locale);
+            }),
+            check("InstagramLink").optional({ nullable: true, checkFalsy: true}).custom((value: string, { req }: any) => {
                 if (!Validators.isValidSocialMediaURL(value, SocialMediaCategoryType.Instagram)) {
-                    throw new Error("Invalid Instagram link");
+                    throw new Error(this._localizationService.getText("validation.instagram.invalid", req.Locale));
                 }
 
                 return true;
             }),
-            check("YoutubeLink").optional({ nullable: true, checkFalsy: true}).custom((value: string) => {
+            check("YoutubeLink").optional({ nullable: true, checkFalsy: true}).custom((value: string, { req }: any) => {
                 if (!Validators.isValidSocialMediaURL(value, SocialMediaCategoryType.Youtube)) {
-                    throw new Error("Invalid Youtube link");
+                    throw new Error(this._localizationService.getText("validation.youtube.invalid", req.Locale));
                 }
 
                 return true;
             }),
-            check("FacebookLink").optional({ nullable: true, checkFalsy: true}).custom((value: string) => {
+            check("FacebookLink").optional({ nullable: true, checkFalsy: true}).custom((value: string, { req }: any) => {
                 if (!Validators.isValidSocialMediaURL(value, SocialMediaCategoryType.Facebook)) {
-                    throw new Error("Invalid Facebook link");
+                    throw new Error(this._localizationService.getText("validation.facebook.invalid", req.Locale));
                 }
 
                 return true;
             }),
-            check("LinkedinLink").optional({ nullable: true, checkFalsy: true}).custom((value: string) => {
+            check("LinkedinLink").optional({ nullable: true, checkFalsy: true}).custom((value: string, { req }: any) => {
                 if (!Validators.isValidSocialMediaURL(value, SocialMediaCategoryType.Linkedin)) {
-                    throw new Error("Invalid Linkedin link");
+                    throw new Error(this._localizationService.getText("validation.linkedin.invalid", req.Locale));
                 }
 
                 return true;
@@ -456,27 +531,29 @@ export class UserRoutesValidators implements IUserRoutesValidators {
     public getSkillsValidators() {
 
         return [
-            body().not().isEmpty().withMessage("Select at least one skill")
+            body().not().isEmpty().withMessage((value: string, { req }: any) => {
+                return this._localizationService.getText("validation.skills.required", req.Locale);
+            })
         ];
     }
 
     public getVideoGalleryValidators() {
 
         return [
-            check("AddedEntities").optional().custom((value: UserVideo[]) => {
+            check("AddedEntities").optional().custom((value: UserVideo[], { req }: any) => {
                 value.forEach(v => {
                     if (!Validators.isValidSocialMediaURL(v.Video, SocialMediaCategoryType.Youtube | SocialMediaCategoryType.Vimeo)) {
-                        throw new Error("Video link is not a valid Youtube or Vimeo link");
+                        throw new Error(this._localizationService.getText("validation.video.invalid", req.Locale));
                     }
                 });
 
 
                 return true;
             }),
-            check("UpdatedEntities").optional().custom((value: UserVideo[]) => {
+            check("UpdatedEntities").optional().custom((value: UserVideo[], { req }: any) => {
                 value.forEach(v => {
                     if (!Validators.isValidSocialMediaURL(v.Video, SocialMediaCategoryType.Youtube | SocialMediaCategoryType.Vimeo)) {
-                        throw new Error("Video link is not a valid Youtube or Vimeo link");
+                        throw new Error(this._localizationService.getText("validation.video.invalid", req.Locale));
                     }
                 });
 
@@ -489,7 +566,7 @@ export class UserRoutesValidators implements IUserRoutesValidators {
     public getAwardsValidators() {
 
         return [
-            check("Awards").optional().custom((value: Award[]) => {
+            check("Awards").optional().custom((value: Award[], { req }: any) => {
                 let isInvalidAwardTitle: boolean   = false;
                 let isInvalidAwardIssuer: boolean  = false;
 
@@ -502,12 +579,14 @@ export class UserRoutesValidators implements IUserRoutesValidators {
                     }
                 }
 
+                this._localizationService.setLocale(req.Locale);
+
                 if (isInvalidAwardTitle && isInvalidAwardIssuer) {
-                    throw new Error("Award title and issuer are required");
+                    throw new Error(this._localizationService.getText("validation.award.fileds-required"));
                 } else if (isInvalidAwardTitle) {
-                    throw new Error("Award title is required");
+                    throw new Error(this._localizationService.getText("validation.award.title.required"));
                 } else if (isInvalidAwardIssuer) {
-                    throw new Error("Award issuer is required");
+                    throw new Error(this._localizationService.getText("validation.award.issuer.required"));
                 }
 
                 return true;
@@ -518,7 +597,7 @@ export class UserRoutesValidators implements IUserRoutesValidators {
     public getExperienceValidators() {
 
         return [
-            check("Experience").optional().custom((value: Experience[]) => {
+            check("Experience").optional().custom((value: Experience[], { req }: any) => {
                 let isInvalidExperiencePosition: boolean   = false;
                 let isInvalidExperienceEmployer: boolean   = false;
 
@@ -531,12 +610,14 @@ export class UserRoutesValidators implements IUserRoutesValidators {
                     }
                 }
 
+                this._localizationService.setLocale(req.Locale);
+
                 if (isInvalidExperiencePosition && isInvalidExperienceEmployer) {
-                    throw new Error("Experience position and employer name are required");
+                    throw new Error(this._localizationService.getText("validation.experience.fileds-required"));
                 } else if (isInvalidExperiencePosition) {
-                    throw new Error("Experience position is required");
+                    throw new Error(this._localizationService.getText("validation.experience.position.required"));
                 } else if (isInvalidExperienceEmployer) {
-                    throw new Error("Experience employer name is required");
+                    throw new Error(this._localizationService.getText("validation.experience.employer.required"));
                 }
 
                 return true;
@@ -547,7 +628,7 @@ export class UserRoutesValidators implements IUserRoutesValidators {
     public getEducationValidators() {
 
         return [
-            check("Education").optional().custom((value: Education[]) => {
+            check("Education").optional().custom((value: Education[], { req }: any) => {
                 let isInvalidEducationTitle: boolean             = false;
                 let isInvalidEducationInstitutionName: boolean   = false;
 
@@ -560,12 +641,14 @@ export class UserRoutesValidators implements IUserRoutesValidators {
                     }
                 }
 
+                this._localizationService.setLocale(req.Locale);
+
                 if (isInvalidEducationTitle && isInvalidEducationInstitutionName) {
-                    throw new Error("Education title and institution name are required");
+                    throw new Error(this._localizationService.getText("validation.education.fileds-required"));
                 } else if (isInvalidEducationTitle) {
-                    throw new Error("Education title is required");
+                    throw new Error(this._localizationService.getText("validation.education.title.required"));
                 } else if (isInvalidEducationInstitutionName) {
-                    throw new Error("Education institution name is required");
+                    throw new Error(this._localizationService.getText("validation.education.institution.required"));
                 }
 
                 return true;

@@ -33,12 +33,16 @@ export class UserVideosController extends BaseApiController<UserVideo> implement
     public async update(request: Request, response: Response): Promise<void> {
         const updateUserVideoDTO: UpdateUserVideoDTO = request.body as UpdateUserVideoDTO;
 
+        this._userVideoService.setLocale(request.Locale);
+
         const video = await this._userVideoService.updateUserVideo(request.Principal.Email, updateUserVideoDTO);
 
         response.send(new UserVideoDTO(video));
     }
 
     public async deleteByID(request: Request, response: Response): Promise<void> {
+
+        this._userVideoService.setLocale(request.Locale);
 
         const video = await this._userVideoService.deleteUserVideoByID(request.Principal.Email, request.params.videoID);
 

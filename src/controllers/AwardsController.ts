@@ -32,12 +32,16 @@ export class AwardsController extends BaseApiController<Award> implements IAward
     public async update(request: Request, response: Response): Promise<void> {
         const updateAwardDTO: UpdateAwardDTO = request.body as UpdateAwardDTO;
 
+        this._awardService.setLocale(request.Locale);
+
         const award = await this._awardService.updateAward(request.Principal.Email, updateAwardDTO);
 
         response.send(new AwardDTO(award));
     }
 
     public async deleteByID(request: Request, response: Response): Promise<void> {
+
+        this._awardService.setLocale(request.Locale);
 
         const award = await this._awardService.deleteAwardByID(request.Principal.Email, request.params.awardID);
 

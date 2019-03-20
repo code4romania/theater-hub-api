@@ -33,12 +33,16 @@ export class ExperienceController extends BaseApiController<Experience> implemen
     public async update(request: Request, response: Response): Promise<void> {
         const updateExperienceDTO: UpdateExperienceDTO = request.body as UpdateExperienceDTO;
 
+        this._experienceService.setLocale(request.Locale);
+
         const experienceStep = await this._experienceService.updateExperienceStep(request.Principal.Email, updateExperienceDTO);
 
         response.send(new ExperienceStepDTO(experienceStep));
     }
 
     public async deleteByID(request: Request, response: Response): Promise<void> {
+
+        this._experienceService.setLocale(request.Locale);
 
         const experienceStep = await this._experienceService.deleteExperienceStepByID(request.Principal.Email, request.params.experienceID);
 
