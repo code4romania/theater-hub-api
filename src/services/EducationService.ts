@@ -1,6 +1,7 @@
 import { inject, injectable }   from "inversify";
 import { TYPES }                from "../types";
 import { IEducationService }    from "./IEducationService";
+import { ILocalizationService } from "./ILocalizationService";
 import { IUserService }         from "./IUserService";
 import { BaseService }          from "./BaseService";
 import { Education }            from "../models/Education";
@@ -12,14 +13,13 @@ import { IEducationRepository } from "../repositories";
 @injectable()
 export class EducationService extends BaseService<Education> implements IEducationService {
 
-    private readonly _educationRepository: IEducationRepository;
     private readonly _userService: IUserService;
 
     constructor(@inject(TYPES.EducationRepository) educationRepository: IEducationRepository,
-                                                @inject(TYPES.UserService) userService: IUserService) {
-        super(educationRepository);
-        this._educationRepository = educationRepository;
-        this._userService         = userService;
+                            @inject(TYPES.LocalizationService) localizationService: ILocalizationService,
+                            @inject(TYPES.UserService) userService: IUserService) {
+        super(educationRepository, localizationService);
+        this._userService = userService;
     }
 
     public async createEducationStep(email: string, createEducationDTO: CreateEducationDTO): Promise<Education> {
@@ -34,15 +34,15 @@ export class EducationService extends BaseService<Education> implements IEducati
             Professional: dbUser.Professional
         } as Education;
 
-        return this._educationRepository.insert(education);
+        return this._repository.insert(education);
     }
 
     public async updateEducationStep(email: string, updateEducationDTO: UpdateEducationDTO): Promise<Education> {
         const dbUser: User           = await this._userService.getByEmail(email);
-        const dbEducation: Education = await this._educationRepository.getByID(updateEducationDTO.ID);
+        const dbEducation: Education = await this._repository.getByID(updateEducationDTO.ID);
 
         if (!dbEducation || !dbUser.Professional.Education.find(e => e.ID === updateEducationDTO.ID)) {
-            throw new Error("Education step does not exist!");
+            throw new Error(this._localizationService.getText("validation.education.non-existent"));
         }
 
         dbEducation.Title         = updateEducationDTO.Title;
@@ -51,17 +51,17 @@ export class EducationService extends BaseService<Education> implements IEducati
         dbEducation.StartDate     = updateEducationDTO.StartDate;
         dbEducation.EndDate       = updateEducationDTO.EndDate;
 
-        return this._educationRepository.update(dbEducation);
+        return this._repository.update(dbEducation);
     }
 
     public async deleteEducationStepByID(email: string, educationID: string): Promise<Education> {
         const dbUser: User = await this._userService.getByEmail(email);
 
         if (!dbUser.Professional.Education.find(e => e.ID === educationID)) {
-            throw new Error("Education step does not exist!");
+            throw new Error(this._localizationService.getText("validation.education.non-existent"));
         }
 
-        return this._educationRepository.deleteByID(educationID);
+        return this._repository.deleteByID(educationID);
     }
 
 }

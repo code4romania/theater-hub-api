@@ -4,6 +4,7 @@ const { check }                                 = require("express-validator/che
 import { User }                                 from "../models/User";
 import { IAdministrationRoutesValidators }      from "./IAdministrationRoutesValidators";
 import { IUserService }                         from "../services";
+import { ILocalizationService }                 from "../services";
 import { UserAccountStatusType, UserRoleType }  from "../enums";
 import { Validators }                           from "../utils";
 
@@ -11,39 +12,49 @@ import { Validators }                           from "../utils";
 export class AdministrationRoutesValidators implements IAdministrationRoutesValidators {
 
     private readonly _userService: IUserService;
+    private readonly _localizationService: ILocalizationService;
 
-    constructor(@inject(TYPES.UserService) userService: IUserService) {
-        this._userService = userService;
+    constructor(@inject(TYPES.UserService) userService: IUserService,
+            @inject(TYPES.LocalizationService) localizationService: ILocalizationService) {
+        this._userService           = userService;
+        this._localizationService   = localizationService;
     }
 
     public getInviteUserValidators() {
 
         return [
-            check("Email").not().isEmpty().withMessage("E-mail is required")
-                          .isLength({ max: 100 }).withMessage("E-mail should have at most 100 characters")
-                          .isEmail().withMessage("E-mail must be valid")
-                          .custom(async (value: string, { req }: any) => {
-                                const adminUser: User   = await this._userService.getByEmail(req.Principal.Email);
-                                const dbUser: User      = await this._userService.getByEmail(value);
+            check("Email").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.email.required", req.Locale);
+                })
+                .isLength({ max: 100 }).withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.email.length", req.Locale);
+                })
+                .isEmail().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.email.invalid", req.Locale);
+                })
+                .custom(async (value: string, { req }: any) => {
+                    const adminUser: User   = await this._userService.getByEmail(req.Principal.Email);
+                    const dbUser: User      = await this._userService.getByEmail(value);
 
-                                if (!adminUser || adminUser.AccountSettings.Role === UserRoleType.User) {
-                                    return Promise.reject("Invalid admin account");
-                                }
+                    this._localizationService.setLocale(req.Locale);
 
-                                if (adminUser.AccountSettings.Role === UserRoleType.Admin && req.body.Role !== UserRoleType.User) {
-                                    return Promise.reject("Insufficient permissions.");
-                                }
+                    if (!adminUser || adminUser.AccountSettings.Role === UserRoleType.User) {
+                        return Promise.reject(this._localizationService.getText("validation.permissions.not-admin"));
+                    }
 
-                                if (adminUser.AccountSettings.Role === UserRoleType.SuperAdmin && req.body.Role === UserRoleType.SuperAdmin) {
-                                    return Promise.reject("Insufficient permissions.");
-                                }
+                    if (adminUser.AccountSettings.Role === UserRoleType.Admin && req.body.Role !== UserRoleType.User) {
+                        return Promise.reject(this._localizationService.getText("validation.permissions.insufficient-permissions"));
+                    }
 
-                                if (dbUser && dbUser.AccountSettings.AccountStatus !== UserAccountStatusType.Managed) {
-                                    return Promise.reject("E-mail already in use");
-                                }
-                              })
+                    if (adminUser.AccountSettings.Role === UserRoleType.SuperAdmin && req.body.Role === UserRoleType.SuperAdmin) {
+                        return Promise.reject(this._localizationService.getText("validation.permissions.insufficient-permissions"));
+                    }
+
+                    if (dbUser && dbUser.AccountSettings.AccountStatus !== UserAccountStatusType.Managed) {
+                        return Promise.reject(this._localizationService.getText("validation.email.in-use"));
+                    }
+            })
         ];
     }
-
 
 }

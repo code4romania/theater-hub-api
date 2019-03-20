@@ -1,4 +1,6 @@
-import { AdminInviteManagedUserEmailDTO, AdminUpdateUserEmailDTO, CreateAccountEmailDTO, ResetPasswordEmailDTO } from "../dtos";
+import { AdminInviteManagedUserEmailDTO, AdminUpdateUserEmailDTO,
+                    CreateAccountEmailDTO, ResetPasswordEmailDTO }  from "../dtos";
+import { LocaleType }                                               from "../enums";
 
 export interface IEmailService  {
 
@@ -13,5 +15,7 @@ export interface IEmailService  {
     sendAdminInviteManagedUserEmail(model: AdminInviteManagedUserEmailDTO): Promise<void>;
 
     sendResetPasswordEmail(model: ResetPasswordEmailDTO): Promise<void>;
+
+    setLocale(locale: LocaleType): void;
 
 }

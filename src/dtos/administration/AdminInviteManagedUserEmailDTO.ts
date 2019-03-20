@@ -1,7 +1,8 @@
+import { LocaleType } from "../../enums";
 
 export class AdminInviteManagedUserEmailDTO {
 
-    public SenderEmailAddres: string;
+    public SenderEmailAddress: string;
 
     public SenderFullName: string;
 

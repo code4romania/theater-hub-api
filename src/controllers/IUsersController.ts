@@ -33,8 +33,6 @@ export interface IUsersController extends IBaseApiController {
 
     resetPassword(req: Request, res: Response): Promise<void>;
 
-    setPassword(req: Request, res: Response): Promise<void>;
-
     changePassword(req: Request, res: Response): Promise<void>;
 
     createProfile(req: Request, res: Response): Promise<void>;

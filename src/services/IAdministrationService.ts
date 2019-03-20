@@ -1,4 +1,5 @@
 import { User }                     from "../models";
+import { LocaleType }               from "../enums";
 import { GetUsersRequestDTO,
     GetUsersResponseDTO,
     ManagedUserDTO,
@@ -15,5 +16,7 @@ export interface IAdministrationService {
     disableUser(adminEmail: string, userID: string, updateUserAccountStatusDTO: UpdateUserAccountStatusDTO): Promise<void>;
 
     deleteUser(adminEmail: string, userID: string, updateUserAccountStatusDTO: UpdateUserAccountStatusDTO): Promise<User>;
+
+    setLocale(locale: LocaleType): void;
 
 }

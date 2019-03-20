@@ -1,3 +1,4 @@
+import { LocaleType } from "../../enums";
 
 export class CreateAccountEmailDTO {
 

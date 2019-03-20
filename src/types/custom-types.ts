@@ -1,10 +1,11 @@
-import { Principal } from "../principal";
-
+import { Principal }    from "../principal";
+import { LocaleType } from "../enums";
 
 declare global {
   namespace Express {
     interface Request {
       Principal: Principal;
+      Locale: LocaleType;
     }
   }
 }
@@ -32,6 +33,7 @@ const TYPES = {
     AwardService: Symbol("AwardService"),
     EducationService: Symbol("EducationService"),
     ExperienceService: Symbol("ExperienceService"),
+    LocalizationService: Symbol("LocalizationService"),
     MessageService: Symbol("MessageService"),
     ProjectService: Symbol("ProjectService"),
     SkillService: Symbol("SkillService"),
@@ -43,6 +45,7 @@ const TYPES = {
     EducationRepository: Symbol("EducationRepository"),
     EntityCategoryRepository: Symbol("EntityCategoryRepository"),
     ExperienceRepository: Symbol("ExperienceRepository"),
+    LocaleRepository: Symbol("LocaleRepository"),
     MessageRepository: Symbol("MessageRepository"),
     ProfessionalRepository: Symbol("ProfessionalRepository"),
     ProfessionalSkillRepository: Symbol("ProfessionalSkillRepository"),

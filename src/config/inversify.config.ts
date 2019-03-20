@@ -14,20 +14,21 @@ import { IAdministrationRoutesValidators, AdministrationRoutesValidators,
          IProjectRoutesValidators, ProjectRoutesValidators,
          IUserRoutesValidators, UserRoutesValidators }                                    from "../validators";
 import { IAdministrationService, IApplicationDataService, IAwardService,
-    IEducationService, IExperienceService,
+    IEducationService, IExperienceService, ILocalizationService,
     IMessageService, IProjectService, ISkillService,
     IUserService, IUserVideoService, IWishService, IEmailService,
     AdministrationService, ApplicationDataService, AwardService,
-    EducationService, ExperienceService,
+    EducationService, ExperienceService, LocalizationService,
     MessageService, ProjectService, SkillService, UserService, UserVideoService,
     WishService, EmailService, IAuthenticationService, AuthenticationService }            from "../services";
 import { IAwardRepository, IEducationRepository, IEntityCategoryRepository,
-    IExperienceRepository, IMessageRepository, IProfessionalRepository,
-    IProfessionalSkillRepository, IProjectRepository,
+    IExperienceRepository, ILocaleRepository, IMessageRepository,
+    IProfessionalRepository, IProfessionalSkillRepository, IProjectRepository,
     ISkillRepository, IUserAccountSettingsRepository,
     IUserImageRepository, IUserSocialMediaRepository,
     IUserRepository, IUserVideoRepository, IWishRepository, AwardRepository,
-    EducationRepository, EntityCategoryRepository, ExperienceRepository, MessageRepository,
+    EducationRepository, EntityCategoryRepository, ExperienceRepository,
+    LocaleRepository, MessageRepository,
     ProfessionalRepository, ProfessionalSkillRepository, ProjectRepository,
     SkillRepository, UserAccountSettingsRepository, UserImageRepository,
     UserSocialMediaRepository, UserRepository, UserVideoRepository, WishRepository}       from "../repositories";
@@ -58,6 +59,7 @@ container.bind<IAuthenticationService>(TYPES.AuthenticationService).to(Authentic
 container.bind<IAwardService>(TYPES.AwardService).to(AwardService);
 container.bind<IEducationService>(TYPES.EducationService).to(EducationService);
 container.bind<IExperienceService>(TYPES.ExperienceService).to(ExperienceService);
+container.bind<ILocalizationService>(TYPES.LocalizationService).to(LocalizationService);
 container.bind<IMessageService>(TYPES.MessageService).to(MessageService);
 container.bind<IProjectService>(TYPES.ProjectService).to(ProjectService);
 container.bind<ISkillService>(TYPES.SkillService).to(SkillService);
@@ -70,6 +72,7 @@ container.bind<IAwardRepository>(TYPES.AwardRepository).to(AwardRepository);
 container.bind<IEducationRepository>(TYPES.EducationRepository).to(EducationRepository);
 container.bind<IEntityCategoryRepository>(TYPES.EntityCategoryRepository).to(EntityCategoryRepository);
 container.bind<IExperienceRepository>(TYPES.ExperienceRepository).to(ExperienceRepository);
+container.bind<ILocaleRepository>(TYPES.LocaleRepository).to(LocaleRepository);
 container.bind<IMessageRepository>(TYPES.MessageRepository).to(MessageRepository);
 container.bind<IProfessionalRepository>(TYPES.ProfessionalRepository).to(ProfessionalRepository);
 container.bind<IProfessionalSkillRepository>(TYPES.ProfessionalSkillRepository).to(ProfessionalSkillRepository);

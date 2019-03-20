@@ -11,4 +11,7 @@ export default (app: any) => {
     app.get("/api/applicationdata/skills", authorizationMiddleware,
                 (req: Request, res: Response) => applicationDataController.getSkills(req, res));
 
+    app.get("/api/applicationdata/locales",
+                (req: Request, res: Response) => applicationDataController.getLocales(req, res));
+
 };

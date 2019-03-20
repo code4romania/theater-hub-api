@@ -1,5 +1,6 @@
 import { inject, injectable }   from "inversify";
 import { TYPES }                from "../types";
+import { ILocalizationService } from "./ILocalizationService";
 import { IUserVideoService }    from "./IUserVideoService";
 import { IUserService }         from "./IUserService";
 import { BaseService }          from "./BaseService";
@@ -16,8 +17,9 @@ export class UserVideoService extends BaseService<UserVideo> implements IUserVid
     private readonly _userService: IUserService;
 
     constructor(@inject(TYPES.UserVideoRepository) userVideoRepository: IUserVideoRepository,
-                                                @inject(TYPES.UserService) userService: IUserService) {
-        super(userVideoRepository);
+                        @inject(TYPES.LocalizationService) localizationService: ILocalizationService,
+                        @inject(TYPES.UserService) userService: IUserService) {
+        super(userVideoRepository, localizationService);
         this._userVideoRepository = userVideoRepository;
         this._userService         = userService;
     }
@@ -38,7 +40,7 @@ export class UserVideoService extends BaseService<UserVideo> implements IUserVid
         const dbUserVideo: UserVideo  = await this._userVideoRepository.getByID(updateUserVideoDTO.ID);
 
         if (!dbUserVideo || !dbUser.VideoGallery.find(v => v.ID === dbUserVideo.ID)) {
-            throw new Error("Video does not exist!");
+            throw new Error(this._localizationService.getText("validation.video.non-existent"));
         }
 
         dbUserVideo.Video = updateUserVideoDTO.Video;
@@ -50,7 +52,7 @@ export class UserVideoService extends BaseService<UserVideo> implements IUserVid
         const dbUser: User = await this._userService.getByEmail(email);
 
         if (!dbUser.VideoGallery.find(v => v.ID === videoID)) {
-            throw new Error("Video does not exist!");
+            throw new Error(this._localizationService.getText("validation.video.non-existent"));
         }
 
         return this._userVideoRepository.deleteByID(videoID);
