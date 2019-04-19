@@ -52,7 +52,8 @@ createConnection().then(async (connection: Connection) => {
   app.set("models", models);
   app.use(compression());
   app.use(logger("dev"));
-  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(bodyParser.json({ limit: "50mb" }));
+  app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
   app.use(bodyParser.json());
   app.use(expressValidator());
   app.use(session({

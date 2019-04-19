@@ -23,6 +23,10 @@ export const commonConfig = {
         app_secret: "",
         callback_url: "https://127.0.0.1:443/api/authentication/google/callback"
     },
+    youtube: {
+       api_key: "",
+       videos_information_url: "https://www.googleapis.com/youtube/v3/videos?part=snippet&id={0}&key={1}"
+    },
     mailer: {
         host: "",
         port: 587,

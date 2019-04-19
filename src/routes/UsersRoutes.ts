@@ -65,7 +65,7 @@ export default (app: any) => {
     app.post("/api/users/me/education", authorizationMiddleware, userRoutesValidators.getEducationValidators(), validatorMiddleware,
                                                     (req: Request, res: Response) => usersController.updateMyEducation(req, res));
 
-    app.post("/api/users/resume",             (req: Request, res: Response) => usersController.generateResume(req, res));
+    app.get("/api/users/resume", authorizationMiddleware, (req: Request, res: Response) => usersController.generateResume(req, res));
 
     app.get("/api/users/settings",     authorizationMiddleware, (req: Request, res: Response) => usersController.getSettings(req, res));
 

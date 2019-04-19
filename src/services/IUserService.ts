@@ -2,6 +2,7 @@ import { IBaseService }                                                    from 
 import { Award, Education, Experience, Skill, User, UserImage, UserVideo } from "../models";
 import { ChangePasswordRequestDTO, ChangePasswordResponseDTO,
         CreateProfileResponseDTO,
+        GenerateResumeRequestDTO,
         FinishRegistrationResponseDTO,
         GetCommunityMembersRequest, GetCommunityResponse,
         ManagedUserRegistrationRequestDTO,
@@ -52,6 +53,8 @@ export interface IUserService extends IBaseService<User> {
     changePassword(email: string, changePasswordRequest: ChangePasswordRequestDTO): Promise<ChangePasswordResponseDTO>;
 
     createProfile(profile: ProfileDTO): Promise<CreateProfileResponseDTO>;
+
+    generateResume(request: GenerateResumeRequestDTO): Promise<any>;
 
     getSettings(email: string): Promise<SettingsDTO>;
 
