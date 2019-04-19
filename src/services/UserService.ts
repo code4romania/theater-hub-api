@@ -30,6 +30,7 @@ import { IAwardRepository,
 import { ChangePasswordResponseDTO,
     ChangePasswordRequestDTO,
     CreateProfileResponseDTO,
+    GenerateResumeRequestDTO,
     CreateAccountEmailDTO,
     FinishRegistrationResponseDTO,
     GetCommunityMembersRequest,
@@ -53,6 +54,10 @@ const bcrypt                                   = require("bcrypt");
 const config                                   = require("../config/env").getConfig();
 const jwt                                      = require("jsonwebtoken");
 const uuidv4                                   = require("uuid/v4");
+const fs                                       = require("fs");
+const path                                     = require("path");
+const pdf                                      = require("html-pdf");
+const handlebars                               = require("handlebars");
 
 @injectable()
 export class UserService extends BaseService<User> implements IUserService {
@@ -867,6 +872,83 @@ export class UserService extends BaseService<User> implements IUserService {
 
         return response;
 
+    }
+
+    public async generateResume(request: GenerateResumeRequestDTO): Promise<any> {
+        this._localizationService.setLocale(request.Locale);
+
+        const dbUser: User        = await this._userRepository.getByEmail(request.Email);
+        const profile: ProfileDTO = new ProfileDTO(dbUser);
+        const resumeHTML: string  = fs.readFileSync(path.join(process.cwd(), "src/views/resume", "Resume.html"), "utf8");
+
+        const currentDateMoment       = moment(new Date());
+        const birthDateMoment         = moment(dbUser.BirthDate);
+        const age                     = Math.floor(moment.duration(currentDateMoment.diff(birthDateMoment)).asYears());
+        const skills                  = dbUser.Professional.Skills.map(s => this._localizationService.getText(`application-data.${s.Skill.Name.toLowerCase()}`));
+        const awards                  = profile.Awards.map(a => {
+            return {
+                title: a.Title,
+                issuer: a.Issuer,
+                date: moment(a.Date).format("MM/YYYY"),
+                description: a.Description
+            };
+        });
+        const experience              = profile.Experience.map(e => {
+            return {
+                position: e.Position,
+                employerName: e.Employer,
+                startDate: moment(e.StartDate).format("MM/YYYY"),
+                endDate: moment(e.EndDate).format("MM/YYYY"),
+                description: e.Description
+            };
+        });
+        const education              = profile.Education.map(e => {
+            return {
+                title: e.Title,
+                institutionName: e.Institution,
+                startDate: moment(e.StartDate).format("MM/YYYY"),
+                endDate: moment(e.EndDate).format("MM/YYYY"),
+                description: e.Description
+            };
+        });
+
+        const context = {
+            profileImageValue: profile.ProfileImage ? profile.ProfileImage.Image : "",
+            fullNameValue: dbUser.Name,
+            ageValue: age,
+            emailValue: profile.Email,
+            phoneNumberValue: profile.PhoneNumber,
+            websiteValue: profile.Website,
+            facebookValue: profile.FacebookLink,
+            instagramValue: profile.InstagramLink,
+            linkedinValue: profile.LinkedinLink,
+            youtubeValue: profile.YoutubeLink,
+            descriptionValue: dbUser.Description,
+            skills,
+            photoGalleryImages: profile.PhotoGallery ? profile.PhotoGallery.map(p => p.Image) : undefined,
+            videos: profile.VideoGallery ? profile.VideoGallery.map(v => v.Video) : undefined,
+            hasAchievements: awards || experience || education,
+            awards,
+            experience,
+            education,
+            years: this._localizationService.getText("resume.years"),
+            email: this._localizationService.getText("resume.e-mail"),
+            phoneNumber: this._localizationService.getText("resume.phone-number"),
+            website: this._localizationService.getText("resume.website"),
+            descriptionTitle: this._localizationService.getText("resume.description-title"),
+            skillsTitle: this._localizationService.getText("resume.skills-title"),
+            photoGalleryTitle: this._localizationService.getText("resume.photo-gallery-title"),
+            videoGalleryTitle: this._localizationService.getText("resume.video-gallery-title"),
+            achievementsTitle: this._localizationService.getText("resume.achievements-title"),
+            awardsTitle: this._localizationService.getText("resume.awards-title"),
+            experienceTitle: this._localizationService.getText("resume.experience-title"),
+            educationTitle: this._localizationService.getText("resume.education-title")
+        };
+
+        const options  = { "renderDelay": 2000, "width": "1020px", "border": "40px" };
+        const template = handlebars.compile(resumeHTML);
+
+        return pdf.create(template(context), options);
     }
 
     public async getSettings(email: string): Promise<SettingsDTO> {

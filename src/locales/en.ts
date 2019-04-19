@@ -207,5 +207,19 @@ export const enLocale = {
             "content": "In order to reset your password, please click the button below and wait for a few moments. You will be redirected to the website.",
             "button": "RESET PASSWORD"
         }
+    },
+    "resume": {
+        "years": "years",
+        "e-mail": "E-mail",
+        "phone-number": "Phone number",
+        "website": "Website",
+        "description-title": "Description",
+        "skills-title": "Skills",
+        "photo-gallery-title": "Photo gallery",
+        "video-gallery-title": "Video gallery",
+        "achievements-title": "Achievements",
+        "awards-title": "Awards",
+        "experience-title": "Experience",
+        "education-title": "Education"
     }
 };

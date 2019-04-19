@@ -5,6 +5,7 @@ export * from "./CreateAccountEmailDTO";
 export * from "./CreateProfileResponseDTO";
 export * from "./FinishRegistrationResponseDTO";
 export * from "./FinishRegistrationRequestDTO";
+export * from "./GenerateResumeRequestDTO";
 export * from "./GetCommunityMembersRequest";
 export * from "./GetCommunityResponse";
 export * from "./ManagedUserRegistrationRequestDTO";
