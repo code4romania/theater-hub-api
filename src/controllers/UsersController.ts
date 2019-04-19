@@ -13,6 +13,7 @@ import { Validators }                  from "../utils";
 import { ChangePasswordRequestDTO,
    ChangePasswordResponseDTO,
    CreateProfileResponseDTO,
+   GenerateResumeRequestDTO,
    FinishRegistrationRequestDTO,
    FinishRegistrationResponseDTO,
    GetCommunityMembersRequest,
@@ -25,9 +26,6 @@ import { ChangePasswordRequestDTO,
    UpdateProfileSection }              from "../dtos";
 import { Award, Education,
   Experience, UserImage, UserVideo }   from "../models";
-const fs                               = require("fs");
-const path                             = require("path");
-const pdf                              = require("html-pdf");
 
 @injectable()
 export class UsersController extends BaseApiController<User> implements IUsersController {
@@ -194,13 +192,20 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
   }
 
   public async generateResume(request: Request, response: Response): Promise<void> {
-    const resumeHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/resume", "Resume.html"), "utf8");
-    const options = { "renderDelay": 2000 };
-    pdf.create(resumeHTML, options).toStream(function(err: any, stream: any){
-      stream.pipe(fs.createWriteStream("./foo.pdf"));
+
+    const generateResumeRequest: GenerateResumeRequestDTO = {
+      Email: request.Principal.Email,
+      Locale: request.Locale
+    } as GenerateResumeRequestDTO;
+
+    (await this._userService.generateResume(generateResumeRequest)).toStream(function (err: any, stream: any) {
+      stream.pipe(response);
     });
 
-    response.send();
+    const fileName: string = `CV_${request.Principal.FirstName}_${request.Principal.LastName}.pdf`;
+
+    response.setHeader("Content-type", "application/pdf");
+    response.setHeader("Content-disposition", `attachment; filename=${fileName}`);
   }
 
   public async getSettings(request: Request, response: Response): Promise<void> {

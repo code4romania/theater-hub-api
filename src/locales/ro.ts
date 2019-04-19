@@ -207,5 +207,19 @@ export const roLocale = {
             "content": "Pentru a schimba parola vă rugăm să apăsați butonul de mai jos și să asteptați câteva clipe. Veți fi redirecționat către sit.",
             "button": "SCHIMBĂ PAROLA"
         }
+    },
+    "resume": {
+        "years": "ani",
+        "e-mail": "E-mail",
+        "phone-number": "Număr de telefon",
+        "website": "Sit web",
+        "description-title": "Descriere",
+        "skills-title": "Aptitudini",
+        "photo-gallery-title": "Galerie foto",
+        "video-gallery-title": "Galerie video",
+        "achievements-title": "Realizări",
+        "awards-title": "Premii",
+        "experience-title": "Experiența profesională",
+        "education-title": "Educație"
     }
 };
