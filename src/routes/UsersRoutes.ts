@@ -71,7 +71,10 @@ export default (app: any) => {
 
     app.patch("/api/users/settings",   authorizationMiddleware, (req: Request, res: Response) => usersController.updateSettings(req, res));
 
-    app.get("/api/users/community", getPrincipalIfRequestHasToken,
+    app.get("/api/users/community/layers", getPrincipalIfRequestHasToken,
+                                             (req: Request, res: Response) => usersController.getCommunityLayers(req, res));
+
+    app.get("/api/users/community/members", getPrincipalIfRequestHasToken,
                                              (req: Request, res: Response) => usersController.getCommunityMembers(req, res));
 
     app.get("/api/users/profile/:userID", getPrincipalIfRequestHasToken,
