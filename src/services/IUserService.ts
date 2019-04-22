@@ -4,13 +4,14 @@ import { ChangePasswordRequestDTO, ChangePasswordResponseDTO,
         CreateProfileResponseDTO,
         GenerateResumeRequestDTO,
         FinishRegistrationResponseDTO,
-        GetCommunityMembersRequest, GetCommunityResponse,
+        GetCommunityLayersRequest, GetCommunityLayersResponse,
+        GetCommunityMembersRequest, GetCommunityMembersResponse,
         ManagedUserRegistrationRequestDTO,
         ManagedUserRegistrationResponseDTO,
         MeDTO, ProfileDTO, RegisterDTO,
         ResetPasswordRequestDTO,
-        SettingsDTO, UpdateProfileSection }                                 from "../dtos";
-import { UserAccountProviderType }                                          from "../enums/UserAccountProviderType";
+        SettingsDTO, UpdateProfileSection }                                from "../dtos";
+import { UserAccountProviderType }                                         from "../enums/UserAccountProviderType";
 
 export interface IUserService extends IBaseService<User> {
 
@@ -60,7 +61,9 @@ export interface IUserService extends IBaseService<User> {
 
     updateSettings(email: string, settings: SettingsDTO): Promise<void>;
 
-    getCommunityMembers(request: GetCommunityMembersRequest): Promise<GetCommunityResponse>;
+    getCommunityLayers(request: GetCommunityLayersRequest): Promise<GetCommunityLayersResponse>;
+
+    getCommunityMembers(request: GetCommunityMembersRequest): Promise<GetCommunityMembersResponse>;
 
     getCommunityMemberProfile(email: string, communityMemberID: string): Promise<ProfileDTO>;
 
