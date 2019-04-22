@@ -43,6 +43,8 @@ export interface IUsersController extends IBaseApiController {
 
     updateSettings(req: Request, res: Response): Promise<void>;
 
+    getCommunityLayers(req: Request, res: Response): Promise<void>;
+
     getCommunityMembers(req: Request, res: Response): Promise<void>;
 
     getCommunityMemberProfile(req: Request, res: Response): Promise<void>;

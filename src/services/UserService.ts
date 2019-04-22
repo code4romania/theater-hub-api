@@ -29,12 +29,15 @@ import { IAwardRepository,
     IUserVideoRepository }                     from "../repositories";
 import { ChangePasswordResponseDTO,
     ChangePasswordRequestDTO,
+    CommunitySkillLayer,
     CreateProfileResponseDTO,
     GenerateResumeRequestDTO,
     CreateAccountEmailDTO,
     FinishRegistrationResponseDTO,
+    GetCommunityLayersRequest,
+    GetCommunityLayersResponse,
     GetCommunityMembersRequest,
-    GetCommunityResponse,
+    GetCommunityMembersResponse,
     ResetPasswordEmailDTO,
     ManagedUserRegistrationRequestDTO,
     ManagedUserRegistrationResponseDTO,
@@ -43,13 +46,14 @@ import { ChangePasswordResponseDTO,
     ResetPasswordRequestDTO,
     SettingsDTO, UpdateProfileSection }        from "../dtos";
 import { EntityCategoryType }                  from "../enums/EntityCategoryType";
-import { ProfileSectionType }                  from "../enums/ProfileSectionType";
+import { SocialMediaManager, Validators }      from "../utils";
 import { SocialMediaCategoryType }             from "../enums/SocialMediaCategoryType";
 import { SortOrientationType }                 from "../enums/SortOrientationType";
 import { UserAccountProviderType }             from "../enums/UserAccountProviderType";
 import { UserAccountStatusType }               from "../enums/UserAccountStatusType";
 import { UserRoleType }                        from "../enums/UserRoleType";
 import { VisibilityType }                      from "../enums/VisibilityType";
+import axios                                   from "axios";
 const bcrypt                                   = require("bcrypt");
 const config                                   = require("../config/env").getConfig();
 const jwt                                      = require("jsonwebtoken");
@@ -978,7 +982,55 @@ export class UserService extends BaseService<User> implements IUserService {
         this._userAccountSettingsRepository.update(dbUserAccountSettings);
     }
 
-    public async getCommunityMembers(request: GetCommunityMembersRequest): Promise<GetCommunityResponse> {
+    public async getCommunityLayers(request: GetCommunityLayersRequest): Promise<GetCommunityLayersResponse> {
+        let me: User;
+        let fullViewingRights: boolean;
+        const viewerIsVisitor: boolean  = !request.MyEmail;
+        const searchTerm: string        = `%${request.SearchTerm.toLowerCase()}%`;
+        const skills: Skill[]           = await this._skillService.getAll();
+
+        let selectedUsers: User[] = await this._userRepository
+                        .runCreateQueryBuilder()
+                        .select("user")
+                        .from(User, "user")
+                        .leftJoinAndSelect("user.ProfileImage", "profileImage")
+                        .innerJoinAndSelect("user.Professional", "professional")
+                        .innerJoinAndSelect("user.AccountSettings", "accountSettings")
+                        .innerJoinAndSelect("professional.Skills", "skills")
+                        .where("LOWER(user.Name) like :searchTerm AND accountSettings.AccountStatus <> :disabledStatus", { searchTerm: searchTerm, disabledStatus: UserAccountStatusType.Disabled })
+                        .getMany();
+
+        // if email is null then the person making the request is a visitor
+        if (!viewerIsVisitor) {
+            me                = await this._userRepository.getByEmail(request.MyEmail);
+            fullViewingRights = me.AccountSettings.Role === UserRoleType.Admin || me.AccountSettings.Role === UserRoleType.SuperAdmin;
+            selectedUsers     = selectedUsers.filter(u => u.ID !== me.ID
+                                                    && u.AccountSettings.ProfileVisibility !== VisibilityType.Private);
+        } else {
+            selectedUsers = selectedUsers.filter(u => u.AccountSettings.ProfileVisibility === VisibilityType.Everyone);
+        }
+
+        const response: GetCommunityLayersResponse = new GetCommunityLayersResponse();
+
+        for (const skill of skills) {
+            const skillUsers = selectedUsers.filter(u => u.Professional.Skills.map(s => s.SkillID).indexOf(skill.ID) !== -1);
+
+            if (skillUsers.length === 0) {
+                continue;
+            }
+
+            if (skillUsers.length <= request.PageSize) {
+                response.Layers.push(new CommunitySkillLayer(skill.ID, skillUsers, false));
+            } else {
+                response.Layers.push(new CommunitySkillLayer(skill.ID, skillUsers.slice(0, request.PageSize), true));
+            }
+        }
+
+        return response;
+
+    }
+
+    public async getCommunityMembers(request: GetCommunityMembersRequest): Promise<GetCommunityMembersResponse> {
 
         let me: User;
         let fullViewingRights: boolean;
@@ -1019,8 +1071,7 @@ export class UserService extends BaseService<User> implements IUserService {
 
         selectedUsers = selectedUsers.splice(request.Page * request.PageSize, request.PageSize);
 
-        return new GetCommunityResponse(selectedUsers, communitySize);
-
+        return new GetCommunityMembersResponse(selectedUsers, communitySize);
     }
 
     public async getCommunityMemberProfile(email: string, communityMemberID: string): Promise<ProfileDTO> {

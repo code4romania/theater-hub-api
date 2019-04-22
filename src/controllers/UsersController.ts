@@ -17,7 +17,9 @@ import { ChangePasswordRequestDTO,
    FinishRegistrationRequestDTO,
    FinishRegistrationResponseDTO,
    GetCommunityMembersRequest,
-   GetCommunityResponse,
+   GetCommunityMembersResponse,
+   GetCommunityLayersRequest,
+   GetCommunityLayersResponse,
    ManagedUserRegistrationRequestDTO,
    ManagedUserRegistrationResponseDTO,
    MeDTO, ProfileDTO, RegisterDTO,
@@ -52,21 +54,35 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     response.send(profile);
   }
 
+  public async getCommunityLayers(request: Request, response: Response): Promise<void> {
+    const myEmail: string           = request.Principal ? request.Principal.Email : "";
+    const searchTerm: string        = request.query.searchTerm || "";
+    const page: number              = request.query.page;
+    const pageSize: number          = request.query.pageSize;
+
+    const getCommunityLayersRequest: GetCommunityLayersRequest = new GetCommunityLayersRequest(myEmail, searchTerm);
+
+    const community: GetCommunityLayersResponse = await this._userService.getCommunityLayers(getCommunityLayersRequest);
+
+    response.send(community);
+
+  }
+
   public async getCommunityMembers(request: Request, response: Response): Promise<void> {
     const myEmail: string           = request.Principal ? request.Principal.Email : "";
     const searchTerm: string        = request.query.searchTerm;
-    const sortOrientation: string   = request.query.sortOrientation;
     const skillsLiteral: string     = request.query.skills;
+    const sortOrientation: string   = request.query.sortOrientation;
     const page: number              = request.query.page;
     const pageSize: number          = request.query.pageSize;
 
     const getCommunityMembersRequest: GetCommunityMembersRequest =
-            new GetCommunityMembersRequest(myEmail, searchTerm, sortOrientation, skillsLiteral, page, pageSize);
+                       new GetCommunityMembersRequest(myEmail, searchTerm, skillsLiteral, sortOrientation, page, pageSize);
 
-    const community: GetCommunityResponse
+    const members: GetCommunityMembersResponse
                   = await this._userService.getCommunityMembers(getCommunityMembersRequest);
 
-    response.send(community);
+    response.send(members);
   }
 
   public async getCommunityMemberProfile(request: Request, response: Response): Promise<void> {
