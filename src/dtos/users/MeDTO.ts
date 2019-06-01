@@ -8,11 +8,12 @@ export class MeDTO {
         this.FirstName      = user.Professional.FirstName;
         this.LastName       = user.Professional.LastName;
         this.Email          = user.Email;
+        this.Username       = user.Username;
 
         if (user.ProfileImage) {
             this.ProfileImage       = {
                 ...user.ProfileImage,
-                Image: user.ProfileImage.Image.toString()
+                // Image: user.ProfileImage.Image.toString()
             };
         }
 
@@ -25,6 +26,8 @@ export class MeDTO {
     public LastName: string;
 
     public Email: string;
+
+    public Username: string;
 
     public ProfileImage: UserImage;
 

@@ -4,9 +4,11 @@ import { TYPES }                       from "../types";
 import { User }                        from "../models/User";
 import { IUsersController }            from "./IUsersController";
 import { BaseApiController }           from "./BaseApiController";
-import { ILocalizationService,
+import { IFileService,
+         ILocalizationService,
          IUserService }                from "../services";
-import { LocaleType,
+import { FileType,
+        LocaleType,
         UserAccountProviderType,
         UserRoleType }                 from "../enums";
 import { Validators }                  from "../utils";
@@ -14,6 +16,7 @@ import { ChangePasswordRequestDTO,
    ChangePasswordResponseDTO,
    CreateProfileResponseDTO,
    GenerateResumeRequestDTO,
+   File,
    FinishRegistrationRequestDTO,
    FinishRegistrationResponseDTO,
    GetCommunityMembersRequest,
@@ -25,21 +28,24 @@ import { ChangePasswordRequestDTO,
    MeDTO, ProfileDTO, RegisterDTO,
    ResetPasswordRequestDTO,
    SettingsDTO,
-   UpdateProfileSection }              from "../dtos";
+   UpdateProfileSection, UserImageDTO } from "../dtos";
 import { Award, Education,
-  Experience, UserImage, UserVideo }   from "../models";
+  Experience, UserImage, UserVideo }    from "../models";
 
 @injectable()
 export class UsersController extends BaseApiController<User> implements IUsersController {
 
   private readonly _userService: IUserService;
   private readonly _localizationService: ILocalizationService;
+  private readonly _fileService: IFileService;
 
   constructor(@inject(TYPES.UserService) userService: IUserService,
-            @inject(TYPES.LocalizationService) localizationService: ILocalizationService) {
+            @inject(TYPES.LocalizationService) localizationService: ILocalizationService,
+            @inject(TYPES.FileService) fileService: IFileService) {
     super(userService);
     this._userService           = userService;
     this._localizationService   = localizationService;
+    this._fileService           = fileService;
   }
 
   public async getMe(request: Request, response: Response): Promise<void> {
@@ -88,7 +94,7 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
   public async getCommunityMemberProfile(request: Request, response: Response): Promise<void> {
     this._userService.setLocale(request.Locale);
     const myEmail: string     = request.Principal ? request.Principal.Email : "";
-    const profile: ProfileDTO = await this._userService.getCommunityMemberProfile(myEmail, request.params.userID);
+    const profile: ProfileDTO = await this._userService.getCommunityMemberProfile(myEmail, request.params.username);
 
     response.send(profile);
   }
@@ -99,10 +105,10 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     response.send(profile);
   }
 
-  public async updateMyGeneralInformation(request: Request, response: Response): Promise<void> {
+  public async updateMyGeneralInformation(request: any, response: Response): Promise<void> {
     const generalInformationSection: ProfileDTO = request.body as ProfileDTO;
 
-    response.send(await this._userService.updateGeneralInformation(request.Principal.Email, generalInformationSection));
+    response.send(await this._userService.updateGeneralInformation(request.Principal.Email, generalInformationSection, request.file));
   }
 
   public async updateMySkills(request: Request, response: Response): Promise<void> {
@@ -113,10 +119,15 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     response.send(await this._userService.updateSkills(request.Principal.Email, skillsSection));
   }
 
-  public async updateMyPhotoGallery(request: Request, response: Response): Promise<void> {
-    const photoGallerySection: UserImage[] = request.body as UserImage[];
+  public async updateMyPhotoGallery(request: any, response: Response): Promise<void> {
+    const photoGallerySection: UserImage[]  = JSON.parse(request.body.PhotoGallery) as UserImage[];
+    let addedPhotos: any                    = [];
 
-    response.send(await this._userService.updatePhotoGallery(request.Principal.Email, photoGallerySection));
+    if (request.files && request.files.length !== 0) {
+      addedPhotos = request.files;
+    }
+
+    response.send(await this._userService.updatePhotoGallery(request.Principal.Email, photoGallerySection, addedPhotos));
   }
 
   public async updateMyVideoGallery(request: Request, response: Response): Promise<void> {
@@ -197,10 +208,45 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     response.send(changePasswordResponse);
   }
 
-  public async createProfile(request: Request, response: Response): Promise<void> {
+  public async createProfile(request: any, response: Response): Promise<void> {
 
-    const profileDTO: ProfileDTO = request.body as ProfileDTO;
-    profileDTO.Email             = request.Principal.Email;
+    const profileDTO: ProfileDTO    = request.body as ProfileDTO;
+    profileDTO.Email                = request.Principal.Email;
+    let profileImageFile: any;
+    let photoGalleryFiles: any      = [];
+
+    if (request.files["ProfileImage"] && request.files["ProfileImage"].length !== 0) {
+      profileImageFile = request.files["ProfileImage"][0];
+    }
+
+    if (request.files["AddedPhotos"] && request.files["AddedPhotos"].length !== 0) {
+      photoGalleryFiles = request.files["AddedPhotos"];
+    }
+
+    const profileImageUploadPromise = this._fileService.uploadFile(profileImageFile, FileType.Image, request.Principal.Email);
+    const photoGalleryUploadPromise = this._fileService.uploadFiles(photoGalleryFiles, FileType.Image, request.Principal.Email);
+
+    const uploadPhotosResults: any  = await Promise.all([profileImageUploadPromise, photoGalleryUploadPromise]);
+
+    if (uploadPhotosResults[0] !== undefined) {
+      profileDTO.ProfileImage = {
+        Key: uploadPhotosResults[0].Key,
+        Location: uploadPhotosResults[0].Location,
+        Size: profileImageFile.size,
+        IsProfileImage: true
+      } as UserImage;
+    }
+
+    if (uploadPhotosResults[1]) {
+      profileDTO.PhotoGallery = uploadPhotosResults[1].map((r: any, index: number) => {
+        return {
+          Key: r.Key,
+          Location: r.Location,
+          Size: photoGalleryFiles[index].size,
+          IsProfileImage: false
+        } as UserImage;
+      });
+    }
 
     const createProfileResponse: CreateProfileResponseDTO = await this._userService.createProfile(profileDTO);
 

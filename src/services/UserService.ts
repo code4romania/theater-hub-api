@@ -1,8 +1,10 @@
 import { inject, injectable }                  from "inversify";
 import * as _                                  from "lodash";
 import * as moment                             from "moment";
+import * as uuid                                from "uuid/v4";
 import { TYPES }                               from "../types";
 import { IUserService, IEmailService,
+    IFileService,
     ILocalizationService, ISkillService }      from "../services";
 import { BaseService }                         from "./BaseService";
 import { Award }                               from "../models/Award";
@@ -18,7 +20,6 @@ import { ProfessionalSkill }                   from "../models/ProfessionalSkill
 import { Skill }                               from "../models/Skill";
 import { IAwardRepository,
     IEducationRepository,
-    IEntityCategoryRepository,
     IExperienceRepository,
     IProfessionalRepository,
     IProfessionalSkillRepository,
@@ -44,16 +45,16 @@ import { ChangePasswordResponseDTO,
     MeDTO, ProfileDTO,
     RegisterDTO,
     ResetPasswordRequestDTO,
-    SettingsDTO, UpdateProfileSection }        from "../dtos";
+    SettingsDTO, UpdateProfileSection,
+    UpdatePhotoGalleryResponse, UserImageDTO } from "../dtos";
 import { EntityCategoryType }                  from "../enums/EntityCategoryType";
-import { SocialMediaManager, Validators }      from "../utils";
+import { FileType }                            from "../enums/FileType";
 import { SocialMediaCategoryType }             from "../enums/SocialMediaCategoryType";
 import { SortOrientationType }                 from "../enums/SortOrientationType";
 import { UserAccountProviderType }             from "../enums/UserAccountProviderType";
 import { UserAccountStatusType }               from "../enums/UserAccountStatusType";
 import { UserRoleType }                        from "../enums/UserRoleType";
 import { VisibilityType }                      from "../enums/VisibilityType";
-import axios                                   from "axios";
 const bcrypt                                   = require("bcrypt");
 const config                                   = require("../config/env").getConfig();
 const jwt                                      = require("jsonwebtoken");
@@ -68,7 +69,6 @@ export class UserService extends BaseService<User> implements IUserService {
 
     private readonly _awardRepository: IAwardRepository;
     private readonly _educationRepository: IEducationRepository;
-    private readonly _entityCategoryRepository: IEntityCategoryRepository;
     private readonly _experienceRepository: IExperienceRepository;
     private readonly _professionalRepository: IProfessionalRepository;
     private readonly _professionalSkillRepository: IProfessionalSkillRepository;
@@ -78,12 +78,12 @@ export class UserService extends BaseService<User> implements IUserService {
     private readonly _userSocialMediaRepository: IUserSocialMediaRepository;
     private readonly _userVideoRepository: IUserVideoRepository;
     private readonly _emailService: IEmailService;
+    private readonly _fileService: IFileService;
     private readonly _skillService: ISkillService;
 
     constructor(
         @inject(TYPES.AwardRepository) awardRepository: IAwardRepository,
         @inject(TYPES.EducationRepository) educationRepository: IEducationRepository,
-        @inject(TYPES.EntityCategoryRepository) entityCategoryRepository: IEntityCategoryRepository,
         @inject(TYPES.ExperienceRepository) experienceRepository: IExperienceRepository,
         @inject(TYPES.ProfessionalRepository) professionalRepository: IProfessionalRepository,
         @inject(TYPES.ProfessionalSkillRepository) professionalSkillRepository: IProfessionalSkillRepository,
@@ -93,13 +93,13 @@ export class UserService extends BaseService<User> implements IUserService {
         @inject(TYPES.UserSocialMediaRepository) userSocialMediaRepository: IUserSocialMediaRepository,
         @inject(TYPES.UserVideoRepository)  userVideoRepository: IUserVideoRepository,
         @inject(TYPES.EmailService) emailService: IEmailService,
+        @inject(TYPES.FileService) fileService: IFileService,
         @inject(TYPES.LocalizationService) localizationService: ILocalizationService,
         @inject(TYPES.SkillService) skillService: ISkillService
     ) {
         super(userRepository, localizationService);
         this._awardRepository                 = awardRepository;
         this._educationRepository             = educationRepository;
-        this._entityCategoryRepository        = entityCategoryRepository;
         this._experienceRepository            = experienceRepository;
         this._professionalRepository           = professionalRepository;
         this._professionalSkillRepository     = professionalSkillRepository;
@@ -109,6 +109,7 @@ export class UserService extends BaseService<User> implements IUserService {
         this._userSocialMediaRepository       = userSocialMediaRepository;
         this._userVideoRepository             = userVideoRepository;
         this._emailService                    = emailService;
+        this._fileService                     = fileService;
         this._skillService                    = skillService;
     }
 
@@ -144,24 +145,38 @@ export class UserService extends BaseService<User> implements IUserService {
                 .execute();
     }
 
-    public async updateGeneralInformation(userEmail: string, generalInformationSection: ProfileDTO): Promise<MeDTO> {
-        const dbUser        = await this.getByEmail(userEmail);
-        let profileImage    = dbUser.ProfileImage || dbUser.PhotoGallery.find(p => p.IsProfileImage);
+    public async updateGeneralInformation(userEmail: string, generalInformationSection: ProfileDTO, profileImageFile: any): Promise<MeDTO> {
+        const dbUser                = await this.getByEmail(userEmail);
+        const dbProfileImage        = dbUser.ProfileImage || dbUser.PhotoGallery.find(p => p.IsProfileImage);
+        let profileImage: UserImage = dbProfileImage;
 
-        if (generalInformationSection.ProfileImage.Image && !profileImage) {
+        if (profileImageFile && !dbProfileImage) {
+            const uploadProfileImageResult: any = await this._fileService.uploadFile(profileImageFile, FileType.Image, userEmail);
 
             profileImage = {
-                Image: generalInformationSection.ProfileImage.Image.replace("data:image/png;base64,", ""),
+                Key: uploadProfileImageResult.Key,
+                Location: uploadProfileImageResult.Location,
+                Size: Math.round(profileImageFile.size * 100 / (1000 * 1000)) / 100, // in MB
                 IsProfileImage: true,
                 User: dbUser
             } as UserImage;
 
-            this._userImageRepository.insert(profileImage);
-        } else if (generalInformationSection.ProfileImage.Image) {
-            profileImage.Image = generalInformationSection.ProfileImage.Image;
+            await this._userImageRepository.insert(profileImage);
+        } else if (profileImageFile) {
+            const newProfileImageUploadPromise = this._fileService.uploadFile(profileImageFile, FileType.Image, userEmail);
+            const oldProfileImageRemovePromise = this._fileService.deleteFile(dbProfileImage.Key);
+
+            const updateProfileImageResults: any  = await Promise.all([newProfileImageUploadPromise, oldProfileImageRemovePromise]);
+
+            profileImage.Location = updateProfileImageResults[0].Location;
+            profileImage.Key      = updateProfileImageResults[0].Key;
+            profileImage.Size     = Math.round(profileImageFile.size * 100 / (1000 * 1000)) / 100;
+
             this._userImageRepository.update(profileImage);
-        } else if (profileImage) {
-            this._userImageRepository.deleteByID(profileImage.ID);
+        } else {
+            await this._fileService.deleteFile(dbProfileImage.Key);
+            await this._userImageRepository.deleteByID(dbProfileImage.ID);
+            profileImage = undefined;
         }
 
         const facebookSocialMedia     = dbUser.SocialMedia.find(s => s.SocialMediaCategoryID === SocialMediaCategoryType.Facebook);
@@ -221,6 +236,13 @@ export class UserService extends BaseService<User> implements IUserService {
             this._userSocialMediaRepository.delete(youtubeSocialMedia);
         }
 
+        let username: string = dbUser.Username;
+
+        if (generalInformationSection.FirstName !== dbUser.Professional.FirstName
+                                    || generalInformationSection.LastName !== dbUser.Professional.LastName) {
+            username = await this.getUsername(generalInformationSection.FirstName, generalInformationSection.LastName);
+        }
+
         this._userRepository
                 .runCreateQueryBuilder()
                 .update(User)
@@ -229,7 +251,8 @@ export class UserService extends BaseService<User> implements IUserService {
                     PhoneNumber: generalInformationSection.PhoneNumber,
                     Description: generalInformationSection.Description,
                     Website: generalInformationSection.Website,
-                    Name: `${generalInformationSection.FirstName} ${generalInformationSection.LastName}`
+                    Name: `${generalInformationSection.FirstName} ${generalInformationSection.LastName}`,
+                    Username: username
                 })
                 .where("Email = :userEmail", { userEmail })
                 .execute();
@@ -248,7 +271,7 @@ export class UserService extends BaseService<User> implements IUserService {
             FirstName: generalInformationSection.FirstName,
             LastName: generalInformationSection.LastName,
             Email: userEmail,
-            ProfileImage: generalInformationSection.ProfileImage,
+            ProfileImage: profileImage,
             Role: dbUser.AccountSettings.Role,
             AccountStatus: dbUser.AccountSettings.AccountStatus
         } as MeDTO;
@@ -281,26 +304,47 @@ export class UserService extends BaseService<User> implements IUserService {
         });
     }
 
-    public async updatePhotoGallery(userEmail: string, photoGallerySection: UserImage[]): Promise<void> {
-        const dbUser                       = await this.getByEmail(userEmail);
-        const dbPhotoGalleryIDs: string[]  = dbUser.PhotoGallery.map(p => p.ID);
-        const photoGalleryIDs: string[]    = photoGallerySection.map(p => p.ID);
-        const addedEntities: UserImage[]   = photoGallerySection.filter(p => dbPhotoGalleryIDs.indexOf(p.ID) === -1);
-        const removedEntitiesIDs: string[] = dbPhotoGalleryIDs.filter(id => photoGalleryIDs.indexOf(id) === -1);
+    public async updatePhotoGallery(userEmail: string, photoGallerySection: UserImage[], addedPhotos: any): Promise<UpdatePhotoGalleryResponse> {
+        const dbUser                        = await this.getByEmail(userEmail);
+        const dbPhotoGalleryIDs: string[]   = dbUser.PhotoGallery.map(p => p.ID);
+        const photoGalleryIDs: string[]     = photoGallerySection.map(p => p.ID);
+        const removedEntitiesIDs: string[]  = dbPhotoGalleryIDs.filter(id => photoGalleryIDs.indexOf(id) === -1);
+        const addedEntities: UserImageDTO[] = [];
 
-        addedEntities.forEach(p => {
+        let removedEntities: UserImage[] = [];
+
+        if (removedEntitiesIDs.length !== 0) {
+            removedEntities = await this._userImageRepository
+                .runCreateQueryBuilder()
+                .select("userImage")
+                .from(UserImage, "userImage")
+                .where("userImage.ID IN (:...removedEntitiesIDs)", { removedEntitiesIDs })
+                .getMany();
+        }
+
+        const photosUploadPromise = this._fileService.uploadFiles(addedPhotos, FileType.Image, userEmail);
+        const photosRemovePromise = this._fileService.deleteFiles(removedEntities.map(e => e.Key));
+
+        const updatePhotoGalleryResults: any  = await Promise.all([photosUploadPromise, photosRemovePromise]);
+
+        for (let index = 0; index <  updatePhotoGalleryResults[0].length; index++) {
             const photo: UserImage = {
-                Image: p.Image.replace("data:image/png;base64,", ""),
-                User: dbUser,
-                IsProfileImage: false
+                Key: updatePhotoGalleryResults[0][index].Key,
+                Location: updatePhotoGalleryResults[0][index].Location,
+                Size: Math.round(addedPhotos[index].size * 100 / (1000 * 1000)) / 100, // in MB
+                IsProfileImage: false,
+                User: dbUser
             } as UserImage;
 
-            this._userImageRepository.insert(photo);
-        });
+            const addedEntity = await this._userImageRepository.insert(photo);
+            addedEntities.push(addedEntity);
+        }
 
-        removedEntitiesIDs.forEach(id => {
-            this._userImageRepository.deleteByID(id);
-        });
+        for (let index = 0; index <  updatePhotoGalleryResults[1].length; index++) {
+            await this._userImageRepository.deleteByID(removedEntities[index].ID);
+        }
+
+        return new UpdatePhotoGalleryResponse(addedEntities);
     }
 
     public async updateVideoGallery(userEmail: string, videoGallerySection: UpdateProfileSection<UserVideo>): Promise<void> {
@@ -481,10 +525,17 @@ export class UserService extends BaseService<User> implements IUserService {
         const registrationIDSalt     = bcrypt.genSaltSync(saltRounds);
         const registrationIDHash     = bcrypt.hashSync(registrationID, registrationIDSalt);
 
+        // Generate username
+        const firstName: string = register.FirstName.toLowerCase();
+        const lastName: string  = register.LastName.toLowerCase();
+
+        const username: string  =  await this.getUsername(firstName, lastName);
+
         const user: User = {
             Email:              register.Email,
             Name:               `${register.FirstName} ${register.LastName}`,
-            PasswordHash:       passwordHash
+            PasswordHash:       passwordHash,
+            Username:           username
         } as User;
 
         user.AccountSettings = {
@@ -704,22 +755,29 @@ export class UserService extends BaseService<User> implements IUserService {
 
         // General Information
 
-        if (profile.ProfileImage.Image) {
+        if (profile.ProfileImage.Location) {
             const profileImage: UserImage = {
-                Image: profile.ProfileImage.Image,
+                Key: profile.ProfileImage.Key,
+                Location: profile.ProfileImage.Location,
+                Size: Math.round(profile.ProfileImage.Size * 100 / (1000 * 1000)) / 100, // in MB
                 IsProfileImage: true
             } as UserImage;
+
             user.ProfileImage = profileImage;
         }
 
-        user.BirthDate     = profile.BirthDate;
+        user.BirthDate     = new Date(profile.BirthDate);
         user.PhoneNumber   = profile.PhoneNumber;
         user.Website       = profile.Website;
         user.Description   = profile.Description;
 
         // Skills
         if (profile.Skills) {
-            const skills: Skill[] = await this._skillService.getByIDs(profile.Skills);
+
+            const profileSkills: string[] = profile.Skills && typeof profile.Skills === "string" ?
+                                                                    (profile.Skills as string).split(",") : profile.Skills;
+
+            const skills: Skill[] = await this._skillService.getByIDs(profileSkills);
 
             skills.forEach(s => {
                 const professionalSkill: ProfessionalSkill = {
@@ -733,12 +791,13 @@ export class UserService extends BaseService<User> implements IUserService {
 
         // Portfolio
 
-        if (profile.PhotoGallery) {
+        if (profile.PhotoGallery.length !== 0) {
 
             profile.PhotoGallery.forEach(p => {
                 const photo: UserImage = {
-                    Image: p.Image,
-                    User: user,
+                    Key: p.Key,
+                    Location: p.Location,
+                    Size: Math.round(p.Size * 100 / (1000 * 1000)) / 100, // in MB
                     IsProfileImage: false
                 } as UserImage;
 
@@ -748,7 +807,9 @@ export class UserService extends BaseService<User> implements IUserService {
 
         if (profile.VideoGallery) {
 
-            profile.VideoGallery.forEach(v => {
+            const videoGallery: UserVideo[] = typeof profile.VideoGallery === "string" ? JSON.parse(profile.VideoGallery) : profile.VideoGallery;
+
+            videoGallery.forEach(v => {
                 const video: UserVideo = {
                     Video: v.Video,
                     User: user
@@ -762,7 +823,9 @@ export class UserService extends BaseService<User> implements IUserService {
 
         if (profile.Awards) {
 
-            profile.Awards.forEach(a => {
+            const awards: Award[] = typeof profile.Awards === "string" ? JSON.parse(profile.Awards) : profile.Awards;
+
+            awards.forEach(a => {
                 const award: Award = {
                     Title: a.Title,
                     Issuer: a.Issuer,
@@ -779,7 +842,9 @@ export class UserService extends BaseService<User> implements IUserService {
 
         if (profile.Experience) {
 
-            profile.Experience.forEach(e => {
+            const experienceSteps: Experience[] = typeof profile.Experience === "string" ? JSON.parse(profile.Experience) : profile.Experience;
+
+            experienceSteps.forEach(e => {
                 const experience: Experience = {
                     Position: e.Position,
                     Employer: e.Employer,
@@ -798,7 +863,9 @@ export class UserService extends BaseService<User> implements IUserService {
 
         if (profile.Education) {
 
-            profile.Education.forEach(e => {
+            const educationSteps: Education[] = typeof profile.Education === "string" ? JSON.parse(profile.Education) : profile.Education;
+
+            educationSteps.forEach(e => {
                 const education: Education = {
                     Title: e.Title,
                     Institution: e.Institution,
@@ -917,7 +984,7 @@ export class UserService extends BaseService<User> implements IUserService {
         });
 
         const context = {
-            profileImageValue: profile.ProfileImage ? profile.ProfileImage.Image : "",
+            profileImageLocation: profile.ProfileImage ? profile.ProfileImage.Location : "",
             fullNameValue: dbUser.Name,
             ageValue: age,
             emailValue: profile.Email,
@@ -929,7 +996,7 @@ export class UserService extends BaseService<User> implements IUserService {
             youtubeValue: profile.YoutubeLink,
             descriptionValue: dbUser.Description,
             skills,
-            photoGalleryImages: profile.PhotoGallery ? profile.PhotoGallery.map(p => p.Image) : undefined,
+            photoGalleryImages: profile.PhotoGallery ? profile.PhotoGallery.map(p => p.Location) : undefined,
             videos: profile.VideoGallery ? profile.VideoGallery.map(v => v.Video) : undefined,
             hasAchievements: awards || experience || education,
             awards,
@@ -1074,14 +1141,14 @@ export class UserService extends BaseService<User> implements IUserService {
         return new GetCommunityMembersResponse(selectedUsers, communitySize);
     }
 
-    public async getCommunityMemberProfile(email: string, communityMemberID: string): Promise<ProfileDTO> {
+    public async getCommunityMemberProfile(email: string, communityMemberUsername: string): Promise<ProfileDTO> {
         let me: User;
         let fullViewingRights: boolean;
         const viewerIsVisitor: boolean = !email;
         let communityMember: User;
 
         try {
-            await this._userRepository.getByID(communityMemberID).then(response => {
+            await this._userRepository.getByUsername(communityMemberUsername).then(response => {
                 if (!response) {
                     throw new Error(this._localizationService.getText("validation.user.non-existent-profile"));
                 }
@@ -1142,6 +1209,22 @@ export class UserService extends BaseService<User> implements IUserService {
         communityMemberProfile.PhoneNumberVisibility = undefined;
 
         return communityMemberProfile;
+    }
+
+    public async getUsername (firstName: string, lastName: string): Promise<string> {
+
+        const similarUsernames: User[] = await this._userRepository
+                        .runCreateQueryBuilder()
+                        .select("user")
+                        .from(User, "user")
+                        .innerJoinAndSelect("user.Professional", "professional")
+                        .where("LOWER(professional.FirstName) = :firstName AND LOWER(professional.LastName) = :lastName", { firstName, lastName })
+                        .getMany();
+        const maximumUsernameID: number = similarUsernames.length !== 0 ?
+                                                similarUsernames.map(u => +(u.Username.split(".").pop())).sort().pop() : 0;
+        const username: string          = `${firstName}.${lastName}.${maximumUsernameID + 1}`;
+
+        return username;
     }
 
 }

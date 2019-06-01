@@ -33,6 +33,7 @@ const TYPES = {
     AwardService: Symbol("AwardService"),
     EducationService: Symbol("EducationService"),
     ExperienceService: Symbol("ExperienceService"),
+    FileService: Symbol("FileService"),
     LocalizationService: Symbol("LocalizationService"),
     MessageService: Symbol("MessageService"),
     ProjectService: Symbol("ProjectService"),

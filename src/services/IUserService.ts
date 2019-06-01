@@ -10,7 +10,7 @@ import { ChangePasswordRequestDTO, ChangePasswordResponseDTO,
         ManagedUserRegistrationResponseDTO,
         MeDTO, ProfileDTO, RegisterDTO,
         ResetPasswordRequestDTO,
-        SettingsDTO, UpdateProfileSection }                                from "../dtos";
+        SettingsDTO, UpdatePhotoGalleryResponse, UpdateProfileSection }    from "../dtos";
 import { UserAccountProviderType }                                         from "../enums/UserAccountProviderType";
 
 export interface IUserService extends IBaseService<User> {
@@ -21,11 +21,11 @@ export interface IUserService extends IBaseService<User> {
 
     deleteMe(email: string): Promise<ProfileDTO>;
 
-    updateGeneralInformation(userEmail: string, generalInformationSection: ProfileDTO): Promise<MeDTO>;
+    updateGeneralInformation(userEmail: string, generalInformationSection: ProfileDTO, profileImage: any): Promise<MeDTO>;
 
     updateSkills(userEmail: string, skillsSection: number[]): Promise<void>;
 
-    updatePhotoGallery(userEmail: string, photoGallerySection: UserImage[]): Promise<void>;
+    updatePhotoGallery(userEmail: string, photoGallerySection: UserImage[], addedPhotos: any): Promise<UpdatePhotoGalleryResponse>;
 
     updateVideoGallery(userEmail: string, videoGallerySection: UpdateProfileSection<UserVideo>): Promise<void>;
 
@@ -65,6 +65,6 @@ export interface IUserService extends IBaseService<User> {
 
     getCommunityMembers(request: GetCommunityMembersRequest): Promise<GetCommunityMembersResponse>;
 
-    getCommunityMemberProfile(email: string, communityMemberID: string): Promise<ProfileDTO>;
+    getCommunityMemberProfile(email: string, communityMemberUsername: string): Promise<ProfileDTO>;
 
 }

@@ -6,4 +6,6 @@ export interface IApplicationDataController {
 
     getLocales(req: Request, res: Response): Promise<void>;
 
+    getGeneralApplicationInformation(req: Request, res: Response): Promise<void>;
+
 }

@@ -14,11 +14,11 @@ import { IAdministrationRoutesValidators, AdministrationRoutesValidators,
          IProjectRoutesValidators, ProjectRoutesValidators,
          IUserRoutesValidators, UserRoutesValidators }                                    from "../validators";
 import { IAdministrationService, IApplicationDataService, IAwardService,
-    IEducationService, IExperienceService, ILocalizationService,
+    IEducationService, IExperienceService, IFileService, ILocalizationService,
     IMessageService, IProjectService, ISkillService,
     IUserService, IUserVideoService, IWishService, IEmailService,
     AdministrationService, ApplicationDataService, AwardService,
-    EducationService, ExperienceService, LocalizationService,
+    EducationService, ExperienceService, FileService, LocalizationService,
     MessageService, ProjectService, SkillService, UserService, UserVideoService,
     WishService, EmailService, IAuthenticationService, AuthenticationService }            from "../services";
 import { IAwardRepository, IEducationRepository, IEntityCategoryRepository,
@@ -59,6 +59,7 @@ container.bind<IAuthenticationService>(TYPES.AuthenticationService).to(Authentic
 container.bind<IAwardService>(TYPES.AwardService).to(AwardService);
 container.bind<IEducationService>(TYPES.EducationService).to(EducationService);
 container.bind<IExperienceService>(TYPES.ExperienceService).to(ExperienceService);
+container.bind<IFileService>(TYPES.FileService).to(FileService);
 container.bind<ILocalizationService>(TYPES.LocalizationService).to(LocalizationService);
 container.bind<IMessageService>(TYPES.MessageService).to(MessageService);
 container.bind<IProjectService>(TYPES.ProjectService).to(ProjectService);

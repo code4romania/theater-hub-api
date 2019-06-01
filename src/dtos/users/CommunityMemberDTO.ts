@@ -4,9 +4,10 @@ export class CommunityMemberDTO {
 
     public constructor(user: User) {
         this.ID             = user.ID;
-        this.ProfileImage   = user.ProfileImage ? user.ProfileImage.Image.toString() : "";
+        // this.ProfileImage   = user.ProfileImage ? user.ProfileImage.Image.toString() : "";
         this.FirstName      = user.Professional.FirstName;
         this.LastName       = user.Professional.LastName;
+        this.Username       = user.Username;
         this.SkillIDs       = user.Professional.Skills.map(s => s.SkillID);
     }
 
@@ -17,6 +18,8 @@ export class CommunityMemberDTO {
     public FirstName: string;
 
     public LastName: string;
+
+    public Username: string;
 
     public SkillIDs: number[];
 

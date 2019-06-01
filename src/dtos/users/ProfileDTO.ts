@@ -5,13 +5,14 @@ import { SocialMediaCategoryType,
 
 export class ProfileDTO {
 
-    public constructor(user: User, includeID: boolean = false) {
+    public constructor (user: User, includeID: boolean = false) {
 
         if (includeID) {
             this.ID = user.ID;
         }
 
         this.Email        = user.Email;
+        this.Username     = user.Username;
         this.FirstName    = user.Professional.FirstName;
         this.LastName     = user.Professional.LastName;
 
@@ -19,8 +20,7 @@ export class ProfileDTO {
 
         if (profileImage) {
             this.ProfileImage = {
-                ...profileImage,
-                Image: profileImage.Image.toString()
+                ...profileImage
             };
         }
 
@@ -36,10 +36,10 @@ export class ProfileDTO {
         this.PhotoGallery   = user.PhotoGallery.filter(p => !p.IsProfileImage).map(p => {
 
             return {
-                ...p,
-                Image: p.Image.toString()
+                ...p
             };
         });
+
         this.VideoGallery   = user.VideoGallery;
         this.Awards         = user.Awards.sort((a1, a2) => a1.Date.getTime() > a2.Date.getTime() ? -1 : 1);
         this.Experience     = user.Professional.Experience.sort((e1, e2) => e1.StartDate.getTime() > e2.StartDate.getTime() ? -1 : 1);
@@ -73,6 +73,8 @@ export class ProfileDTO {
     public ID?: string;
 
     public Email?: string;
+
+    public Username?: string;
 
     public FirstName?: string;
 
