@@ -1,9 +1,8 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class SeedMigration1552641263849 implements MigrationInterface {
+export class SeedMigration1559215297217 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {
-
         await queryRunner.query(`INSERT INTO "EntityCategory"("ID", "Name", "ParentID") VALUES (0, 'Professional', null)`);
         await queryRunner.query(`INSERT INTO "EntityCategory"("ID", "Name", "ParentID") VALUES (1, 'Institution', null)`);
         await queryRunner.query(`INSERT INTO "EntityCategory"("ID", "Name", "ParentID") VALUES (2, 'Sponsor', null)`);
@@ -46,7 +45,6 @@ export class SeedMigration1552641263849 implements MigrationInterface {
 
         await queryRunner.query(`INSERT INTO "Locale"("ID", "Name") VALUES ('ro', 'Romanian')`);
         await queryRunner.query(`INSERT INTO "Locale"("ID", "Name") VALUES ('en', 'English')`);
-
     }
 
     public async down(queryRunner: QueryRunner): Promise<any> {

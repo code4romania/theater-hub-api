@@ -18,4 +18,8 @@ export class UserRepository extends BaseRepository<User> implements IUserReposit
         return this._userRepository.findOne({ Email: email });
     }
 
+    public getByUsername (username: string): Promise<User> {
+        return this._userRepository.findOne({ Username: username });
+    }
+
 }

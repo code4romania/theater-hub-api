@@ -2,7 +2,10 @@ export const commonConfig = {
     application: {
         name: "Theater Hub",
         email: "",
-        tokenSecret: ""
+        tokenSecret: "",
+        baseURL: "https://127.0.0.1:443",
+        maxFileSize: 5, // MB
+        maxPhotoGalleryFileCount: 10
     },
     client: {
         baseURL: "http://localhost:3000",
@@ -33,5 +36,11 @@ export const commonConfig = {
         secure: false,
         user: "",
         pass: ""
+    },
+    aws: {
+        accessKeyId: "",
+        secretAccessKey: "",
+        region: "",
+        files_bucket: ""
     }
 };
