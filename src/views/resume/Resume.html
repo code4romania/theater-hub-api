@@ -239,8 +239,8 @@
 		<div id="main-content">
 			<div id="general-information-section" class="profile-information-group-header atomic">
 				<div class="left-side">
-					{{#if profileImageValue}}
-						<img id="avatar" src="data:image/png;base64,{{profileImageValue}}">
+					{{#if profileImageLocation}}
+						<img id="avatar" src="{{profileImageLocation}}">
 					{{else}}
 						<img id="avatar" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHdpZHRoPSIxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0ibTQyLjE1NjI1IDQ2LjU5Mzc1Yy01Ljg1NTA2NCAwLTEwLjgzMTc5MzctMi4wNDkyNDE3LTE0LjkzMDMzODUtNi4xNDc3ODY1cy02LjE0Nzc4NjUtOS4wNzUyNzQ1LTYuMTQ3Nzg2NS0xNC45MzAzMzg1IDIuMDQ5MjQxNy0xMC44MzE3OTM3IDYuMTQ3Nzg2NS0xNC45MzAzMzg1YzQuMDk4NTQ0OC00LjA5ODU0NDg0IDkuMDc1Mjc0NS02LjE0Nzc4NjUgMTQuOTMwMzM4NS02LjE0Nzc4NjVzMTAuODMxNzkzNyAyLjA0OTI0MTY2IDE0LjkzMDMzODUgNi4xNDc3ODY1YzQuMDk4NTQ0OCA0LjA5ODU0NDggNi4xNDc3ODY1IDkuMDc1Mjc0NSA2LjE0Nzc4NjUgMTQuOTMwMzM4NXMtMi4wNDkyNDE3IDEwLjgzMTc5MzctNi4xNDc3ODY1IDE0LjkzMDMzODUtOS4wNzUyNzQ1IDYuMTQ3Nzg2NS0xNC45MzAzMzg1IDYuMTQ3Nzg2NXptMCAxMC41MzkwNjI1YzguNzgyNTk2IDAgMTguMDA0MTgzNSAxLjkzOTQ2MDkgMjcuNjY1MDM5MSA1LjgxODQ0MDhzMTQuNDkxMjEwOSA4Ljk2NTQ5MDQgMTQuNDkxMjEwOSAxNS4yNTk2ODQydjEwLjUzOTA2MjVoLTg0LjMxMjV2LTEwLjUzOTA2MjVjMC02LjI5NDE5MzggNC44MzAzNTUzNC0xMS4zODA3MDQzIDE0LjQ5MTIxMDktMTUuMjU5Njg0MiA5LjY2MDg1NTYtMy44Nzg5Nzk5IDE4Ljg4MjQ0MzEtNS44MTg0NDA4IDI3LjY2NTAzOTEtNS44MTg0NDA4eiIgZmlsbD0iIzFmMWYxZiIgZmlsbC1ydWxlPSJldmVub2RkIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4LjU4MyAyLjY2NykiLz48L3N2Zz4=">
 					{{/if}}
@@ -330,7 +330,7 @@
 							<ul id="photo-gallery-list">
 								{{#each photoGalleryImages}}
 									<li class="photo-gallery-list-item">
-										<img src="data:image/png;base64,{{this}}">
+										<img src="{{this}}">
 									</li>
 								{{/each}}
 							</ul>

@@ -337,7 +337,13 @@ export class UserRoutesValidators implements IUserRoutesValidators {
                 return this._localizationService.getText("validation.skills.required", req.Locale);
             }),
             check("VideoGallery").optional().custom((value: UserVideo[], { req }: any) => {
-                value.forEach(v => {
+                if (!value) {
+                    return true;
+                }
+
+                const videos: UserVideo[] = typeof value === "string" ? JSON.parse(value) : value;
+
+                videos.forEach(v => {
                     if (!Validators.isValidSocialMediaURL(v.Video, SocialMediaCategoryType.Youtube | SocialMediaCategoryType.Vimeo )) {
                         throw new Error(this._localizationService.getText("validation.video.invalid", req.Locale));
                     }
@@ -347,10 +353,13 @@ export class UserRoutesValidators implements IUserRoutesValidators {
                 return true;
             }),
             check("Awards").optional().custom((value: Award[], { req }: any) => {
+
+                const awards: Award[] = typeof value === "string" ? JSON.parse(value) : value;
+
                 let isInvalidAwardTitle: boolean   = false;
                 let isInvalidAwardIssuer: boolean  = false;
 
-                for (const award of value) {
+                for (const award of awards) {
                     isInvalidAwardTitle   = isInvalidAwardTitle  || !award.Title;
                     isInvalidAwardIssuer  = isInvalidAwardIssuer || !award.Issuer;
 
@@ -372,10 +381,13 @@ export class UserRoutesValidators implements IUserRoutesValidators {
                 return true;
             }),
             check("Experience").optional().custom((value: Experience[], { req }: any) => {
+
+                const experienceSteps: Experience[] = typeof value === "string" ? JSON.parse(value) : value;
+
                 let isInvalidExperiencePosition: boolean   = false;
                 let isInvalidExperienceEmployer: boolean   = false;
 
-                for (const experience of value) {
+                for (const experience of experienceSteps) {
                     isInvalidExperiencePosition   = isInvalidExperiencePosition || !experience.Position;
                     isInvalidExperienceEmployer   = isInvalidExperienceEmployer || !experience.Employer;
 
@@ -397,10 +409,13 @@ export class UserRoutesValidators implements IUserRoutesValidators {
                 return true;
             }),
             check("Education").optional().custom((value: Education[], { req }: any) => {
+
+                const educationSteps: Education[] = typeof value === "string" ? JSON.parse(value) : value;
+
                 let isInvalidEducationTitle: boolean             = false;
                 let isInvalidEducationInstitutionName: boolean   = false;
 
-                for (const education of value) {
+                for (const education of educationSteps) {
                     isInvalidEducationTitle             = isInvalidEducationTitle || !education.Title;
                     isInvalidEducationInstitutionName   = isInvalidEducationInstitutionName || !education.Institution;
 

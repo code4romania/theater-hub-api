@@ -1,10 +1,7 @@
 import { injectable }           from "inversify";
-const fs                        = require("fs");
-const path                      = require("path");
 import * as _                   from "lodash";
 import { ILocalizationService } from "./ILocalizationService";
-import { EntityCategoryType,
-         LocaleType }           from "../enums";
+import { LocaleType }           from "../enums";
 import { enLocale }             from "../locales/en";
 import { roLocale }             from "../locales/ro";
 

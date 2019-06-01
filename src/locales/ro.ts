@@ -221,5 +221,9 @@ export const roLocale = {
         "awards-title": "Premii",
         "experience-title": "Experiența profesională",
         "education-title": "Educație"
+    },
+    "errors": {
+        "file-upload-error": "Fișierul nu a putut fi incărcat",
+        "file-deletion-error": "Fișierul nu a putut fi șters"
     }
 };

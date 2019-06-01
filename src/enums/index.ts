@@ -1,4 +1,5 @@
 export * from "./EntityCategoryType";
+export * from "./FileType";
 export * from "./ProfileSectionType";
 export * from "./SocialMediaCategoryType";
 export * from "./SortOrientationType";

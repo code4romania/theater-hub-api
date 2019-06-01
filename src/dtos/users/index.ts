@@ -21,5 +21,6 @@ export * from "./RegisterDTO";
 export * from "./ResetPasswordEmailDTO";
 export * from "./ResetPasswordRequestDTO";
 export * from "./SettingsDTO";
+export * from "./UpdatePhotoGalleryResponse";
 export * from "./UpdateProfileSection";
 export * from "./UserDTO";

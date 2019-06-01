@@ -221,5 +221,9 @@ export const enLocale = {
         "awards-title": "Awards",
         "experience-title": "Experience",
         "education-title": "Education"
+    },
+    "errors": {
+        "file-upload-error": "File could not be uploaded",
+        "file-deletion-error": "File could not be deleted"
     }
 };

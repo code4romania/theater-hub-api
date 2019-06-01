@@ -5,7 +5,7 @@ export class DashboardUser {
 
     public constructor(user: User) {
         this.ID                 = user.ID;
-        this.ProfileImage       = user.ProfileImage ? user.ProfileImage.Image.toString() : "";
+        // this.ProfileImage       = user.ProfileImage ? user.ProfileImage.Image.toString() : "";
         this.FirstName          = user.Professional.FirstName;
         this.LastName           = user.Professional.LastName;
         this.Email              = user.Email;

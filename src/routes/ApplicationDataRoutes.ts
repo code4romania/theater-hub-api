@@ -14,4 +14,7 @@ export default (app: any) => {
     app.get("/api/applicationdata/locales",
                 (req: Request, res: Response) => applicationDataController.getLocales(req, res));
 
+    app.get("/api/applicationdata/general",
+                (req: Request, res: Response) => applicationDataController.getGeneralApplicationInformation(req, res));
+
 };

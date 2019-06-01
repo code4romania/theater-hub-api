@@ -33,4 +33,12 @@ export class ApplicationDataController implements IApplicationDataController {
 
     }
 
+    public async getGeneralApplicationInformation(request: Request, response: Response): Promise<void> {
+
+        const generalApplicationInformation = await this._applicationDataService.getGeneralApplicationInformation();
+
+        response.send(generalApplicationInformation);
+
+    }
+
 }
