@@ -1,6 +1,6 @@
 import { container }                       from "../config/inversify.config";
 import { TYPES }                           from "../types/custom-types";
-import { IApplicationDataController }      from "../controllers";
+import { IApplicationDataController }      from "../contracts";
 import { authorizationMiddleware }         from "../middlewares";
 import { Request, Response }               from "express";
 
@@ -13,6 +13,9 @@ export default (app: any) => {
 
     app.get("/api/applicationdata/locales",
                 (req: Request, res: Response) => applicationDataController.getLocales(req, res));
+
+    app.get("/api/applicationdata/currencies",
+                (req: Request, res: Response) => applicationDataController.getCurrencies(req, res));
 
     app.get("/api/applicationdata/general",
                 (req: Request, res: Response) => applicationDataController.getGeneralApplicationInformation(req, res));

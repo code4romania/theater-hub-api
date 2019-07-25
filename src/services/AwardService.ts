@@ -1,14 +1,14 @@
 import { inject, injectable }   from "inversify";
 import { TYPES }                from "../types";
-import { IAwardService }        from "./IAwardService";
-import { ILocalizationService } from "./ILocalizationService";
-import { IUserService }         from "./IUserService";
+import { IAwardService,
+    ILocalizationService,
+    IUserService,
+    IAwardRepository }          from "../contracts";
 import { BaseService }          from "./BaseService";
 import { Award }                from "../models/Award";
 import { User }                 from "../models/User";
 import { CreateAwardDTO,
     UpdateAwardDTO }            from "../dtos";
-import { IAwardRepository }     from "../repositories";
 
 @injectable()
 export class AwardService extends BaseService<Award> implements IAwardService {
@@ -33,7 +33,12 @@ export class AwardService extends BaseService<Award> implements IAwardService {
             User: dbUser
         } as Award;
 
-        return this._repository.insert(award);
+        const response = await this._repository.insert(award);
+
+        this._userService.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
+
+        return response;
+
     }
 
     public async updateAward(email: string, updateAwardDTO: UpdateAwardDTO): Promise<Award> {
@@ -49,7 +54,11 @@ export class AwardService extends BaseService<Award> implements IAwardService {
         dbAward.Description    = updateAwardDTO.Description;
         dbAward.Date           = updateAwardDTO.Date;
 
-        return this._repository.update(dbAward);
+        const response = await this._repository.update(dbAward);
+
+        this._userService.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
+
+        return response;
     }
 
     public async deleteAwardByID(email: string, awardID: string): Promise<Award> {
@@ -59,7 +68,11 @@ export class AwardService extends BaseService<Award> implements IAwardService {
             throw new Error(this._localizationService.getText("validation.award.non-existent"));
         }
 
-        return this._repository.deleteByID(awardID);
+        const response = await this._repository.deleteByID(awardID);
+
+        this._userService.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
+
+        return response;
     }
 
 }

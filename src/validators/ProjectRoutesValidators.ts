@@ -1,8 +1,7 @@
 import { inject, injectable }       from "inversify";
 import { TYPES }                    from "../types";
-import { IProjectService }          from "../services";
-import { IProjectRoutesValidators } from "./IProjectRoutesValidators";
-const { check }                     = require("express-validator/check");
+import { IProjectService,
+    IProjectRoutesValidators }      from "../contracts";
 
 @injectable()
 export class ProjectRoutesValidators implements IProjectRoutesValidators {

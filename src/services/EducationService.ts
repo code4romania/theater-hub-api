@@ -1,14 +1,14 @@
 import { inject, injectable }   from "inversify";
 import { TYPES }                from "../types";
-import { IEducationService }    from "./IEducationService";
-import { ILocalizationService } from "./ILocalizationService";
-import { IUserService }         from "./IUserService";
+import { IEducationService,
+    ILocalizationService,
+    IEducationRepository,
+    IUserService }              from "../contracts";
 import { BaseService }          from "./BaseService";
 import { Education }            from "../models/Education";
 import { User }                 from "../models/User";
 import { CreateEducationDTO,
     UpdateEducationDTO }        from "../dtos";
-import { IEducationRepository } from "../repositories";
 
 @injectable()
 export class EducationService extends BaseService<Education> implements IEducationService {
@@ -34,7 +34,11 @@ export class EducationService extends BaseService<Education> implements IEducati
             Professional: dbUser.Professional
         } as Education;
 
-        return this._repository.insert(education);
+        const response = await this._repository.insert(education);
+
+        this._userService.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
+
+        return response;
     }
 
     public async updateEducationStep(email: string, updateEducationDTO: UpdateEducationDTO): Promise<Education> {
@@ -51,7 +55,11 @@ export class EducationService extends BaseService<Education> implements IEducati
         dbEducation.StartDate     = updateEducationDTO.StartDate;
         dbEducation.EndDate       = updateEducationDTO.EndDate;
 
-        return this._repository.update(dbEducation);
+        const response = await this._repository.update(dbEducation);
+
+        this._userService.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
+
+        return response;
     }
 
     public async deleteEducationStepByID(email: string, educationID: string): Promise<Education> {
@@ -61,7 +69,11 @@ export class EducationService extends BaseService<Education> implements IEducati
             throw new Error(this._localizationService.getText("validation.education.non-existent"));
         }
 
-        return this._repository.deleteByID(educationID);
+        const response = await this._repository.deleteByID(educationID);
+
+        this._userService.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
+
+        return response;
     }
 
 }

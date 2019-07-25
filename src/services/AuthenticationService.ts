@@ -1,8 +1,7 @@
 import { inject, injectable }                                  from "inversify";
 import { TYPES }                                               from "../types";
-import { IAuthenticationService }                              from "./IAuthenticationService";
-import { IUserService }                                        from "./IUserService";
-import { User, UserImage }                                     from "../models";
+import { IAuthenticationService, IUserService }                from "../contracts";
+import { User }                                                 from "../models";
 import { AuthenticationRequestDTO, AuthenticationResponseDTO } from "../dtos";
 import { UserAccountStatusType }                               from "../enums/UserAccountStatusType";
 const bcrypt                                                   = require("bcrypt");

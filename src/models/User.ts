@@ -1,18 +1,14 @@
 import { Entity, Column, PrimaryGeneratedColumn,
    OneToOne, OneToMany, JoinColumn }  from "typeorm";
 import { BaseEntity }                 from "./BaseEntity";
+import { UserFile }                   from "./UserFile";
 import { UserImage }                  from "./UserImage";
 import { UserVideo }                  from "./UserVideo";
 import { Award }                      from "./Award";
 import { UserSocialMedia }            from "./UserSocialMedia";
-import { Wish }                       from "./Wish";
-import { UserProject }                from "./UserProject";
-import { Comment }                    from "./Comment";
-import { Message }                    from "./Message";
 import { Professional }               from "./Professional";
-import { Sponsor }                    from "./Sponsor";
-import { Institution }                from "./Institution";
 import { UserAccountSettings }        from "./UserAccountSettings";
+import { Project }                    from "./Project";
 
 @Entity("User")
 export class User extends BaseEntity {
@@ -54,38 +50,20 @@ export class User extends BaseEntity {
   @OneToMany(type => UserVideo, userVideo => userVideo.User, { cascade: true, eager: true })
   VideoGallery?: UserVideo[];
 
+  @OneToMany(type => UserFile, userFile => userFile.User, { cascade: true, eager: true })
+  Files?: UserFile[];
+
   @OneToMany(type => Award, award => award.User, { cascade: true, eager: true })
   Awards: Award[];
 
   @OneToMany(type => UserSocialMedia, userSocialMedia => userSocialMedia.User, { cascade: true, eager: true })
   SocialMedia?: UserSocialMedia[];
 
-  @OneToMany(type => Wish, wish => wish.User)
-  Wishes?: Wish[];
-
-  @OneToMany(type => Wish, wish => wish.Sponsor)
-  SponsoredWishes?: Wish[];
-
-  @OneToMany(type => UserProject, userProject => userProject.Member)
-  Projects?: UserProject[];
-
-  @OneToMany(type => Comment, comment => comment.User)
-  Comments?: Comment[];
-
-  @OneToMany(type => Message, message => message.Sender)
-  SentMessages?: Message[];
-
-  @OneToMany(type => Message, message => message.Recipient)
-  ReceivedMessages?: Message[];
+  @OneToMany(type => Project, project => project.Initiator, { cascade: true, eager: true })
+  Projects?: Project[];
 
   @OneToOne(type => Professional, professional => professional.User, { cascade: true, eager: true })
   Professional?: Professional;
-
-  @OneToOne(type => Sponsor, sponsor => sponsor.User)
-  Sponsor?: Sponsor;
-
-  @OneToOne(type => Institution, institution => institution.User, { eager: true })
-  Institution?: Institution;
 
   @OneToOne(type => UserAccountSettings, accountSettings => accountSettings.User, { cascade: true, eager: true })
   AccountSettings?: UserAccountSettings;

@@ -1,8 +1,8 @@
 import { inject, injectable }      from "inversify";
 import { TYPES }                   from "../types";
 import * as _                      from "lodash";
-import { IEmailService }           from "./IEmailService";
-import { ILocalizationService }    from "./ILocalizationService";
+import { IEmailService,
+        ILocalizationService }     from "../contracts";
 import {
         AdminInviteManagedUserEmailDTO,
         AdminUpdateUserEmailDTO,

@@ -1,15 +1,12 @@
 import { inject, injectable }       from "inversify";
 import { Request, Response }        from "express";
-import chalk                        from "chalk";
-import * as uuid                    from "uuid/v4";
-import { Application }              from "express";
 import { TYPES }                    from "../types";
 import { Award }                    from "../models/Award";
 import { CreateAwardDTO,
     UpdateAwardDTO, AwardDTO }      from "../dtos/awards";
-import { IAwardsController }        from "./IAwardsController";
+import { IAwardsController,
+         IAwardService }            from "../contracts";
 import { BaseApiController }        from "./BaseApiController";
-import { IAwardService }            from "../services";
 
 @injectable()
 export class AwardsController extends BaseApiController<Award> implements IAwardsController {

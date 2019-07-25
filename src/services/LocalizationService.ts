@@ -1,6 +1,6 @@
 import { injectable }           from "inversify";
 import * as _                   from "lodash";
-import { ILocalizationService } from "./ILocalizationService";
+import { ILocalizationService } from "../contracts";
 import { LocaleType }           from "../enums";
 import { enLocale }             from "../locales/en";
 import { roLocale }             from "../locales/ro";

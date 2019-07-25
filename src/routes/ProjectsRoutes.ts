@@ -1,9 +1,8 @@
 import { container }                 from "../config/inversify.config";
 import { TYPES }                     from "../types/custom-types";
-import { IProjectsController }       from "../controllers";
-import { IProjectRoutesValidators }  from "../validators";
+import { IProjectsController,
+    IProjectRoutesValidators }       from "../contracts";
 import { Request, Response }         from "express";
-import { validatorMiddleware }       from "../middlewares";
 
 export default (app: any) => {
 

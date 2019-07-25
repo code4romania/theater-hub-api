@@ -1,8 +1,8 @@
 import { inject, injectable }   from "inversify";
 import * as uuid                from "uuid/v4";
 import { TYPES }                from "../types";
-import { IFileService }         from "./IFileService";
-import { ILocalizationService } from "./ILocalizationService";
+import { IFileService,
+        ILocalizationService }  from "../contracts";
 import { File }                 from "../dtos";
 import { FileType, LocaleType } from "../enums";
 import { FileManager }          from "../utils";
@@ -42,6 +42,20 @@ export class FileService implements IFileService {
         (error: any) => {
             this._hasBucket = false;
         });
+    }
+
+    public async uploadFromStream (stream: any, fileType: FileType, userEmail: string, fileName: string): Promise<void> {
+
+        const fileExtension: string = FileManager.getFileExtension(fileType);
+
+        const objectParams = {
+            Bucket: config.aws.files_bucket,
+            Key: `${userEmail}/${fileName}.${fileExtension}`,
+            Body: stream,
+            ACL: "public-read",
+        };
+
+        return this._s3.upload(objectParams).promise();
     }
 
     public async uploadFile (file: any, fileType: FileType, userEmail: string): Promise<void> {

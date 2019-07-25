@@ -1,7 +1,7 @@
-import { getRepository, Repository }       from "typeorm";
-import { injectable }                      from "inversify";
+import { getRepository, Repository }     from "typeorm";
+import { injectable }                    from "inversify";
 import { EntityCategory }                from "../models/EntityCategory";
-import { IEntityCategoryRepository }     from "./IEntityCategoryRepository";
+import { IEntityCategoryRepository }     from "../contracts";
 
 @injectable()
 export class EntityCategoryRepository implements IEntityCategoryRepository {

@@ -1,7 +1,7 @@
 import { injectable }           from "inversify";
-import { IBaseService }         from "./IBaseService";
-import { ILocalizationService } from "./ILocalizationService";
-import { IBaseRepository }      from "../repositories";
+import { IBaseService,
+    ILocalizationService,
+    IBaseRepository }           from "../contracts";
 import { BaseEntity }           from "../models";
 import { LocaleType }           from "../enums";
 

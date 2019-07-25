@@ -1,16 +1,13 @@
 import { inject, injectable }       from "inversify";
 import { Request, Response }        from "express";
-import chalk                        from "chalk";
-import * as uuid                    from "uuid/v4";
-import { Application }              from "express";
 import { TYPES }                    from "../types";
 import { Education }                from "../models/Education";
 import { CreateEducationDTO,
     UpdateEducationDTO,
     EducationStepDTO }              from "../dtos/education";
-import { IEducationController }     from "./IEducationController";
+import { IEducationController,
+         IEducationService }        from "../contracts";
 import { BaseApiController }        from "./BaseApiController";
-import { IEducationService }        from "../services";
 
 @injectable()
 export class EducationController extends BaseApiController<Education> implements IEducationController {

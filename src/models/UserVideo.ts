@@ -8,6 +8,9 @@ export class UserVideo extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   ID: string;
 
+  @Column("varchar", { nullable: true })
+  Title: string;
+
   @Column("varchar")
   Video: string;
 

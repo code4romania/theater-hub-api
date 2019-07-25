@@ -1,37 +1,41 @@
 import { Container }                                                                      from "inversify";
 import { TYPES }                                                                          from "../types/custom-types";
-import { IAdministrationController, AdministrationController,
+import { IAdministrationController,
     IApplicationDataController, IAuthenticationController,
     IAwardsController, IEducationController, IExperienceController,
-    IMessagesController, IProjectsController, IUsersController, IUserVideosController,
-    IWishesController, ApplicationDataController, AuthenticationController,
-    AwardsController, EducationController, ExperienceController,
-    MessagesController,  ProjectsController, UsersController,
-    UserVideosController, WishesController }                                             from "../controllers";
-import { IAdministrationRoutesValidators, AdministrationRoutesValidators,
-         IAuthenticationRoutesValidators, AuthenticationRoutesValidators,
-         IEntitiesValidators, EntitiesValidators,
-         IProjectRoutesValidators, ProjectRoutesValidators,
-         IUserRoutesValidators, UserRoutesValidators }                                    from "../validators";
-import { IAdministrationService, IApplicationDataService, IAwardService,
+    IProjectsController, IUsersController, IUserVideosController,
+    IAuthenticationService, IAdministrationService, IApplicationDataService, IAwardService,
     IEducationService, IExperienceService, IFileService, ILocalizationService,
-    IMessageService, IProjectService, ISkillService,
-    IUserService, IUserVideoService, IWishService, IEmailService,
-    AdministrationService, ApplicationDataService, AwardService,
-    EducationService, ExperienceService, FileService, LocalizationService,
-    MessageService, ProjectService, SkillService, UserService, UserVideoService,
-    WishService, EmailService, IAuthenticationService, AuthenticationService }            from "../services";
-import { IAwardRepository, IEducationRepository, IEntityCategoryRepository,
-    IExperienceRepository, ILocaleRepository, IMessageRepository,
+    IProjectService, ISkillService,
+    IUserService, IUserVideoService, IEmailService,
+    IAwardRepository, IEducationRepository, IEntityCategoryRepository,
+    IExperienceRepository, ILocaleRepository, ICurrencyRepository,
     IProfessionalRepository, IProfessionalSkillRepository, IProjectRepository,
     ISkillRepository, IUserAccountSettingsRepository,
-    IUserImageRepository, IUserSocialMediaRepository,
-    IUserRepository, IUserVideoRepository, IWishRepository, AwardRepository,
+    IUserFileRepository, IUserImageRepository, IUserSocialMediaRepository,
+    IUserRepository, IUserVideoRepository,
+    IAdministrationRoutesValidators, IAuthenticationRoutesValidators,
+    IEntitiesValidators, IProjectRoutesValidators, IUserRoutesValidators }          from "../contracts";
+import { AdministrationController,
+        ApplicationDataController, AuthenticationController,
+        AwardsController, EducationController, ExperienceController,
+        ProjectsController, UsersController,
+        UserVideosController }                                                      from "../controllers";
+import { AdministrationRoutesValidators, AuthenticationRoutesValidators,
+         EntitiesValidators, ProjectRoutesValidators,
+         UserRoutesValidators }                                                     from "../validators";
+import {
+    AdministrationService, ApplicationDataService, AwardService,
+    EducationService, ExperienceService, FileService, LocalizationService,
+    ProjectService, SkillService, UserService, UserVideoService,
+    EmailService, AuthenticationService }                                           from "../services";
+import { AwardRepository,
     EducationRepository, EntityCategoryRepository, ExperienceRepository,
-    LocaleRepository, MessageRepository,
+    LocaleRepository, CurrencyRepository,
     ProfessionalRepository, ProfessionalSkillRepository, ProjectRepository,
-    SkillRepository, UserAccountSettingsRepository, UserImageRepository,
-    UserSocialMediaRepository, UserRepository, UserVideoRepository, WishRepository}       from "../repositories";
+    SkillRepository, UserAccountSettingsRepository,
+    UserFileRepository, UserImageRepository,
+    UserSocialMediaRepository, UserRepository, UserVideoRepository }                from "../repositories";
 
 const container = new Container();
 
@@ -41,11 +45,9 @@ container.bind<IAuthenticationController>(TYPES.AuthenticationController).to(Aut
 container.bind<IAwardsController>(TYPES.AwardsController).to(AwardsController);
 container.bind<IEducationController>(TYPES.EducationController).to(EducationController);
 container.bind<IExperienceController>(TYPES.ExperienceController).to(ExperienceController);
-container.bind<IMessagesController>(TYPES.MessagesController).to(MessagesController);
 container.bind<IProjectsController>(TYPES.ProjectsController).to(ProjectsController);
 container.bind<IUsersController>(TYPES.UsersController).to(UsersController);
 container.bind<IUserVideosController>(TYPES.UserVideosController).to(UserVideosController);
-container.bind<IWishesController>(TYPES.WishesController).to(WishesController);
 
 container.bind<IAdministrationRoutesValidators>(TYPES.AdministrationRoutesValidators).to(AdministrationRoutesValidators);
 container.bind<IAuthenticationRoutesValidators>(TYPES.AuthenticationRoutesValidators).to(AuthenticationRoutesValidators);
@@ -61,12 +63,10 @@ container.bind<IEducationService>(TYPES.EducationService).to(EducationService);
 container.bind<IExperienceService>(TYPES.ExperienceService).to(ExperienceService);
 container.bind<IFileService>(TYPES.FileService).to(FileService);
 container.bind<ILocalizationService>(TYPES.LocalizationService).to(LocalizationService);
-container.bind<IMessageService>(TYPES.MessageService).to(MessageService);
 container.bind<IProjectService>(TYPES.ProjectService).to(ProjectService);
 container.bind<ISkillService>(TYPES.SkillService).to(SkillService);
 container.bind<IUserService>(TYPES.UserService).to(UserService);
 container.bind<IUserVideoService>(TYPES.UserVideoService).to(UserVideoService);
-container.bind<IWishService>(TYPES.WishService).to(WishService);
 container.bind<IEmailService>(TYPES.EmailService).to(EmailService);
 
 container.bind<IAwardRepository>(TYPES.AwardRepository).to(AwardRepository);
@@ -74,16 +74,16 @@ container.bind<IEducationRepository>(TYPES.EducationRepository).to(EducationRepo
 container.bind<IEntityCategoryRepository>(TYPES.EntityCategoryRepository).to(EntityCategoryRepository);
 container.bind<IExperienceRepository>(TYPES.ExperienceRepository).to(ExperienceRepository);
 container.bind<ILocaleRepository>(TYPES.LocaleRepository).to(LocaleRepository);
-container.bind<IMessageRepository>(TYPES.MessageRepository).to(MessageRepository);
+container.bind<ICurrencyRepository>(TYPES.CurrencyRepository).to(CurrencyRepository);
 container.bind<IProfessionalRepository>(TYPES.ProfessionalRepository).to(ProfessionalRepository);
 container.bind<IProfessionalSkillRepository>(TYPES.ProfessionalSkillRepository).to(ProfessionalSkillRepository);
 container.bind<IProjectRepository>(TYPES.ProjectRepository).to(ProjectRepository);
+container.bind<IUserFileRepository>(TYPES.UserFileRepository).to(UserFileRepository);
 container.bind<IUserImageRepository>(TYPES.UserImageRepository).to(UserImageRepository);
 container.bind<IUserSocialMediaRepository>(TYPES.UserSocialMediaRepository).to(UserSocialMediaRepository);
 container.bind<ISkillRepository>(TYPES.SkillRepository).to(SkillRepository);
 container.bind<IUserAccountSettingsRepository>(TYPES.UserAccountSettingsRepository).to(UserAccountSettingsRepository);
 container.bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
-container.bind<IWishRepository>(TYPES.WishRepository).to(WishRepository);
 container.bind<IUserVideoRepository>(TYPES.UserVideoRepository).to(UserVideoRepository);
 
 export {container};

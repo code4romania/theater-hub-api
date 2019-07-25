@@ -1,14 +1,14 @@
 import { inject, injectable }       from "inversify";
 import { TYPES }                    from "../types";
-import { IExperienceService }       from "./IExperienceService";
-import { ILocalizationService }     from "./ILocalizationService";
-import { IUserService }             from "./IUserService";
+import { IExperienceService,
+        ILocalizationService,
+        IExperienceRepository,
+        IUserService }              from "../contracts";
 import { BaseService }              from "./BaseService";
 import { Experience }               from "../models/Experience";
 import { User }                     from "../models/User";
 import { CreateExperienceDTO,
     UpdateExperienceDTO }           from "../dtos";
-import { IExperienceRepository }    from "../repositories";
 
 @injectable()
 export class ExperienceService extends BaseService<Experience> implements IExperienceService {
@@ -34,7 +34,11 @@ export class ExperienceService extends BaseService<Experience> implements IExper
             Professional: dbUser.Professional
         } as Experience;
 
-        return this._repository.insert(experienceStep);
+        const response = await this._repository.insert(experienceStep);
+
+        this._userService.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
+
+        return response;
     }
 
     public async updateExperienceStep(email: string, updateExperienceDTO: UpdateExperienceDTO): Promise<Experience> {
@@ -51,7 +55,11 @@ export class ExperienceService extends BaseService<Experience> implements IExper
         dbExperience.StartDate      = updateExperienceDTO.StartDate;
         dbExperience.EndDate        = updateExperienceDTO.EndDate;
 
-        return this._repository.update(dbExperience);
+        const response = await this._repository.update(dbExperience);
+
+        this._userService.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
+
+        return response;
     }
 
     public async deleteExperienceStepByID(email: string, experienceID: string): Promise<Experience> {
@@ -61,7 +69,11 @@ export class ExperienceService extends BaseService<Experience> implements IExper
             throw new Error(this._localizationService.getText("validation.experience.non-existent"));
         }
 
-        return this._repository.deleteByID(experienceID);
+        const response = await this._repository.deleteByID(experienceID);
+
+        this._userService.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
+
+        return response;
     }
 
 }

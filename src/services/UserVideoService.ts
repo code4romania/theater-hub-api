@@ -1,14 +1,16 @@
-import { inject, injectable }   from "inversify";
-import { TYPES }                from "../types";
-import { ILocalizationService } from "./ILocalizationService";
-import { IUserVideoService }    from "./IUserVideoService";
-import { IUserService }         from "./IUserService";
-import { BaseService }          from "./BaseService";
-import { UserVideo }            from "../models/UserVideo";
-import { User }                 from "../models/User";
+import { inject, injectable }           from "inversify";
+import { TYPES }                        from "../types";
+import { ILocalizationService,
+         IUserVideoService,
+         IUserService,
+         IUserVideoRepository }         from "../contracts";
+import { BaseService }                  from "./BaseService";
+import { UserVideo }                    from "../models/UserVideo";
+import { User }                         from "../models/User";
 import { CreateUserVideoDTO,
-    UpdateUserVideoDTO }        from "../dtos";
-import { IUserVideoRepository } from "../repositories";
+    UpdateUserVideoDTO }                from "../dtos";
+
+const config                            = require("../config/env").getConfig();
 
 @injectable()
 export class UserVideoService extends BaseService<UserVideo> implements IUserVideoService {
@@ -25,10 +27,12 @@ export class UserVideoService extends BaseService<UserVideo> implements IUserVid
     }
 
     public async createUserVideo(email: string, createUserVideoDTO: CreateUserVideoDTO): Promise<UserVideo> {
-        const dbUser: User = await this._userService.getByEmail(email);
+        const dbUser: User          = await this._userService.getByEmail(email);
+        const videoTitle: string    = await this._userService.getVideoTitle(createUserVideoDTO.Video);
 
         const userVideo: UserVideo = {
             Video: createUserVideoDTO.Video,
+            Title: videoTitle,
             User: dbUser
         } as UserVideo;
 
@@ -44,6 +48,7 @@ export class UserVideoService extends BaseService<UserVideo> implements IUserVid
         }
 
         dbUserVideo.Video = updateUserVideoDTO.Video;
+        dbUserVideo.Title = await this._userService.getVideoTitle(updateUserVideoDTO.Video);
 
         return this._userVideoRepository.update(dbUserVideo);
     }

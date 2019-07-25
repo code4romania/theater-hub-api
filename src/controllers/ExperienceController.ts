@@ -1,16 +1,13 @@
 import { inject, injectable }       from "inversify";
 import { Request, Response }        from "express";
-import chalk                        from "chalk";
-import * as uuid                    from "uuid/v4";
-import { Application }              from "express";
 import { TYPES }                    from "../types";
 import { Experience }               from "../models/Experience";
 import { CreateExperienceDTO,
     UpdateExperienceDTO,
     ExperienceStepDTO }             from "../dtos/experience";
-import { IExperienceController }    from "./IExperienceController";
+import { IExperienceController,
+         IExperienceService }       from "../contracts";
 import { BaseApiController }        from "./BaseApiController";
-import { IExperienceService }       from "../services";
 
 @injectable()
 export class ExperienceController extends BaseApiController<Experience> implements IExperienceController {

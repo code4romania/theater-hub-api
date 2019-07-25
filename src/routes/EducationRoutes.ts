@@ -1,9 +1,9 @@
 import { container }                 from "../config/inversify.config";
 import { TYPES }                     from "../types/custom-types";
-import { IEducationController }      from "../controllers";
+import { IEducationController,
+            IEntitiesValidators }    from "../contracts";
 import { Request, Response }         from "express";
 import { authorizationMiddleware }   from "../middlewares";
-import { IEntitiesValidators }       from "../validators";
 
 export default (app: any) => {
 

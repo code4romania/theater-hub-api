@@ -1,7 +1,7 @@
 import { getRepository, Repository }    from "typeorm";
 import { injectable }                   from "inversify";
 import { Locale }                       from "../models/Locale";
-import { ILocaleRepository }            from "./ILocaleRepository";
+import { ILocaleRepository }            from "../contracts";
 
 @injectable()
 export class LocaleRepository implements ILocaleRepository {

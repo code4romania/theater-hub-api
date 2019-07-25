@@ -1,3 +1,4 @@
+export * from "./CurrencyType";
 export * from "./EntityCategoryType";
 export * from "./FileType";
 export * from "./ProfileSectionType";
@@ -6,7 +7,7 @@ export * from "./SortOrientationType";
 export * from "./LocaleType";
 export * from "./UserAccountProviderType";
 export * from "./UserAccountStatusType";
+export * from "./FileCategoryType";
 export * from "./UserRoleType";
 export * from "./UserSortCriterion";
 export * from "./VisibilityType";
-export * from "./WishCategoryType";

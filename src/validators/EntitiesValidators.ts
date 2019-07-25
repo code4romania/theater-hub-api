@@ -1,8 +1,8 @@
 import { inject, injectable }      from "inversify";
 import { TYPES }                   from "../types";
 const { check }                    = require("express-validator/check");
-import { IEntitiesValidators }     from "./IEntitiesValidators";
-import { ILocalizationService }    from "../services";
+import { IEntitiesValidators,
+        ILocalizationService }     from "../contracts";
 import { SocialMediaCategoryType } from "../enums";
 import { Validators }              from "../utils";
 

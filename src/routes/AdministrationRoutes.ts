@@ -1,7 +1,7 @@
 import { container }                       from "../config/inversify.config";
 import { TYPES }                           from "../types/custom-types";
-import { IAdministrationController }       from "../controllers";
-import { IAdministrationRoutesValidators } from "../validators";
+import { IAdministrationController,
+    IAdministrationRoutesValidators }      from "../contracts";
 import { authorizationMiddleware,
     validatorMiddleware }                  from "../middlewares";
 import { Request, Response }               from "express";

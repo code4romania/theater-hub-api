@@ -1,6 +1,6 @@
 import { injectable, unmanaged }       from "inversify";
-import { getRepository, Repository }   from "typeorm";
-import { IBaseRepository }             from "./IBaseRepository";
+import { Repository }                  from "typeorm";
+import { IBaseRepository }             from "../contracts";
 import { BaseEntity }                  from "../models";
 
 @injectable()

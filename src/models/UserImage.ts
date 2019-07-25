@@ -15,6 +15,9 @@ export class UserImage extends BaseEntity {
   @Column("varchar")
   Location: string;
 
+  @Column("varchar")
+  ThumbnailLocation: string;
+
   @Column("decimal", { scale: 2 })
   Size: number;
 

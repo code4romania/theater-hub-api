@@ -2,7 +2,7 @@ import { getRepository, Repository }       from "typeorm";
 import { injectable }                      from "inversify";
 import { Award }                           from "../models/Award";
 import { BaseRepository }                  from "./BaseRepository";
-import { IAwardRepository }                from "./IAwardRepository";
+import { IAwardRepository }                from "../contracts";
 
 @injectable()
 export class AwardRepository extends BaseRepository<Award> implements IAwardRepository {

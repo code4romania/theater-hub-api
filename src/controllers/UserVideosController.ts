@@ -1,16 +1,13 @@
 import { inject, injectable }       from "inversify";
 import { Request, Response }        from "express";
-import chalk                        from "chalk";
-import * as uuid                    from "uuid/v4";
-import { Application }              from "express";
 import { TYPES }                    from "../types";
 import { UserVideo }                from "../models/UserVideo";
 import { CreateUserVideoDTO,
     UpdateUserVideoDTO,
     UserVideoDTO }                  from "../dtos/user-videos";
-import { IUserVideosController }    from "./IUserVideosController";
+import { IUserVideosController,
+         IUserVideoService }        from "../contracts";
 import { BaseApiController }        from "./BaseApiController";
-import { IUserVideoService }        from "../services";
 
 @injectable()
 export class UserVideosController extends BaseApiController<UserVideo> implements IUserVideosController {

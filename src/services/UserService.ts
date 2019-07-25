@@ -1,11 +1,22 @@
 import { inject, injectable }                  from "inversify";
 import * as _                                  from "lodash";
+import axios                                   from "axios";
 import * as moment                             from "moment";
-import * as uuid                                from "uuid/v4";
 import { TYPES }                               from "../types";
 import { IUserService, IEmailService,
-    IFileService,
-    ILocalizationService, ISkillService }      from "../services";
+    IFileService, ILocalizationService,
+    ISkillService,
+    IAwardRepository,
+    IEducationRepository,
+    IExperienceRepository,
+    IProfessionalRepository,
+    IProfessionalSkillRepository,
+    IUserAccountSettingsRepository,
+    IUserFileRepository,
+    IUserImageRepository,
+    IUserRepository,
+    IUserVideoRepository,
+    IUserSocialMediaRepository }               from "../contracts";
 import { BaseService }                         from "./BaseService";
 import { Award }                               from "../models/Award";
 import { Education }                           from "../models/Education";
@@ -13,21 +24,12 @@ import { Experience }                          from "../models/Experience";
 import { User }                                from "../models/User";
 import { UserAccountSettings }                 from "../models/UserAccountSettings";
 import { UserImage }                           from "../models/UserImage";
+import { UserFile }                            from "../models/UserFile";
 import { UserSocialMedia }                     from "../models/UserSocialMedia";
 import { UserVideo }                           from "../models/UserVideo";
 import { Professional }                        from "../models/Professional";
 import { ProfessionalSkill }                   from "../models/ProfessionalSkill";
 import { Skill }                               from "../models/Skill";
-import { IAwardRepository,
-    IEducationRepository,
-    IExperienceRepository,
-    IProfessionalRepository,
-    IProfessionalSkillRepository,
-    IUserAccountSettingsRepository,
-    IUserImageRepository,
-    IUserRepository,
-    IUserSocialMediaRepository,
-    IUserVideoRepository }                     from "../repositories";
 import { ChangePasswordResponseDTO,
     ChangePasswordRequestDTO,
     CommunitySkillLayer,
@@ -49,12 +51,15 @@ import { ChangePasswordResponseDTO,
     UpdatePhotoGalleryResponse, UserImageDTO } from "../dtos";
 import { EntityCategoryType }                  from "../enums/EntityCategoryType";
 import { FileType }                            from "../enums/FileType";
+import { FileCategoryType }                    from "../enums/FileCategoryType";
+import { LocaleType }                          from "../enums/LocaleType";
 import { SocialMediaCategoryType }             from "../enums/SocialMediaCategoryType";
 import { SortOrientationType }                 from "../enums/SortOrientationType";
 import { UserAccountProviderType }             from "../enums/UserAccountProviderType";
 import { UserAccountStatusType }               from "../enums/UserAccountStatusType";
 import { UserRoleType }                        from "../enums/UserRoleType";
 import { VisibilityType }                      from "../enums/VisibilityType";
+import { AWS, SocialMediaManager, Validators } from "../utils";
 const bcrypt                                   = require("bcrypt");
 const config                                   = require("../config/env").getConfig();
 const jwt                                      = require("jsonwebtoken");
@@ -73,6 +78,7 @@ export class UserService extends BaseService<User> implements IUserService {
     private readonly _professionalRepository: IProfessionalRepository;
     private readonly _professionalSkillRepository: IProfessionalSkillRepository;
     private readonly _userAccountSettingsRepository: IUserAccountSettingsRepository;
+    private readonly _userFileRepository: IUserFileRepository;
     private readonly _userImageRepository: IUserImageRepository;
     private readonly _userRepository: IUserRepository;
     private readonly _userSocialMediaRepository: IUserSocialMediaRepository;
@@ -88,10 +94,11 @@ export class UserService extends BaseService<User> implements IUserService {
         @inject(TYPES.ProfessionalRepository) professionalRepository: IProfessionalRepository,
         @inject(TYPES.ProfessionalSkillRepository) professionalSkillRepository: IProfessionalSkillRepository,
         @inject(TYPES.UserAccountSettingsRepository) userAccountSettingsRepository: IUserAccountSettingsRepository,
+        @inject(TYPES.UserFileRepository) userFileRepository: IUserFileRepository,
         @inject(TYPES.UserImageRepository) userImageRepository: IUserImageRepository,
         @inject(TYPES.UserRepository) userRepository: IUserRepository,
         @inject(TYPES.UserSocialMediaRepository) userSocialMediaRepository: IUserSocialMediaRepository,
-        @inject(TYPES.UserVideoRepository)  userVideoRepository: IUserVideoRepository,
+        @inject(TYPES.UserVideoRepository) userVideoRepository: IUserVideoRepository,
         @inject(TYPES.EmailService) emailService: IEmailService,
         @inject(TYPES.FileService) fileService: IFileService,
         @inject(TYPES.LocalizationService) localizationService: ILocalizationService,
@@ -104,6 +111,7 @@ export class UserService extends BaseService<User> implements IUserService {
         this._professionalRepository           = professionalRepository;
         this._professionalSkillRepository     = professionalSkillRepository;
         this._userAccountSettingsRepository   = userAccountSettingsRepository;
+        this._userFileRepository              = userFileRepository;
         this._userImageRepository             = userImageRepository;
         this._userRepository                  = userRepository;
         this._userSocialMediaRepository       = userSocialMediaRepository;
@@ -156,24 +164,26 @@ export class UserService extends BaseService<User> implements IUserService {
             profileImage = {
                 Key: uploadProfileImageResult.Key,
                 Location: uploadProfileImageResult.Location,
+                ThumbnailLocation: AWS.getThumbnailURL(uploadProfileImageResult.Key),
                 Size: Math.round(profileImageFile.size * 100 / (1000 * 1000)) / 100, // in MB
                 IsProfileImage: true,
                 User: dbUser
             } as UserImage;
 
             await this._userImageRepository.insert(profileImage);
-        } else if (profileImageFile) {
+        } else if (profileImageFile && dbProfileImage) {
             const newProfileImageUploadPromise = this._fileService.uploadFile(profileImageFile, FileType.Image, userEmail);
             const oldProfileImageRemovePromise = this._fileService.deleteFile(dbProfileImage.Key);
 
             const updateProfileImageResults: any  = await Promise.all([newProfileImageUploadPromise, oldProfileImageRemovePromise]);
 
-            profileImage.Location = updateProfileImageResults[0].Location;
-            profileImage.Key      = updateProfileImageResults[0].Key;
-            profileImage.Size     = Math.round(profileImageFile.size * 100 / (1000 * 1000)) / 100;
+            profileImage.Location           = updateProfileImageResults[0].Location;
+            profileImage.ThumbnailLocation  = AWS.getThumbnailURL(updateProfileImageResults[0].Key);
+            profileImage.Key                = updateProfileImageResults[0].Key;
+            profileImage.Size               = Math.round(profileImageFile.size * 100 / (1000 * 1000)) / 100;
 
-            this._userImageRepository.update(profileImage);
-        } else {
+            await this._userImageRepository.update(profileImage);
+        } else if (!profileImageFile && dbProfileImage) {
             await this._fileService.deleteFile(dbProfileImage.Key);
             await this._userImageRepository.deleteByID(dbProfileImage.ID);
             profileImage = undefined;
@@ -185,55 +195,55 @@ export class UserService extends BaseService<User> implements IUserService {
         const youtubeSocialMedia      = dbUser.SocialMedia.find(s => s.SocialMediaCategoryID === SocialMediaCategoryType.Youtube);
 
         if (generalInformationSection.FacebookLink && !facebookSocialMedia) {
-            this._userSocialMediaRepository.insert({
+            await this._userSocialMediaRepository.insert({
                 Link: generalInformationSection.FacebookLink,
                 User: dbUser,
                 SocialMediaCategoryID: SocialMediaCategoryType.Facebook
             } as UserSocialMedia);
         } else if (generalInformationSection.FacebookLink && facebookSocialMedia.Link !== generalInformationSection.FacebookLink) {
             facebookSocialMedia.Link = generalInformationSection.FacebookLink;
-            this._userSocialMediaRepository.update(facebookSocialMedia);
+            await this._userSocialMediaRepository.update(facebookSocialMedia);
         } else if (!generalInformationSection.FacebookLink && facebookSocialMedia) {
-            this._userSocialMediaRepository.delete(facebookSocialMedia);
+            await this._userSocialMediaRepository.delete(facebookSocialMedia);
         }
 
         if (generalInformationSection.InstagramLink && !instagramSocialMedia) {
-            this._userSocialMediaRepository.insert({
+            await this._userSocialMediaRepository.insert({
                 Link: generalInformationSection.InstagramLink,
                 User: dbUser,
                 SocialMediaCategoryID: SocialMediaCategoryType.Instagram
             } as UserSocialMedia);
         } else if (generalInformationSection.InstagramLink && instagramSocialMedia.Link !== generalInformationSection.InstagramLink) {
             instagramSocialMedia.Link = generalInformationSection.InstagramLink;
-            this._userSocialMediaRepository.update(instagramSocialMedia);
+            await this._userSocialMediaRepository.update(instagramSocialMedia);
         } else if (!generalInformationSection.InstagramLink && instagramSocialMedia) {
-            this._userSocialMediaRepository.delete(instagramSocialMedia);
+            await this._userSocialMediaRepository.delete(instagramSocialMedia);
         }
 
         if (generalInformationSection.LinkedinLink && !linkedinSocialMedia) {
-            this._userSocialMediaRepository.insert({
+            await this._userSocialMediaRepository.insert({
                 Link: generalInformationSection.LinkedinLink,
                 User: dbUser,
                 SocialMediaCategoryID: SocialMediaCategoryType.Linkedin
             } as UserSocialMedia);
         } else if (generalInformationSection.LinkedinLink && linkedinSocialMedia.Link !== generalInformationSection.LinkedinLink) {
             linkedinSocialMedia.Link = generalInformationSection.LinkedinLink;
-            this._userSocialMediaRepository.update(linkedinSocialMedia);
+            await this._userSocialMediaRepository.update(linkedinSocialMedia);
         } else if (!generalInformationSection.LinkedinLink && linkedinSocialMedia) {
-            this._userSocialMediaRepository.delete(linkedinSocialMedia);
+            await this._userSocialMediaRepository.delete(linkedinSocialMedia);
         }
 
         if (generalInformationSection.YoutubeLink && !youtubeSocialMedia) {
-            this._userSocialMediaRepository.insert({
+            await this._userSocialMediaRepository.insert({
                 Link: generalInformationSection.YoutubeLink,
                 User: dbUser,
                 SocialMediaCategoryID: SocialMediaCategoryType.Youtube
             } as UserSocialMedia);
         } else if (generalInformationSection.YoutubeLink && youtubeSocialMedia.Link !== generalInformationSection.YoutubeLink) {
             youtubeSocialMedia.Link = generalInformationSection.YoutubeLink;
-            this._userSocialMediaRepository.update(youtubeSocialMedia);
+            await this._userSocialMediaRepository.update(youtubeSocialMedia);
         } else if (!generalInformationSection.YoutubeLink && youtubeSocialMedia) {
-            this._userSocialMediaRepository.delete(youtubeSocialMedia);
+            await this._userSocialMediaRepository.delete(youtubeSocialMedia);
         }
 
         let username: string = dbUser.Username;
@@ -243,7 +253,7 @@ export class UserService extends BaseService<User> implements IUserService {
             username = await this.getUsername(generalInformationSection.FirstName, generalInformationSection.LastName);
         }
 
-        this._userRepository
+        await this._userRepository
                 .runCreateQueryBuilder()
                 .update(User)
                 .set({
@@ -257,7 +267,7 @@ export class UserService extends BaseService<User> implements IUserService {
                 .where("Email = :userEmail", { userEmail })
                 .execute();
 
-        this._professionalRepository
+        await this._professionalRepository
             .runCreateQueryBuilder()
             .update(Professional)
             .set({
@@ -276,6 +286,8 @@ export class UserService extends BaseService<User> implements IUserService {
             AccountStatus: dbUser.AccountSettings.AccountStatus
         } as MeDTO;
 
+        this.publishUpdatedResume(userEmail, dbUser.AccountSettings.Locale);
+
         return response;
     }
 
@@ -290,18 +302,21 @@ export class UserService extends BaseService<User> implements IUserService {
             throw new Error(this._localizationService.getText("validation.skills.required"));
         }
 
-        addedEntitiesIDs.forEach(id => {
+        addedEntitiesIDs.forEach(async id => {
             const professionalSkill: ProfessionalSkill = {
                 ProfessionalID: dbUser.Professional.ID,
                 SkillID: id
             } as ProfessionalSkill;
 
-            this._professionalSkillRepository.insert(professionalSkill);
+            await this._professionalSkillRepository.insert(professionalSkill);
         });
 
-        removedEntitiesIDs.forEach(id => {
-            this._professionalSkillRepository.delete(dbUser.Professional.Skills.find(ps => ps.SkillID === id));
+        removedEntitiesIDs.forEach(async id => {
+            await this._professionalSkillRepository.delete(dbUser.Professional.Skills.find(ps => ps.SkillID === id));
         });
+
+        this.publishUpdatedResume(userEmail, dbUser.AccountSettings.Locale);
+
     }
 
     public async updatePhotoGallery(userEmail: string, photoGallerySection: UserImage[], addedPhotos: any): Promise<UpdatePhotoGalleryResponse> {
@@ -331,6 +346,7 @@ export class UserService extends BaseService<User> implements IUserService {
             const photo: UserImage = {
                 Key: updatePhotoGalleryResults[0][index].Key,
                 Location: updatePhotoGalleryResults[0][index].Location,
+                ThumbnailLocation: AWS.getThumbnailURL(updatePhotoGalleryResults[0][index].Key),
                 Size: Math.round(addedPhotos[index].size * 100 / (1000 * 1000)) / 100, // in MB
                 IsProfileImage: false,
                 User: dbUser
@@ -344,6 +360,8 @@ export class UserService extends BaseService<User> implements IUserService {
             await this._userImageRepository.deleteByID(removedEntities[index].ID);
         }
 
+        this.publishUpdatedResume(userEmail, dbUser.AccountSettings.Locale);
+
         return new UpdatePhotoGalleryResponse(addedEntities);
     }
 
@@ -356,26 +374,44 @@ export class UserService extends BaseService<User> implements IUserService {
                                     [];
         const updatedEntities: UserVideo[] = videoGallerySection.UpdatedEntities ? videoGallerySection.UpdatedEntities : [];
 
-        addedEntities.forEach(v => {
+        const addedEntitiesTitleResults: string[]   = await Promise.all(
+            addedEntities.map(v => this.getVideoTitle(v.Video))
+        );
+
+        addedEntities.forEach(async (v: UserVideo, index: number) => {
             const video: UserVideo = {
                 Video: v.Video,
+                Title: addedEntitiesTitleResults[index],
                 User: dbUser
             } as UserVideo;
 
-            this._userVideoRepository.insert(video);
+            await this._userVideoRepository.insert(video);
         });
 
-        for (const entity of updatedEntities) {
-            const dbUserVideo = await this._userVideoRepository.getByID(entity.ID);
+        const updatedEntitiesTitleResults: string[]   = await Promise.all(
+            updatedEntities.map(v => this.getVideoTitle(v.Video))
+        );
 
-            dbUserVideo.Video = entity.Video;
+         const updatedEntitiesIDs: string[] = updatedEntities.map(v => v.ID);
+         const dbUserVideos: UserVideo[] = await this._userVideoRepository
+            .runCreateQueryBuilder()
+            .select("userVideo")
+            .from(UserVideo, "userVideo")
+            .where("userVideo.ID IN (:...updatedEntitiesIDs)", { updatedEntitiesIDs  })
+            .getMany();
 
-            this._userVideoRepository.update(dbUserVideo);
-        }
+        dbUserVideos.forEach(async (v: UserVideo, index: number) => {
+            v.Video = updatedEntities.find(e => e.ID === v.ID).Video;
+            v.Title = updatedEntitiesTitleResults[index];
 
-        removedEntitiesIDs.forEach(id => {
-            this._userVideoRepository.deleteByID(id);
+            await this._userVideoRepository.update(v);
         });
+
+        removedEntitiesIDs.forEach(async id => {
+            await this._userVideoRepository.deleteByID(id);
+        });
+
+        this.publishUpdatedResume(userEmail, dbUser.AccountSettings.Locale);
 
     }
 
@@ -388,7 +424,7 @@ export class UserService extends BaseService<User> implements IUserService {
                                     [];
         const updatedEntities: Award[]     = awardsSection.UpdatedEntities ? awardsSection.UpdatedEntities : [];
 
-        addedEntities.forEach(a => {
+        addedEntities.forEach(async a => {
             const award: Award = {
                 Title: a.Title,
                 Issuer: a.Issuer,
@@ -397,7 +433,7 @@ export class UserService extends BaseService<User> implements IUserService {
                 User: dbUser
             } as Award;
 
-            this._awardRepository.insert(award);
+            await this._awardRepository.insert(award);
         });
 
         for (const entity of updatedEntities) {
@@ -408,12 +444,14 @@ export class UserService extends BaseService<User> implements IUserService {
             dbAward.Description    = entity.Description;
             dbAward.Date           = entity.Date;
 
-            this._awardRepository.update(dbAward);
+            await this._awardRepository.update(dbAward);
         }
 
-        removedEntitiesIDs.forEach(id => {
-            this._awardRepository.deleteByID(id);
+        removedEntitiesIDs.forEach(async id => {
+            await this._awardRepository.deleteByID(id);
         });
+
+        this.publishUpdatedResume(userEmail, dbUser.AccountSettings.Locale);
 
     }
 
@@ -426,7 +464,7 @@ export class UserService extends BaseService<User> implements IUserService {
                                         [];
         const updatedEntities: Experience[]    = experienceSection.UpdatedEntities ? experienceSection.UpdatedEntities : [];
 
-        addedEntities.forEach(e => {
+        addedEntities.forEach(async e => {
             const experience: Experience = {
                 Position: e.Position,
                 Employer: e.Employer,
@@ -436,7 +474,7 @@ export class UserService extends BaseService<User> implements IUserService {
                 Professional: dbUser.Professional
             } as Experience;
 
-            this._experienceRepository.insert(experience);
+            await this._experienceRepository.insert(experience);
         });
 
         for (const entity of updatedEntities) {
@@ -448,12 +486,14 @@ export class UserService extends BaseService<User> implements IUserService {
             dbExperience.StartDate      = entity.StartDate;
             dbExperience.EndDate        = entity.EndDate;
 
-            this._experienceRepository.update(dbExperience);
+            await this._experienceRepository.update(dbExperience);
         }
 
-        experienceSection.RemovedEntities.forEach(id => {
-            this._experienceRepository.deleteByID(id);
+        experienceSection.RemovedEntities.forEach(async id => {
+            await this._experienceRepository.deleteByID(id);
         });
+
+        this.publishUpdatedResume(userEmail, dbUser.AccountSettings.Locale);
 
     }
 
@@ -466,7 +506,7 @@ export class UserService extends BaseService<User> implements IUserService {
                                             [];
         const updatedEntities: Education[]     = educationSection.UpdatedEntities ? educationSection.UpdatedEntities : [];
 
-        addedEntities.forEach(e => {
+        addedEntities.forEach(async e => {
             const education: Education = {
                 Title: e.Title,
                 Institution: e.Institution,
@@ -476,7 +516,7 @@ export class UserService extends BaseService<User> implements IUserService {
                 Professional: dbUser.Professional
             } as Education;
 
-            this._educationRepository.insert(education);
+            await this._educationRepository.insert(education);
         });
 
         for (const entity of updatedEntities) {
@@ -488,12 +528,14 @@ export class UserService extends BaseService<User> implements IUserService {
             dbEducation.StartDate     = entity.StartDate;
             dbEducation.EndDate       = entity.EndDate;
 
-            this._educationRepository.update(dbEducation);
+            await this._educationRepository.update(dbEducation);
         }
 
-        removedEntitiesIDs.forEach(id => {
-            this._educationRepository.deleteByID(id);
+        removedEntitiesIDs.forEach(async id => {
+            await this._educationRepository.deleteByID(id);
         });
+
+        this.publishUpdatedResume(userEmail, dbUser.AccountSettings.Locale);
     }
 
     public async getByEmail(email: string): Promise<User> {
@@ -759,6 +801,7 @@ export class UserService extends BaseService<User> implements IUserService {
             const profileImage: UserImage = {
                 Key: profile.ProfileImage.Key,
                 Location: profile.ProfileImage.Location,
+                ThumbnailLocation: profile.ProfileImage.ThumbnailLocation,
                 Size: Math.round(profile.ProfileImage.Size * 100 / (1000 * 1000)) / 100, // in MB
                 IsProfileImage: true
             } as UserImage;
@@ -797,6 +840,7 @@ export class UserService extends BaseService<User> implements IUserService {
                 const photo: UserImage = {
                     Key: p.Key,
                     Location: p.Location,
+                    ThumbnailLocation: p.ThumbnailLocation,
                     Size: Math.round(p.Size * 100 / (1000 * 1000)) / 100, // in MB
                     IsProfileImage: false
                 } as UserImage;
@@ -807,11 +851,19 @@ export class UserService extends BaseService<User> implements IUserService {
 
         if (profile.VideoGallery) {
 
-            const videoGallery: UserVideo[] = typeof profile.VideoGallery === "string" ? JSON.parse(profile.VideoGallery) : profile.VideoGallery;
+            const videoGallery: UserVideo[]     = typeof profile.VideoGallery === "string" ?
+                                                    JSON.parse(profile.VideoGallery) :
+                                                    profile.VideoGallery;
 
-            videoGallery.forEach(v => {
+            const videoTitleResults: string[]   = await Promise.all(
+                videoGallery.map(v => this.getVideoTitle(v.Video))
+            );
+
+            videoGallery.forEach((v: UserVideo, index: number) => {
+
                 const video: UserVideo = {
                     Video: v.Video,
+                    Title: videoTitleResults[index],
                     User: user
                 } as UserVideo;
 
@@ -927,7 +979,9 @@ export class UserService extends BaseService<User> implements IUserService {
 
         user.AccountSettings.AccountStatus  = UserAccountStatusType.Enabled;
 
-        this.update(user);
+        await this.update(user);
+
+        this.publishUpdatedResume(user.Email, user.AccountSettings.Locale);
 
         const response: CreateProfileResponseDTO = {
             Token: jwt.sign({
@@ -983,6 +1037,15 @@ export class UserService extends BaseService<User> implements IUserService {
             };
         });
 
+        const videos = profile.VideoGallery ?
+                profile.VideoGallery.map(v => {
+                    return {
+                        Link: v.Video,
+                        Title: v.Title
+                    };
+                }) :
+                undefined;
+
         const context = {
             profileImageLocation: profile.ProfileImage ? profile.ProfileImage.Location : "",
             fullNameValue: dbUser.Name,
@@ -996,8 +1059,8 @@ export class UserService extends BaseService<User> implements IUserService {
             youtubeValue: profile.YoutubeLink,
             descriptionValue: dbUser.Description,
             skills,
-            photoGalleryImages: profile.PhotoGallery ? profile.PhotoGallery.map(p => p.Location) : undefined,
-            videos: profile.VideoGallery ? profile.VideoGallery.map(v => v.Video) : undefined,
+            photoGalleryImages: profile.PhotoGallery ? profile.PhotoGallery.map(p => p.ThumbnailLocation) : undefined,
+            videos: videos,
             hasAchievements: awards || experience || education,
             awards,
             experience,
@@ -1039,6 +1102,7 @@ export class UserService extends BaseService<User> implements IUserService {
     public async updateSettings(email: string, settings: SettingsDTO): Promise<void> {
         const dbUser: User                  = await this._userRepository.getByEmail(email);
         const dbUserAccountSettings         = await this._userAccountSettingsRepository.getByID(dbUser.AccountSettings.ID);
+        const hasChangedLocale              = dbUserAccountSettings.Locale !== settings.Locale;
 
         dbUserAccountSettings.ProfileVisibility       = settings.ProfileVisibility;
         dbUserAccountSettings.EmailVisibility         = settings.EmailVisibility;
@@ -1046,7 +1110,11 @@ export class UserService extends BaseService<User> implements IUserService {
         dbUserAccountSettings.PhoneNumberVisibility   = settings.PhoneNumberVisibility;
         dbUserAccountSettings.Locale                  = settings.Locale;
 
-        this._userAccountSettingsRepository.update(dbUserAccountSettings);
+        await this._userAccountSettingsRepository.update(dbUserAccountSettings);
+
+        if (hasChangedLocale) {
+            this.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
+        }
     }
 
     public async getCommunityLayers(request: GetCommunityLayersRequest): Promise<GetCommunityLayersResponse> {
@@ -1226,5 +1294,57 @@ export class UserService extends BaseService<User> implements IUserService {
 
         return username;
     }
+
+    public async getVideoTitle (link: string): Promise<string> {
+        let title: string = "";
+        let videoID: string = "";
+
+        if (Validators.isValidSocialMediaURL(link, SocialMediaCategoryType.Youtube)) {
+            videoID                     = SocialMediaManager.extractYoutubeID(link);
+            const youtubeURL: string    = config.youtube.videos_information_url
+                                                .replace("{0}", videoID)
+                                                .replace("{1}", config.youtube.api_key);
+            const response              = await axios.get(youtubeURL);
+            title                       = response.data && response.data.items.length !== 0 ?
+                                            response.data.items[0].snippet.title : link;
+        } else if (Validators.isValidSocialMediaURL(link, SocialMediaCategoryType.Vimeo)) {
+            videoID                 = SocialMediaManager.extractVimeoID(link);
+            const vimeoURL: string  = config.vimeo.videos_information_url
+                                                .replace("{0}", videoID);
+            const response          = await axios.get(vimeoURL);
+            title                   = response.data && response.data.length !== 0 ?
+                                        response.data[0].title : link;
+
+        } else {
+            title = link;
+        }
+
+        return title;
+    }
+
+    public async publishUpdatedResume(email: string, locale: LocaleType): Promise<void> {
+        const generateResumeRequest: GenerateResumeRequestDTO = {
+            Email: email,
+            Locale: locale
+          } as GenerateResumeRequestDTO;
+
+          const fileName: string = "CV";
+
+        (await this.generateResume(generateResumeRequest)).toStream(async (err: any, stream: any) => {
+            const dbUser: User      = await this.getByEmail(email);
+            const uploadResult: any = await this._fileService.uploadFromStream(stream, FileType.PDF, email, fileName);
+
+            const userFile = {
+                Key: uploadResult.Key,
+                Location: uploadResult.Location,
+                FileCategory: FileCategoryType.Resume,
+                User: dbUser
+            } as UserFile;
+
+            await this._userFileRepository.insert(userFile);
+          });
+
+    }
+
 
 }

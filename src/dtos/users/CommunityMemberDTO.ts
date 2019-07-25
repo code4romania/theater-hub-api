@@ -4,7 +4,7 @@ export class CommunityMemberDTO {
 
     public constructor(user: User) {
         this.ID             = user.ID;
-        // this.ProfileImage   = user.ProfileImage ? user.ProfileImage.Image.toString() : "";
+        this.ProfileImage   = user.ProfileImage ? user.ProfileImage.ThumbnailLocation : "";
         this.FirstName      = user.Professional.FirstName;
         this.LastName       = user.Professional.LastName;
         this.Username       = user.Username;

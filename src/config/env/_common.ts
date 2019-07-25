@@ -30,6 +30,9 @@ export const commonConfig = {
        api_key: "",
        videos_information_url: "https://www.googleapis.com/youtube/v3/videos?part=snippet&id={0}&key={1}"
     },
+    vimeo: {
+       videos_information_url: "https://vimeo.com/api/v2/video/{0}.json"
+    },
     mailer: {
         host: "",
         port: 587,
@@ -41,6 +44,7 @@ export const commonConfig = {
         accessKeyId: "",
         secretAccessKey: "",
         region: "",
-        files_bucket: ""
+        files_bucket: "",
+        cloudFrontURL: ""
     }
 };
