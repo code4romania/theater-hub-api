@@ -4,11 +4,9 @@ import AuthenticationRoutes    from "./AuthenticationRoutes";
 import AwardsRoutes            from "./AwardsRoutes";
 import EducationRoutes         from "./EducationRoutes";
 import ExperienceRoutes        from "./ExperienceRoutes";
-import MessagesRoutes          from "./MessagesRoutes";
 import ProjectsRoutes          from "./ProjectsRoutes";
 import UsersRoutes             from "./UsersRoutes";
 import UserVideosRoutes        from "./UserVideosRoutes";
-import WishesRoutes            from "./WishesRoutes";
 
 module.exports = (app: any) => {
     AdministrationRoutes(app);
@@ -17,9 +15,7 @@ module.exports = (app: any) => {
     AwardsRoutes(app);
     EducationRoutes(app);
     ExperienceRoutes(app);
-    MessagesRoutes(app);
     ProjectsRoutes(app);
     UsersRoutes(app);
     UserVideosRoutes(app);
-    WishesRoutes(app);
 };

@@ -3,7 +3,6 @@ import { Entity, Column, PrimaryGeneratedColumn, OneToOne,
 import { BaseEntity }              from "./BaseEntity";
 import { Experience }              from "./Experience";
 import { Education }               from "./Education";
-import { ProfessionalInstitution } from "./ProfessionalInstitution";
 import { User }                    from "./User";
 import { ProfessionalSkill }       from "./ProfessionalSkill";
 
@@ -31,8 +30,5 @@ export class Professional extends BaseEntity {
 
   @OneToMany(type => Education, education => education.Professional, { cascade: true, eager: true })
   Education: Education[];
-
-  @OneToMany(type => ProfessionalInstitution, professionalInstitution => professionalInstitution.Professional, { eager: true })
-  Institutions: ProfessionalInstitution[];
 
 }

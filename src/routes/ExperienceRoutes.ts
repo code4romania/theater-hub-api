@@ -1,9 +1,9 @@
 import { container }                 from "../config/inversify.config";
 import { TYPES }                     from "../types/custom-types";
-import { IExperienceController }     from "../controllers";
+import { IExperienceController,
+            IEntitiesValidators }    from "../contracts";
 import { Request, Response }         from "express";
 import { authorizationMiddleware }   from "../middlewares";
-import { IEntitiesValidators }       from "../validators";
 
 export default (app: any) => {
 

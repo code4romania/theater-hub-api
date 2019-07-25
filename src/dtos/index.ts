@@ -5,6 +5,7 @@ export * from "./awards";
 export * from "./education";
 export * from "./experience";
 export * from "./files";
+export * from "./projects";
 export * from "./users";
 export * from "./user-images";
 export * from "./user-videos";

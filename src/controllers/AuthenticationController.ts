@@ -1,11 +1,10 @@
 import { inject, injectable }                                  from "inversify";
 import { Request, Response }                                   from "express";
 import { TYPES }                                               from "../types";
-import { User }                                                from "../models/User";
-import { IAuthenticationController }                           from "./IAuthenticationController";
-import { IAuthenticationService, IUserService }                from "../services";
-import { AuthenticationRequestDTO, AuthenticationResponseDTO,
-                                 CheckUserPasswordRequestDTO } from "../dtos";
+import { IAuthenticationController,
+        IAuthenticationService,
+        IUserService }                                         from "../contracts";
+import { AuthenticationRequestDTO, AuthenticationResponseDTO } from "../dtos";
 const config = require("../config/env").getConfig();
 
 @injectable()

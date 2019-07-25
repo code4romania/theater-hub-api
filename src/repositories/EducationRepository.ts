@@ -2,7 +2,7 @@ import { getRepository, Repository }       from "typeorm";
 import { injectable }                      from "inversify";
 import { Education }                       from "../models/Education";
 import { BaseRepository }                  from "./BaseRepository";
-import { IEducationRepository }            from "./IEducationRepository";
+import { IEducationRepository }            from "../contracts";
 
 @injectable()
 export class EducationRepository extends BaseRepository<Education> implements IEducationRepository {

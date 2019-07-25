@@ -1,9 +1,8 @@
 import { inject, injectable }              from "inversify";
 import { TYPES }                           from "../types";
-import { User }                            from "../models/User";
-import { IAuthenticationService }          from "../services";
-import { ILocalizationService }            from "../services";
-import { IAuthenticationRoutesValidators } from "./IAuthenticationRoutesValidators";
+import { IAuthenticationService,
+    ILocalizationService,
+    IAuthenticationRoutesValidators }      from "../contracts";
 import { Validators }                      from "../utils";
 const { check }                            = require("express-validator/check");
 

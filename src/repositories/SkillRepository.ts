@@ -1,7 +1,7 @@
 import { getRepository, Repository }       from "typeorm";
 import { injectable }                      from "inversify";
 import { Skill }                           from "../models/Skill";
-import { ISkillRepository }                from "./ISkillRepository";
+import { ISkillRepository }                from "../contracts";
 
 @injectable()
 export class SkillRepository implements ISkillRepository {

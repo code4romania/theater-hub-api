@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { validationResult }                from "express-validator/check";
 import { LocaleType, UserRoleType }        from "../enums";
-import { ILocalizationService }            from "../services";
+import { ILocalizationService }            from "../contracts";
 import { container }                       from "../config/inversify.config";
 import { TYPES }                           from "../types/custom-types";
 const config                               = require("../config/env").getConfig();

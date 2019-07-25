@@ -1,9 +1,9 @@
 import { inject, injectable }         from "inversify";
 import { Request, Response }          from "express";
 import { TYPES }                      from "../types";
-import { IAdministrationController }  from "./IAdministrationController";
+import { IAdministrationController,
+        IAdministrationService }      from "../contracts";
 import { User }                       from "../models";
-import { IAdministrationService }     from "../services";
 import { GetUsersRequestDTO,
     GetUsersResponseDTO,
     ManagedUserDTO,

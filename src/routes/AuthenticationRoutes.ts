@@ -1,9 +1,8 @@
 import { container }                       from "../config/inversify.config";
 import { TYPES }                           from "../types/custom-types";
-import { IAuthenticationController }       from "../controllers";
-import { IAuthenticationRoutesValidators } from "../validators";
+import { IAuthenticationController,
+        IAuthenticationRoutesValidators }  from "../contracts";
 import { authorizationMiddleware,
-        setOriginMiddleware,
         validatorMiddleware }              from "../middlewares";
 import { Request, Response }               from "express";
 import * as passport                       from "passport";

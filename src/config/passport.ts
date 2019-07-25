@@ -1,5 +1,4 @@
 import * as passport                from "passport";
-import * as request                 from "request";
 import * as passportLocal           from "passport-local";
 import * as passportFacebook        from "passport-facebook";
 import * as passportGoogle          from "passport-google-oauth2";
@@ -8,15 +7,13 @@ import { container }                from "../config/inversify.config";
 import { Request, Response,
                NextFunction }       from "express";
 import { TYPES }                    from "../types/custom-types";
-import { IUserService }             from "../services";
-import { Container }                from "inversify";
+import { IUserService }             from "../contracts";
 import { RegisterDTO }              from "../dtos";
 import { User }                     from "../models";
 import { UserAccountProviderType }  from "../enums/UserAccountProviderType";
 
 const config                     = require("./env").getConfig();
 
-const LocalStrategy      = passportLocal.Strategy;
 const FacebookStrategy   = passportFacebook.Strategy;
 const GoogleStrategy     = passportGoogle.Strategy;
 

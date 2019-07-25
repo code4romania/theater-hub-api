@@ -1,9 +1,10 @@
 import { inject, injectable }               from "inversify";
 import { TYPES }                            from "../types";
 import { IApplicationDataService,
-     ISkillService }                        from ".";
-import { ILocaleRepository }                from "../repositories";
-import { Skill, Locale }                    from "../models";
+     ISkillService,
+     ICurrencyRepository,
+     ILocaleRepository }                    from "../contracts";
+import { Currency, Skill, Locale }          from "../models";
 import { GeneralApplicationInformation }    from "../dtos";
 
 const config    = require("../config/env").getConfig();
@@ -13,14 +14,17 @@ const config    = require("../config/env").getConfig();
 export class ApplicationDataService implements IApplicationDataService {
 
     private readonly _localeRepository: ILocaleRepository;
+    private readonly _currencyRepository: ICurrencyRepository;
     private readonly _skillService: ISkillService;
 
     constructor(
         @inject(TYPES.LocaleRepository) localeRepository: ILocaleRepository,
+        @inject(TYPES.CurrencyRepository) currencyRepository: ICurrencyRepository,
         @inject(TYPES.SkillService) skillService: ISkillService) {
 
-        this._localeRepository  = localeRepository;
-        this._skillService      = skillService;
+        this._localeRepository      = localeRepository;
+        this._currencyRepository    = currencyRepository;
+        this._skillService          = skillService;
     }
 
     public async getSkills(): Promise<Skill[]> {
@@ -36,6 +40,14 @@ export class ApplicationDataService implements IApplicationDataService {
         const locales: Locale[] = await this._localeRepository.getAll();
 
         return locales;
+
+    }
+
+    public async getCurrencies(): Promise<Currency[]> {
+
+        const currencies: Currency[] = await this._currencyRepository.getAll();
+
+        return currencies;
 
     }
 

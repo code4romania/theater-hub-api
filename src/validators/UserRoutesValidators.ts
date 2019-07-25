@@ -8,11 +8,11 @@ import { Education }               from "../models/Education";
 import { Experience }              from "../models/Experience";
 import { IAuthenticationService,
          ILocalizationService,
-         IUserService }            from "../services";
+         IUserService,
+         IUserRoutesValidators }   from "../contracts";
 import { Validators }              from "../utils";
 import { SocialMediaCategoryType,
            UserAccountStatusType } from "../enums";
-import { IUserRoutesValidators }   from "./IUserRoutesValidators";
 const { body, check }              = require("express-validator/check");
 
 @injectable()

@@ -19,6 +19,8 @@ export class UserImageDTO {
 
     public Location: string;
 
+    public ThumbnailLocation: string;
+
     public IsProfileImage?: boolean;
 
 }

@@ -2,11 +2,9 @@ import { inject, injectable }                   from "inversify";
 import { TYPES }                                from "../types";
 const { check }                                 = require("express-validator/check");
 import { User }                                 from "../models/User";
-import { IAdministrationRoutesValidators }      from "./IAdministrationRoutesValidators";
-import { IUserService }                         from "../services";
-import { ILocalizationService }                 from "../services";
+import { IAdministrationRoutesValidators,
+        ILocalizationService, IUserService }    from "../contracts";
 import { UserAccountStatusType, UserRoleType }  from "../enums";
-import { Validators }                           from "../utils";
 
 @injectable()
 export class AdministrationRoutesValidators implements IAdministrationRoutesValidators {

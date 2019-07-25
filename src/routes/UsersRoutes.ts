@@ -2,13 +2,11 @@ import { Request, Response }     from "express";
 const multer                     = require("multer");
 import { container }             from "../config/inversify.config";
 import { TYPES }                 from "../types/custom-types";
-import { IUsersController }      from "../controllers";
-import { UserRoleType }          from "../enums";
-import { IUserRoutesValidators } from "../validators";
+import { IUsersController,
+    IUserRoutesValidators }      from "../contracts";
 import { validatorMiddleware,
      authorizationMiddleware,
-     getPrincipalIfRequestHasToken,
-     checkUserRoleMiddleware }   from "../middlewares";
+     getPrincipalIfRequestHasToken }   from "../middlewares";
 
 export default (app: any) => {
 

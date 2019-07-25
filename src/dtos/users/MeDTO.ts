@@ -12,8 +12,7 @@ export class MeDTO {
 
         if (user.ProfileImage) {
             this.ProfileImage       = {
-                ...user.ProfileImage,
-                // Image: user.ProfileImage.Image.toString()
+                ...user.ProfileImage
             };
         }
 

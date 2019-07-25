@@ -4,9 +4,9 @@ const uuidv4                                = require("uuid/v4");
 import { TYPES }                            from "../types";
 import { IAdministrationService,
     IEmailService,
-    ILocalizationService, IUserService }    from ".";
-import { IUserAccountSettingsRepository,
-    IUserRepository }                       from "../repositories";
+    ILocalizationService, IUserService,
+    IUserAccountSettingsRepository,
+    IUserRepository }                       from "../contracts";
 import { Professional, User,
     UserAccountSettings }                   from "../models";
 import { AdminInviteManagedUserEmailDTO,

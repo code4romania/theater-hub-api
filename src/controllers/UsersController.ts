@@ -2,16 +2,16 @@ import { inject, injectable }          from "inversify";
 import { Request, Response }           from "express";
 import { TYPES }                       from "../types";
 import { User }                        from "../models/User";
-import { IUsersController }            from "./IUsersController";
 import { BaseApiController }           from "./BaseApiController";
-import { IFileService,
+import { IUsersController,
+         IFileService,
          ILocalizationService,
-         IUserService }                from "../services";
+         IUserService }                from "../contracts";
 import { FileType,
         LocaleType,
         UserAccountProviderType,
         UserRoleType }                 from "../enums";
-import { Validators }                  from "../utils";
+import { AWS, Validators }             from "../utils";
 import { ChangePasswordRequestDTO,
    ChangePasswordResponseDTO,
    CreateProfileResponseDTO,
@@ -28,7 +28,7 @@ import { ChangePasswordRequestDTO,
    MeDTO, ProfileDTO, RegisterDTO,
    ResetPasswordRequestDTO,
    SettingsDTO,
-   UpdateProfileSection, UserImageDTO } from "../dtos";
+   UpdateProfileSection }               from "../dtos";
 import { Award, Education,
   Experience, UserImage, UserVideo }    from "../models";
 
@@ -232,6 +232,7 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
       profileDTO.ProfileImage = {
         Key: uploadPhotosResults[0].Key,
         Location: uploadPhotosResults[0].Location,
+        ThumbnailLocation: AWS.getThumbnailURL(uploadPhotosResults[0].Key),
         Size: profileImageFile.size,
         IsProfileImage: true
       } as UserImage;
@@ -242,6 +243,7 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
         return {
           Key: r.Key,
           Location: r.Location,
+          ThumbnailLocation: AWS.getThumbnailURL(r.Key),
           Size: photoGalleryFiles[index].size,
           IsProfileImage: false
         } as UserImage;

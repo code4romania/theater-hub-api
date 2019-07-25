@@ -1,8 +1,8 @@
 import { injectable }           from "inversify";
 import { Request, Response }    from "express";
 import { Validators }           from "../utils";
-import { IBaseApiController }   from "./IBaseApiController";
-import { IBaseService }         from "../services";
+import { IBaseApiController,
+         IBaseService }         from "../contracts";
 import { BaseEntity }           from "../models";
 
 
