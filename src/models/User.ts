@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn,
-   OneToOne, OneToMany, JoinColumn }  from "typeorm";
+import { Entity, Column, Index,
+    PrimaryGeneratedColumn,
+    OneToOne, OneToMany, JoinColumn } from "typeorm";
 import { BaseEntity }                 from "./BaseEntity";
 import { UserFile }                   from "./UserFile";
 import { UserImage }                  from "./UserImage";
@@ -19,6 +20,7 @@ export class User extends BaseEntity {
   @Column("varchar")
   Name: string;
 
+  @Index({ unique: true })
   @Column("varchar", { length: 100 })
   Email: string;
 

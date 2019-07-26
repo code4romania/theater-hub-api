@@ -182,10 +182,10 @@ export class UserService extends BaseService<User> implements IUserService {
             profileImage.Key                = updateProfileImageResults[0].Key;
             profileImage.Size               = Math.round(profileImageFile.size * 100 / (1000 * 1000)) / 100;
 
-            await this._userImageRepository.update(profileImage);
-        } else if (!profileImageFile && dbProfileImage) {
-            await this._fileService.deleteFile(dbProfileImage.Key);
-            await this._userImageRepository.deleteByID(dbProfileImage.ID);
+            this._userImageRepository.update(profileImage);
+        } else if (!profileImageFile && !generalInformationSection.ProfileImage && dbProfileImage) {
+            this._fileService.deleteFile(dbProfileImage.Key);
+            this._userImageRepository.deleteByID(dbProfileImage.ID);
             profileImage = undefined;
         }
 
@@ -195,55 +195,55 @@ export class UserService extends BaseService<User> implements IUserService {
         const youtubeSocialMedia      = dbUser.SocialMedia.find(s => s.SocialMediaCategoryID === SocialMediaCategoryType.Youtube);
 
         if (generalInformationSection.FacebookLink && !facebookSocialMedia) {
-            await this._userSocialMediaRepository.insert({
+            this._userSocialMediaRepository.insert({
                 Link: generalInformationSection.FacebookLink,
                 User: dbUser,
                 SocialMediaCategoryID: SocialMediaCategoryType.Facebook
             } as UserSocialMedia);
         } else if (generalInformationSection.FacebookLink && facebookSocialMedia.Link !== generalInformationSection.FacebookLink) {
             facebookSocialMedia.Link = generalInformationSection.FacebookLink;
-            await this._userSocialMediaRepository.update(facebookSocialMedia);
+            this._userSocialMediaRepository.update(facebookSocialMedia);
         } else if (!generalInformationSection.FacebookLink && facebookSocialMedia) {
-            await this._userSocialMediaRepository.delete(facebookSocialMedia);
+            this._userSocialMediaRepository.delete(facebookSocialMedia);
         }
 
         if (generalInformationSection.InstagramLink && !instagramSocialMedia) {
-            await this._userSocialMediaRepository.insert({
+            this._userSocialMediaRepository.insert({
                 Link: generalInformationSection.InstagramLink,
                 User: dbUser,
                 SocialMediaCategoryID: SocialMediaCategoryType.Instagram
             } as UserSocialMedia);
         } else if (generalInformationSection.InstagramLink && instagramSocialMedia.Link !== generalInformationSection.InstagramLink) {
             instagramSocialMedia.Link = generalInformationSection.InstagramLink;
-            await this._userSocialMediaRepository.update(instagramSocialMedia);
+            this._userSocialMediaRepository.update(instagramSocialMedia);
         } else if (!generalInformationSection.InstagramLink && instagramSocialMedia) {
-            await this._userSocialMediaRepository.delete(instagramSocialMedia);
+            this._userSocialMediaRepository.delete(instagramSocialMedia);
         }
 
         if (generalInformationSection.LinkedinLink && !linkedinSocialMedia) {
-            await this._userSocialMediaRepository.insert({
+            this._userSocialMediaRepository.insert({
                 Link: generalInformationSection.LinkedinLink,
                 User: dbUser,
                 SocialMediaCategoryID: SocialMediaCategoryType.Linkedin
             } as UserSocialMedia);
         } else if (generalInformationSection.LinkedinLink && linkedinSocialMedia.Link !== generalInformationSection.LinkedinLink) {
             linkedinSocialMedia.Link = generalInformationSection.LinkedinLink;
-            await this._userSocialMediaRepository.update(linkedinSocialMedia);
+            this._userSocialMediaRepository.update(linkedinSocialMedia);
         } else if (!generalInformationSection.LinkedinLink && linkedinSocialMedia) {
-            await this._userSocialMediaRepository.delete(linkedinSocialMedia);
+            this._userSocialMediaRepository.delete(linkedinSocialMedia);
         }
 
         if (generalInformationSection.YoutubeLink && !youtubeSocialMedia) {
-            await this._userSocialMediaRepository.insert({
+            this._userSocialMediaRepository.insert({
                 Link: generalInformationSection.YoutubeLink,
                 User: dbUser,
                 SocialMediaCategoryID: SocialMediaCategoryType.Youtube
             } as UserSocialMedia);
         } else if (generalInformationSection.YoutubeLink && youtubeSocialMedia.Link !== generalInformationSection.YoutubeLink) {
             youtubeSocialMedia.Link = generalInformationSection.YoutubeLink;
-            await this._userSocialMediaRepository.update(youtubeSocialMedia);
+            this._userSocialMediaRepository.update(youtubeSocialMedia);
         } else if (!generalInformationSection.YoutubeLink && youtubeSocialMedia) {
-            await this._userSocialMediaRepository.delete(youtubeSocialMedia);
+            this._userSocialMediaRepository.delete(youtubeSocialMedia);
         }
 
         let username: string = dbUser.Username;
@@ -253,7 +253,7 @@ export class UserService extends BaseService<User> implements IUserService {
             username = await this.getUsername(generalInformationSection.FirstName, generalInformationSection.LastName);
         }
 
-        await this._userRepository
+        this._userRepository
                 .runCreateQueryBuilder()
                 .update(User)
                 .set({
@@ -267,7 +267,7 @@ export class UserService extends BaseService<User> implements IUserService {
                 .where("Email = :userEmail", { userEmail })
                 .execute();
 
-        await this._professionalRepository
+        this._professionalRepository
             .runCreateQueryBuilder()
             .update(Professional)
             .set({
@@ -285,8 +285,6 @@ export class UserService extends BaseService<User> implements IUserService {
             Role: dbUser.AccountSettings.Role,
             AccountStatus: dbUser.AccountSettings.AccountStatus
         } as MeDTO;
-
-        this.publishUpdatedResume(userEmail, dbUser.AccountSettings.Locale);
 
         return response;
     }
@@ -308,14 +306,12 @@ export class UserService extends BaseService<User> implements IUserService {
                 SkillID: id
             } as ProfessionalSkill;
 
-            await this._professionalSkillRepository.insert(professionalSkill);
+            this._professionalSkillRepository.insert(professionalSkill);
         });
 
         removedEntitiesIDs.forEach(async id => {
-            await this._professionalSkillRepository.delete(dbUser.Professional.Skills.find(ps => ps.SkillID === id));
+            this._professionalSkillRepository.delete(dbUser.Professional.Skills.find(ps => ps.SkillID === id));
         });
-
-        this.publishUpdatedResume(userEmail, dbUser.AccountSettings.Locale);
 
     }
 
@@ -360,8 +356,6 @@ export class UserService extends BaseService<User> implements IUserService {
             await this._userImageRepository.deleteByID(removedEntities[index].ID);
         }
 
-        this.publishUpdatedResume(userEmail, dbUser.AccountSettings.Locale);
-
         return new UpdatePhotoGalleryResponse(addedEntities);
     }
 
@@ -385,7 +379,7 @@ export class UserService extends BaseService<User> implements IUserService {
                 User: dbUser
             } as UserVideo;
 
-            await this._userVideoRepository.insert(video);
+            this._userVideoRepository.insert(video);
         });
 
         const updatedEntitiesTitleResults: string[]   = await Promise.all(
@@ -404,14 +398,12 @@ export class UserService extends BaseService<User> implements IUserService {
             v.Video = updatedEntities.find(e => e.ID === v.ID).Video;
             v.Title = updatedEntitiesTitleResults[index];
 
-            await this._userVideoRepository.update(v);
+            this._userVideoRepository.update(v);
         });
 
         removedEntitiesIDs.forEach(async id => {
-            await this._userVideoRepository.deleteByID(id);
+            this._userVideoRepository.deleteByID(id);
         });
-
-        this.publishUpdatedResume(userEmail, dbUser.AccountSettings.Locale);
 
     }
 
@@ -433,7 +425,7 @@ export class UserService extends BaseService<User> implements IUserService {
                 User: dbUser
             } as Award;
 
-            await this._awardRepository.insert(award);
+            this._awardRepository.insert(award);
         });
 
         for (const entity of updatedEntities) {
@@ -444,14 +436,12 @@ export class UserService extends BaseService<User> implements IUserService {
             dbAward.Description    = entity.Description;
             dbAward.Date           = entity.Date;
 
-            await this._awardRepository.update(dbAward);
+            this._awardRepository.update(dbAward);
         }
 
         removedEntitiesIDs.forEach(async id => {
-            await this._awardRepository.deleteByID(id);
+            this._awardRepository.deleteByID(id);
         });
-
-        this.publishUpdatedResume(userEmail, dbUser.AccountSettings.Locale);
 
     }
 
@@ -474,7 +464,7 @@ export class UserService extends BaseService<User> implements IUserService {
                 Professional: dbUser.Professional
             } as Experience;
 
-            await this._experienceRepository.insert(experience);
+            this._experienceRepository.insert(experience);
         });
 
         for (const entity of updatedEntities) {
@@ -486,14 +476,12 @@ export class UserService extends BaseService<User> implements IUserService {
             dbExperience.StartDate      = entity.StartDate;
             dbExperience.EndDate        = entity.EndDate;
 
-            await this._experienceRepository.update(dbExperience);
+            this._experienceRepository.update(dbExperience);
         }
 
         experienceSection.RemovedEntities.forEach(async id => {
-            await this._experienceRepository.deleteByID(id);
+            this._experienceRepository.deleteByID(id);
         });
-
-        this.publishUpdatedResume(userEmail, dbUser.AccountSettings.Locale);
 
     }
 
@@ -516,7 +504,7 @@ export class UserService extends BaseService<User> implements IUserService {
                 Professional: dbUser.Professional
             } as Education;
 
-            await this._educationRepository.insert(education);
+            this._educationRepository.insert(education);
         });
 
         for (const entity of updatedEntities) {
@@ -528,14 +516,13 @@ export class UserService extends BaseService<User> implements IUserService {
             dbEducation.StartDate     = entity.StartDate;
             dbEducation.EndDate       = entity.EndDate;
 
-            await this._educationRepository.update(dbEducation);
+            this._educationRepository.update(dbEducation);
         }
 
         removedEntitiesIDs.forEach(async id => {
-            await this._educationRepository.deleteByID(id);
+            this._educationRepository.deleteByID(id);
         });
 
-        this.publishUpdatedResume(userEmail, dbUser.AccountSettings.Locale);
     }
 
     public async getByEmail(email: string): Promise<User> {
@@ -979,9 +966,7 @@ export class UserService extends BaseService<User> implements IUserService {
 
         user.AccountSettings.AccountStatus  = UserAccountStatusType.Enabled;
 
-        await this.update(user);
-
-        this.publishUpdatedResume(user.Email, user.AccountSettings.Locale);
+        this.update(user);
 
         const response: CreateProfileResponseDTO = {
             Token: jwt.sign({
@@ -1102,7 +1087,6 @@ export class UserService extends BaseService<User> implements IUserService {
     public async updateSettings(email: string, settings: SettingsDTO): Promise<void> {
         const dbUser: User                  = await this._userRepository.getByEmail(email);
         const dbUserAccountSettings         = await this._userAccountSettingsRepository.getByID(dbUser.AccountSettings.ID);
-        const hasChangedLocale              = dbUserAccountSettings.Locale !== settings.Locale;
 
         dbUserAccountSettings.ProfileVisibility       = settings.ProfileVisibility;
         dbUserAccountSettings.EmailVisibility         = settings.EmailVisibility;
@@ -1110,11 +1094,7 @@ export class UserService extends BaseService<User> implements IUserService {
         dbUserAccountSettings.PhoneNumberVisibility   = settings.PhoneNumberVisibility;
         dbUserAccountSettings.Locale                  = settings.Locale;
 
-        await this._userAccountSettingsRepository.update(dbUserAccountSettings);
-
-        if (hasChangedLocale) {
-            this.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
-        }
+        this._userAccountSettingsRepository.update(dbUserAccountSettings);
     }
 
     public async getCommunityLayers(request: GetCommunityLayersRequest): Promise<GetCommunityLayersResponse> {
@@ -1137,7 +1117,13 @@ export class UserService extends BaseService<User> implements IUserService {
 
         // if email is null then the person making the request is a visitor
         if (!viewerIsVisitor) {
-            me                = await this._userRepository.getByEmail(request.MyEmail);
+            me = await this._userRepository
+                            .runCreateQueryBuilder()
+                            .select("user")
+                            .from(User, "user")
+                            .innerJoinAndSelect("user.AccountSettings", "accountSettings")
+                            .where("user.Email = :email", { email: request.MyEmail })
+                            .getOne();
             fullViewingRights = me.AccountSettings.Role === UserRoleType.Admin || me.AccountSettings.Role === UserRoleType.SuperAdmin;
             selectedUsers     = selectedUsers.filter(u => u.ID !== me.ID
                                                     && u.AccountSettings.ProfileVisibility !== VisibilityType.Private);
@@ -1187,7 +1173,13 @@ export class UserService extends BaseService<User> implements IUserService {
 
         // if email is null then the person making the request is a visitor
         if (!viewerIsVisitor) {
-            me                = await this._userRepository.getByEmail(request.MyEmail);
+            me = await this._userRepository
+                        .runCreateQueryBuilder()
+                        .select("user")
+                        .from(User, "user")
+                        .innerJoinAndSelect("user.AccountSettings", "accountSettings")
+                        .where("user.Email = :email", { email: request.MyEmail })
+                        .getOne();
             fullViewingRights = me.AccountSettings.Role === UserRoleType.Admin || me.AccountSettings.Role === UserRoleType.SuperAdmin;
             selectedUsers     = selectedUsers.filter(u => u.ID !== me.ID
                                                     && u.AccountSettings.ProfileVisibility !== VisibilityType.Private);
@@ -1322,7 +1314,9 @@ export class UserService extends BaseService<User> implements IUserService {
         return title;
     }
 
+    // TODO: When the user profile is updated, a new CV should be published to AWS S3.
     public async publishUpdatedResume(email: string, locale: LocaleType): Promise<void> {
+        return;
         const generateResumeRequest: GenerateResumeRequestDTO = {
             Email: email,
             Locale: locale

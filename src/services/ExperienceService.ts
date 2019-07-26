@@ -34,11 +34,8 @@ export class ExperienceService extends BaseService<Experience> implements IExper
             Professional: dbUser.Professional
         } as Experience;
 
-        const response = await this._repository.insert(experienceStep);
+        return this._repository.insert(experienceStep);
 
-        this._userService.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
-
-        return response;
     }
 
     public async updateExperienceStep(email: string, updateExperienceDTO: UpdateExperienceDTO): Promise<Experience> {
@@ -55,11 +52,8 @@ export class ExperienceService extends BaseService<Experience> implements IExper
         dbExperience.StartDate      = updateExperienceDTO.StartDate;
         dbExperience.EndDate        = updateExperienceDTO.EndDate;
 
-        const response = await this._repository.update(dbExperience);
+        return this._repository.update(dbExperience);
 
-        this._userService.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
-
-        return response;
     }
 
     public async deleteExperienceStepByID(email: string, experienceID: string): Promise<Experience> {
@@ -69,11 +63,8 @@ export class ExperienceService extends BaseService<Experience> implements IExper
             throw new Error(this._localizationService.getText("validation.experience.non-existent"));
         }
 
-        const response = await this._repository.deleteByID(experienceID);
+        return this._repository.deleteByID(experienceID);
 
-        this._userService.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
-
-        return response;
     }
 
 }

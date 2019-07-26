@@ -34,11 +34,8 @@ export class EducationService extends BaseService<Education> implements IEducati
             Professional: dbUser.Professional
         } as Education;
 
-        const response = await this._repository.insert(education);
+        return this._repository.insert(education);
 
-        this._userService.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
-
-        return response;
     }
 
     public async updateEducationStep(email: string, updateEducationDTO: UpdateEducationDTO): Promise<Education> {
@@ -55,11 +52,8 @@ export class EducationService extends BaseService<Education> implements IEducati
         dbEducation.StartDate     = updateEducationDTO.StartDate;
         dbEducation.EndDate       = updateEducationDTO.EndDate;
 
-        const response = await this._repository.update(dbEducation);
+        return this._repository.update(dbEducation);
 
-        this._userService.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
-
-        return response;
     }
 
     public async deleteEducationStepByID(email: string, educationID: string): Promise<Education> {
@@ -69,11 +63,8 @@ export class EducationService extends BaseService<Education> implements IEducati
             throw new Error(this._localizationService.getText("validation.education.non-existent"));
         }
 
-        const response = await this._repository.deleteByID(educationID);
+        return this._repository.deleteByID(educationID);
 
-        this._userService.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
-
-        return response;
     }
 
 }

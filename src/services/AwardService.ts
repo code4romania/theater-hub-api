@@ -33,11 +33,7 @@ export class AwardService extends BaseService<Award> implements IAwardService {
             User: dbUser
         } as Award;
 
-        const response = await this._repository.insert(award);
-
-        this._userService.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
-
-        return response;
+        return this._repository.insert(award);
 
     }
 
@@ -54,11 +50,8 @@ export class AwardService extends BaseService<Award> implements IAwardService {
         dbAward.Description    = updateAwardDTO.Description;
         dbAward.Date           = updateAwardDTO.Date;
 
-        const response = await this._repository.update(dbAward);
+        return this._repository.update(dbAward);
 
-        this._userService.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
-
-        return response;
     }
 
     public async deleteAwardByID(email: string, awardID: string): Promise<Award> {
@@ -68,11 +61,8 @@ export class AwardService extends BaseService<Award> implements IAwardService {
             throw new Error(this._localizationService.getText("validation.award.non-existent"));
         }
 
-        const response = await this._repository.deleteByID(awardID);
+        return this._repository.deleteByID(awardID);
 
-        this._userService.publishUpdatedResume(email, dbUser.AccountSettings.Locale);
-
-        return response;
     }
 
 }

@@ -1,6 +1,6 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class InitialMigration1563878571697 implements MigrationInterface {
+export class InitialMigration1564139187036 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.query(`CREATE TABLE "UserFile" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "Key" character varying NOT NULL, "Location" character varying NOT NULL, "FileCategory" integer NOT NULL, "UserID" uuid, CONSTRAINT "PK_38196a9bc4691af4ca2c1ecaf6c" PRIMARY KEY ("ID"))`);
@@ -19,6 +19,7 @@ export class InitialMigration1563878571697 implements MigrationInterface {
         await queryRunner.query(`CREATE TABLE "ProjectUpdate" ("ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "Description" character varying(500) NOT NULL, "Date" TIMESTAMP WITH TIME ZONE NOT NULL, "ProjectID" uuid, CONSTRAINT "PK_13e35a1926f2312f03d1310ea54" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "Project" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "Name" character varying(100) NOT NULL, "Description" character varying(500), "Email" character varying(100), "PhoneNumber" character varying(50), "Date" TIMESTAMP WITH TIME ZONE NOT NULL, "Budget" money, "Currency" integer NOT NULL, "City" character varying(100) NOT NULL, "Visibility" integer NOT NULL, "InitiatorID" uuid, "ImageID" uuid, CONSTRAINT "REL_91b433e693d439d9ce40623f18" UNIQUE ("ImageID"), CONSTRAINT "PK_8d9b9f2cd4400b2861e2fa3f00d" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "User" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "Name" character varying NOT NULL, "Email" character varying(100) NOT NULL, "Username" character varying(100) NOT NULL, "PasswordHash" character varying NOT NULL, "Description" character varying, "BirthDate" TIMESTAMP WITH TIME ZONE, "PhoneNumber" character varying, "Website" character varying, "ProfileImageID" uuid, CONSTRAINT "REL_6b519da47b33fb18d9db02d97e" UNIQUE ("ProfileImageID"), CONSTRAINT "PK_7c38bb872c3c617c80a311b81d0" PRIMARY KEY ("ID"))`);
+        await queryRunner.query(`CREATE UNIQUE INDEX "IDX_2f56f7040c2b05fc8f08a113f7" ON "User"  ("Email") `);
         await queryRunner.query(`CREATE TABLE "Award" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "Title" character varying(100) NOT NULL, "Issuer" character varying(100) NOT NULL, "Description" character varying NOT NULL, "Date" TIMESTAMP WITH TIME ZONE NOT NULL, "UserID" uuid, CONSTRAINT "PK_a6d1e5342f5d7b7633c7b50286a" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "Currency" ("ID" character varying(10) NOT NULL, "Name" character varying(100) NOT NULL, CONSTRAINT "PK_eefb5d87e298802d8c17beccf94" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "EntityCategory" ("ID" integer NOT NULL, "Name" character varying(100) NOT NULL, "ParentID" integer, CONSTRAINT "PK_029cde6c720b2d2a0c8a8383f22" PRIMARY KEY ("ID"))`);
@@ -78,6 +79,7 @@ export class InitialMigration1563878571697 implements MigrationInterface {
         await queryRunner.query(`DROP TABLE "EntityCategory"`);
         await queryRunner.query(`DROP TABLE "Currency"`);
         await queryRunner.query(`DROP TABLE "Award"`);
+        await queryRunner.query(`DROP INDEX "IDX_2f56f7040c2b05fc8f08a113f7"`);
         await queryRunner.query(`DROP TABLE "User"`);
         await queryRunner.query(`DROP TABLE "Project"`);
         await queryRunner.query(`DROP TABLE "ProjectUpdate"`);
