@@ -32,6 +32,25 @@ export const enLocale = {
         "english": "English"
     },
     "validation": {
+        "contact-fullName": {
+            "required": "Name and last name are required",
+            "length": "Name and last name should have at most 100 characters"
+        },
+        "contact-email": {
+            "required": "E-mail address is required",
+            "length": "E-mail address should have at most 100 characters"
+        },
+        "contact-subject": {
+            "required": "Subject is required",
+            "length": "Subject should have at most 50 characters"
+        },
+        "contact-message": {
+            "required": "Message is required",
+            "length": "Message should have at most 200 characters"
+        },
+        "contact-agree-to-terms": {
+            "invalid": "You have to agree with the way the provided data is being used"
+        },
         "first-name": {
             "required": "First name is required",
             "length": "First name should have at most 50 characters"
@@ -193,6 +212,15 @@ export const enLocale = {
             "content-1": "Welcome to ",
             "content-2": "A {0} account has been created for you. Please click on the button below to finish the registration process. If you have any questions please send them to:",
             "button": "CONTINUE"
+        },
+        "contact": {
+            "subject": "contact: {0}",
+            "full-name": "Name and last name",
+            "email": "E-mail address",
+            "has-agreed-to-terms": "Has agreed to terms",
+            "message": "Message",
+            "yes": "YES",
+            "no": "NO"
         },
         "finish-registration": {
             "subject": "{0} registration",

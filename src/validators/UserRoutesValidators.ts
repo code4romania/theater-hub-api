@@ -30,6 +30,43 @@ export class UserRoutesValidators implements IUserRoutesValidators {
         this._localizationService   = localizationService;
     }
 
+    public getContactValidators () {
+
+        return [
+            check("FullName").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.contact-fullName.required", req.Locale);
+                })
+                .isLength({ max: 100 }).withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.contact-fullName.length", req.Locale);
+                }),
+            check("Email").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.contact-email.required", req.Locale);
+                })
+                .isLength({ max: 100 }).withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.contact-email.length", req.Locale);
+                }),
+            check("Subject").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.contact-subject.required", req.Locale);
+                })
+                .isLength({ max: 100 }).withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.contact-subject.length", req.Locale);
+                }),
+            check("Message").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.contact-message.required", req.Locale);
+                })
+                .isLength({ max: 100 }).withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.contact-message.length", req.Locale);
+                }),
+            check("AgreeToTerms").custom((value: boolean, { req }: any) => {
+                    if (!value) {
+                        throw new Error(this._localizationService.getText("validation.contact-agree-to-terms.invalid", req.Locale));
+                    }
+
+                    return true;
+                })
+        ];
+    }
+
     public getRegisterValidators() {
 
         return [

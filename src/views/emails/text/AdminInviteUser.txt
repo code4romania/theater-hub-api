@@ -1,0 +1,5 @@
+{{greeting}}
+
+{{content1}} {{applicationName}}. {{content2}} {{senderEmailAddress}}.
+
+{{buttonText}}: {{buttonLink}}

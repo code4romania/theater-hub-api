@@ -27,7 +27,11 @@ export default (app: any) => {
 
     app.delete("/api/users/me",             authorizationMiddleware, (req: Request, res: Response) => usersController.deleteMe(req, res));
 
-    app.post("/api/users/register",         (req: Request, res: Response) => usersController.register(req, res));
+    app.post("/api/users/contact",          userRoutesValidators.getContactValidators(), validatorMiddleware,
+                                            (req: Request, res: Response) => usersController.contact(req, res));
+
+    app.post("/api/users/register",         userRoutesValidators.getRegisterValidators(), validatorMiddleware,
+                                            (req: Request, res: Response) => usersController.register(req, res));
 
     app.post("/api/users/register/managed", userRoutesValidators.getManagedUserRegisterValidators(), validatorMiddleware,
                                               (req: Request, res: Response) => usersController.managedUserRegister(req, res));

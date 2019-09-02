@@ -8,7 +8,8 @@ import { ChangePasswordRequestDTO, ChangePasswordResponseDTO,
         GetCommunityMembersRequest, GetCommunityMembersResponse,
         ManagedUserRegistrationRequestDTO,
         ManagedUserRegistrationResponseDTO,
-        MeDTO, ProfileDTO, RegisterDTO,
+        MeDTO, ProfileDTO,
+        ContactEmailDTO, RegisterDTO,
         ResetPasswordRequestDTO,
         SettingsDTO, UpdatePhotoGalleryResponse, UpdateProfileSection }    from "../../dtos";
 import { LocaleType }                                                      from "../../enums/LocaleType";
@@ -37,6 +38,8 @@ export interface IUserService extends IBaseService<User> {
     updateEducation(userEmail: string, educationSection: UpdateProfileSection<Education>): Promise<void>;
 
     getByEmail(email: string): Promise<User>;
+
+    contact(model: ContactEmailDTO): Promise<void>;
 
     register(register: RegisterDTO, accountProvider: UserAccountProviderType): Promise<User>;
 

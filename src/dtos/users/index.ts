@@ -2,6 +2,7 @@ export * from "./ChangePasswordRequestDTO";
 export * from "./ChangePasswordResponseDTO";
 export * from "./CommunityMemberDTO";
 export * from "./CommunitySkillLayer";
+export * from "./ContactEmailDTO";
 export * from "./CreateAccountEmailDTO";
 export * from "./CreateProfileResponseDTO";
 export * from "./FinishRegistrationResponseDTO";

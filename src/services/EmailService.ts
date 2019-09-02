@@ -6,11 +6,13 @@ import { IEmailService,
 import {
         AdminInviteManagedUserEmailDTO,
         AdminUpdateUserEmailDTO,
+        ContactEmailDTO,
         CreateAccountEmailDTO,
         ResetPasswordEmailDTO }    from "../dtos";
 import { LocaleType,
     UserRoleType }                 from "../enums";
 const config                       = require("../config/env").getConfig();
+const AWS                          = require("aws-sdk");
 const nodemailer                   = require("nodemailer");
 const fs                           = require("fs");
 const path                         = require("path");
@@ -27,13 +29,12 @@ export class EmailService implements IEmailService {
         this._localizationService = localizationService;
 
         this._transporter = nodemailer.createTransport({
-            host: config.mailer.host,
-            port: config.mailer.port,
-            secure: config.mailer.secure,
-            service: config.mailer.host,
+            host: config.aws.ses.host,
+            port: config.aws.ses.port,
+            secure: config.aws.ses.secure,
             auth: {
-                user: config.mailer.user,
-                pass: config.mailer.pass
+                user: config.aws.ses.user,
+                pass: config.aws.ses.pass
             }
         });
 
@@ -41,7 +42,19 @@ export class EmailService implements IEmailService {
 
     public async sendCreateAccountEmail(model: CreateAccountEmailDTO): Promise<void> {
 
-        const finishRegistrationHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails", "FinishRegistration.html"), "utf8");
+        const finishRegistrationHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/html", "FinishRegistration.html"), "utf8");
+        let finishRegistrationText: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/text", "FinishRegistration.txt"), "utf8");
+
+        const greeting: string = this._localizationService.getText("emails.finish-registration.greeting").replace("{0}", model.UserFullName);
+        const buttonLink: string = `${config.client.baseURL}/${config.client.endpoints.createProfileResource}/?registrationID=${model.UserRegistrationID}&email=${model.UserEmailAddress}&lang=${this._localizationService.getLocale()}`;
+
+        finishRegistrationText = finishRegistrationText
+                .replace("{{greeting}}", greeting)
+                .replace("{{content1}}", this._localizationService.getText("emails.finish-registration.content-1"))
+                .replace("{{content2}}", this._localizationService.getText("emails.finish-registration.content-2"))
+                .replace("{{applicationName}}", config.application.name)
+                .replace("{{buttonLink}}", buttonLink)
+                .replace("{{buttonText}}", this._localizationService.getText("emails.finish-registration.button"));
 
         const template = handlebars.compile(finishRegistrationHTML);
 
@@ -50,7 +63,7 @@ export class EmailService implements IEmailService {
             content1: this._localizationService.getText("emails.finish-registration.content-1"),
             content2: this._localizationService.getText("emails.finish-registration.content-2"),
             applicationName: config.application.name,
-            buttonLink: `${config.client.baseURL}/${config.client.endpoints.createProfileResource}/?registrationID=${model.UserRegistrationID}&email=${model.UserEmailAddress}&lang=${this._localizationService.getLocale()}`,
+            buttonLink,
             buttonText: this._localizationService.getText("emails.finish-registration.button")
         };
 
@@ -59,7 +72,13 @@ export class EmailService implements IEmailService {
             from: `${config.application.name} <${config.application.email}>`,
             to: model.UserEmailAddress,
             subject: subject,
-            html: template(context)
+            html: template(context),
+            text: finishRegistrationText,
+            attachments: [{
+                filename: "header_theater_hub.png",
+                path: path.join(process.cwd(), "public/images", "header_theater_hub.png"),
+                cid: "header-image"
+            }]
         };
 
         this._transporter.sendMail(mailOptions, (error: any, info: any) => {
@@ -71,17 +90,30 @@ export class EmailService implements IEmailService {
 
     public async sendAdminInviteManagedUserEmail(model: AdminInviteManagedUserEmailDTO): Promise<void> {
 
-        const inviteManagedUserHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails", "AdminInviteUser.html"), "utf8");
+        const inviteManagedUserHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/html", "AdminInviteUser.html"), "utf8");
+        let inviteManagedUserText: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/text", "AdminInviteUser.txt"), "utf8");
+
+        const content2: string = this._localizationService.getText("emails.admin-invite-user.content-2").replace("{0}", (_.invert(UserRoleType))[model.ReceiverRole].toLowerCase());
+        const buttonLink: string = `${config.client.baseURL}/${config.client.endpoints.managedUserRegisterResource}/?registrationID=${model.RegistrationID}&email=${model.ReceiverEmailAddress}&lang=${this._localizationService.getLocale()}`;
+
+        inviteManagedUserText = inviteManagedUserText
+                    .replace("{{greeting}}", this._localizationService.getText("emails.admin-invite-user.greeting"))
+                    .replace("{{content1}}", this._localizationService.getText("emails.admin-invite-user.content-1"))
+                    .replace("{{content2}}", content2)
+                    .replace("{{applicationName}}", config.application.name)
+                    .replace("{{senderEmailAddress}}", model.SenderEmailAddress)
+                    .replace("{{buttonLink}}", buttonLink)
+                    .replace("{{buttonText}}", this._localizationService.getText("emails.admin-invite-user.button"));
 
         const template = handlebars.compile(inviteManagedUserHTML);
 
         const context = {
             greeting: this._localizationService.getText("emails.admin-invite-user.greeting"),
             content1: this._localizationService.getText("emails.admin-invite-user.content-1"),
-            content2: this._localizationService.getText("emails.admin-invite-user.content-2").replace("{0}", (_.invert(UserRoleType))[model.ReceiverRole].toLowerCase()),
+            content2,
             applicationName: config.application.name,
             senderEmailAddress: model.SenderEmailAddress,
-            buttonLink: `${config.client.baseURL}/${config.client.endpoints.managedUserRegisterResource}/?registrationID=${model.RegistrationID}&email=${model.ReceiverEmailAddress}&lang=${this._localizationService.getLocale()}`,
+            buttonLink,
             buttonText: this._localizationService.getText("emails.admin-invite-user.button")
         };
 
@@ -90,7 +122,66 @@ export class EmailService implements IEmailService {
             from: `${config.application.name} <${config.application.email}>`,
             to: model.ReceiverEmailAddress,
             subject,
-            html: template(context)
+            html: template(context),
+            text: inviteManagedUserText,
+            attachments: [{
+                filename: "header_theater_hub.png",
+                path: path.join(process.cwd(), "public/images", "header_theater_hub.png"),
+                cid: "header-image"
+            }]
+        };
+
+        this._transporter.sendMail(mailOptions, (error: any, info: any) => {
+            if (error) {
+                return console.log(error);
+            }
+        });
+
+    }
+
+    public async sendContactEmail(model: ContactEmailDTO): Promise<void> {
+
+        const contactHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/html", "Contact.html"), "utf8");
+        let contactText: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/text", "Contact.txt"), "utf8");
+
+        const hasAgreedToTerms: string = model.AgreeToTerms ? this._localizationService.getText("emails.contact.yes") :
+                                                                        this._localizationService.getText("emails.contact.no");
+
+        contactText = contactText
+                .replace("{{fullNameLabel}}", this._localizationService.getText("emails.contact.full-name"))
+                .replace("{{emailLabel}}", this._localizationService.getText("emails.contact.email"))
+                .replace("{{messageLabel}}", this._localizationService.getText("emails.contact.message"))
+                .replace("{{hasAgreedToTermsLabel}}", this._localizationService.getText("emails.contact.has-agreed-to-terms"))
+                .replace("{{fullName}}", model.FullName)
+                .replace("{{email}}", model.Email)
+                .replace("{{message}}", model.Message)
+                .replace("{{hasAgreedToTerms}}", hasAgreedToTerms);
+
+        const template = handlebars.compile(contactHTML);
+
+        const context = {
+            fullNameLabel: this._localizationService.getText("emails.contact.full-name"),
+            emailLabel: this._localizationService.getText("emails.contact.email"),
+            messageLabel: this._localizationService.getText("emails.contact.message"),
+            hasAgreedToTermsLabel: this._localizationService.getText("emails.contact.has-agreed-to-terms"),
+            fullName: model.FullName,
+            email: model.Email,
+            message: model.Message,
+            hasAgreedToTerms
+        };
+
+        const subject     = this._localizationService.getText("emails.contact.subject").replace("{0}", model.Subject);
+        const mailOptions = {
+            from: `${config.application.name} <${config.application.email}>`,
+            to: config.application.email,
+            subject,
+            html: template(context),
+            text: contactText,
+            attachments: [{
+                filename: "header_theater_hub.png",
+                path: path.join(process.cwd(), "public/images", "header_theater_hub.png"),
+                cid: "header-image"
+            }]
         };
 
         this._transporter.sendMail(mailOptions, (error: any, info: any) => {
@@ -103,12 +194,21 @@ export class EmailService implements IEmailService {
 
     public async sendAdminEnableUserEmail(model: AdminUpdateUserEmailDTO): Promise<void> {
 
-        const enableUserHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails", "AdminEnableUser.html"), "utf8");
+        const enableUserHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/html", "AdminEnableUser.html"), "utf8");
+        let enableUserText: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/text", "AdminEnableUser.txt"), "utf8");
+
+        const greeting: string = this._localizationService.getText("emails.admin-enable-user.greeting").replace("{0}", model.ReceiverFullName);
+
+        enableUserText = enableUserText
+                    .replace("{{greeting}}", greeting)
+                    .replace("{{content}}", this._localizationService.getText("emails.admin-enable-user.content"))
+                    .replace("{{senderEmailAddress}}", model.SenderEmailAddress)
+                    .replace("{{message}}", model.Message);
 
         const template = handlebars.compile(enableUserHTML);
 
         const context = {
-            greeting: this._localizationService.getText("emails.admin-enable-user.greeting").replace("{0}", model.ReceiverFullName),
+            greeting,
             content: this._localizationService.getText("emails.admin-enable-user.content"),
             senderEmailAddress: model.SenderEmailAddress,
             message: model.Message
@@ -119,7 +219,13 @@ export class EmailService implements IEmailService {
             from: `${config.application.name} <${config.application.email}>`,
             to: model.ReceiverEmailAddress,
             subject,
-            html: template(context)
+            html: template(context),
+            text: enableUserText,
+            attachments: [{
+                filename: "header_theater_hub.png",
+                path: path.join(process.cwd(), "public/images", "header_theater_hub.png"),
+                cid: "header-image"
+            }]
         };
 
         this._transporter.sendMail(mailOptions, (error: any, info: any) => {
@@ -132,12 +238,21 @@ export class EmailService implements IEmailService {
 
     public async sendAdminDisableUserEmail(model: AdminUpdateUserEmailDTO): Promise<void> {
 
-        const disableUserHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails", "AdminDisableUser.html"), "utf8");
+        const disableUserHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/html", "AdminDisableUser.html"), "utf8");
+        let disableUserText: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/text", "AdminDisableUser.txt"), "utf8");
+
+        const greeting: string = this._localizationService.getText("emails.admin-disable-user.greeting").replace("{0}", model.ReceiverFullName);
+
+        disableUserText = disableUserText
+                        .replace("{{greeting}}", greeting)
+                        .replace("{{content}}", this._localizationService.getText("emails.admin-disable-user.content"))
+                        .replace("{{senderEmailAddress}}", model.SenderEmailAddress)
+                        .replace("{{message}}", model.Message);
 
         const template = handlebars.compile(disableUserHTML);
 
         const context = {
-            greeting: this._localizationService.getText("emails.admin-disable-user.greeting").replace("{0}", model.ReceiverFullName),
+            greeting,
             content: this._localizationService.getText("emails.admin-disable-user.content"),
             senderEmailAddress: model.SenderEmailAddress,
             message: model.Message
@@ -148,7 +263,13 @@ export class EmailService implements IEmailService {
             from: `${config.application.name} <${config.application.email}>`,
             to: model.ReceiverEmailAddress,
             subject,
-            html: template(context)
+            html: template(context),
+            text: disableUserText,
+            attachments: [{
+                filename: "header_theater_hub.png",
+                path: path.join(process.cwd(), "public/images", "header_theater_hub.png"),
+                cid: "header-image"
+            }]
         };
 
         this._transporter.sendMail(mailOptions, (error: any, info: any) => {
@@ -161,12 +282,21 @@ export class EmailService implements IEmailService {
 
     public async sendAdminDeleteUserEmail(model: AdminUpdateUserEmailDTO): Promise<void> {
 
-        const deleteUserHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails", "AdminDeleteUser.html"), "utf8");
+        const deleteUserHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/html", "AdminDeleteUser.html"), "utf8");
+        let deleteUserText: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/text", "AdminDeleteUser.txt"), "utf8");
+
+        const greeting: string = this._localizationService.getText("emails.admin-delete-user.greeting").replace("{0}", model.ReceiverFullName);
+
+        deleteUserText = deleteUserText
+                    .replace("{{greeting}}", greeting)
+                    .replace("{{content}}", this._localizationService.getText("emails.admin-delete-user.content"))
+                    .replace("{{senderEmailAddress}}", model.SenderEmailAddress)
+                    .replace("{{message}}", model.Message);
 
         const template = handlebars.compile(deleteUserHTML);
 
         const context = {
-            greeting: this._localizationService.getText("emails.admin-delete-user.greeting").replace("{0}", model.ReceiverFullName),
+            greeting,
             content: this._localizationService.getText("emails.admin-delete-user.content"),
             senderEmailAddress: model.SenderEmailAddress,
             message: model.Message
@@ -177,7 +307,13 @@ export class EmailService implements IEmailService {
             from: `${config.application.name} <${config.application.email}>`,
             to: model.ReceiverEmailAddress,
             subject,
-            html: template(context)
+            html: template(context),
+            text: deleteUserText,
+            attachments: [{
+                filename: "header_theater_hub.png",
+                path: path.join(process.cwd(), "public/images", "header_theater_hub.png"),
+                cid: "header-image"
+            }]
         };
 
         this._transporter.sendMail(mailOptions, (error: any, info: any) => {
@@ -190,14 +326,24 @@ export class EmailService implements IEmailService {
 
     public async sendResetPasswordEmail(model: ResetPasswordEmailDTO): Promise<void> {
 
-        const resetPasswordHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails", "ResetPassword.html"), "utf8");
+        const resetPasswordHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/html", "ResetPassword.html"), "utf8");
+        let resetPasswordText: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/text", "ResetPassword.txt"), "utf8");
+
+        const greeting: string = this._localizationService.getText("emails.reset-password.greeting").replace("{0}", model.UserFullName);
+        const buttonLink: string = `${config.client.baseURL}/${config.client.endpoints.resetPasswordResource}/?resetForgottenPasswordID=${model.UserResetForgottenPasswordID}&email=${model.UserEmaiAddress}&lang=${this._localizationService.getLocale()}`;
+
+        resetPasswordText = resetPasswordText
+                            .replace("{{greeting}}", greeting)
+                            .replace("{{content}}", this._localizationService.getText("emails.reset-password.content"))
+                            .replace("{{buttonText}}", this._localizationService.getText("emails.reset-password.button"))
+                            .replace("{{buttonLink}}", buttonLink);
 
         const template = handlebars.compile(resetPasswordHTML);
 
         const context = {
-            greeting: this._localizationService.getText("emails.reset-password.greeting").replace("{0}", model.UserFullName),
+            greeting,
             content: this._localizationService.getText("emails.reset-password.content"),
-            buttonLink: `${config.client.baseURL}/${config.client.endpoints.resetPasswordResource}/?resetForgottenPasswordID=${model.UserResetForgottenPasswordID}&email=${model.UserEmaiAddress}&lang=${this._localizationService.getLocale()}`,
+            buttonLink: buttonLink,
             buttonText: this._localizationService.getText("emails.reset-password.button")
         };
 
@@ -206,7 +352,13 @@ export class EmailService implements IEmailService {
             from: `${config.application.name} <${config.application.email}>`,
             to: model.UserEmaiAddress,
             subject,
-            html: template(context)
+            html: template(context),
+            text: resetPasswordText,
+            attachments: [{
+                filename: "header_theater_hub.png",
+                path: path.join(process.cwd(), "public/images", "header_theater_hub.png"),
+                cid: "header-image"
+            }]
         };
 
         this._transporter.sendMail(mailOptions, (error: any, info: any) => {
