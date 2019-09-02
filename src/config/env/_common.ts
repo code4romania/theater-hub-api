@@ -33,18 +33,18 @@ export const commonConfig = {
     vimeo: {
        videos_information_url: "https://vimeo.com/api/v2/video/{0}.json"
     },
-    mailer: {
-        host: "",
-        port: 587,
-        secure: false,
-        user: "",
-        pass: ""
-    },
     aws: {
         accessKeyId: "",
         secretAccessKey: "",
         region: "",
         files_bucket: "",
-        cloudFrontURL: ""
+        cloudFrontURL: "",
+        ses: {
+            host: "",
+            port: 465,
+            secure: true,
+            user: "",
+            pass: ""
+        }
     }
 };

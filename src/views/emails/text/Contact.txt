@@ -1,0 +1,8 @@
+{{ fullNameLabel }}:  {{ fullName }}
+
+{{ emailLabel }}:  {{ email }}
+
+{{ hasAgreedToTermsLabel }}:  {{ hasAgreedToTerms }}
+
+{{ messageLabel }}:
+{{ message }}

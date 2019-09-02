@@ -45,7 +45,7 @@ import { ChangePasswordResponseDTO,
     ManagedUserRegistrationRequestDTO,
     ManagedUserRegistrationResponseDTO,
     MeDTO, ProfileDTO,
-    RegisterDTO,
+    ContactEmailDTO, RegisterDTO,
     ResetPasswordRequestDTO,
     SettingsDTO, UpdateProfileSection,
     UpdatePhotoGalleryResponse, UserImageDTO } from "../dtos";
@@ -527,6 +527,12 @@ export class UserService extends BaseService<User> implements IUserService {
 
     public async getByEmail(email: string): Promise<User> {
         return this._userRepository.getByEmail(email);
+    }
+
+    public async contact(model: ContactEmailDTO): Promise<void> {
+        this._emailService.setLocale(this._localizationService.getLocale());
+
+        this._emailService.sendContactEmail(model);
     }
 
     public async register(register: RegisterDTO, accountProvider: UserAccountProviderType): Promise<User> {

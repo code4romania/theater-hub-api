@@ -8,7 +8,7 @@ export default (app: any) => {
 
     const applicationDataController: IApplicationDataController = container.get<IApplicationDataController>(TYPES.ApplicationDataController);
 
-    app.get("/api/applicationdata/skills", authorizationMiddleware,
+    app.get("/api/applicationdata/skills",
                 (req: Request, res: Response) => applicationDataController.getSkills(req, res));
 
     app.get("/api/applicationdata/locales",

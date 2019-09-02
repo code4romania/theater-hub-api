@@ -32,6 +32,25 @@ export const roLocale = {
         "english": "Engleză"
     },
     "validation": {
+        "contact-fullName": {
+            "required": "Numele și prenumele sunt obligatorii",
+            "length": "Numele și prenumele trebuie să aibă cel mult 100 de caractere"
+        },
+        "contact-email": {
+            "required": "Adresa de e-mail este obligatorie",
+            "length": "Adresa de e-mail trebuie să aibă cel mult 100 de caractere"
+        },
+        "contact-subject": {
+            "required": "Subiectul este obligatoriu",
+            "length": "Subiectul trebuie să aibă cel mult 50 de caractere"
+        },
+        "contact-message": {
+            "required": "Mesajul este obligatoriu",
+            "length": "Mesajul trebuie să aibă cel mult 200 de caractere"
+        },
+        "contact-agree-to-terms": {
+            "invalid": "Trebuie să fiți de acord cu modul de utilizare al datelor furnizate"
+        },
         "first-name": {
             "required": "Prenumele este obligatoriu",
             "length": "Prenumele trebuie să aibă cel mult 50 de caractere"
@@ -193,6 +212,15 @@ export const roLocale = {
             "content-1": "Bine ați venit la ",
             "content-2": "Un cont {0} a fost creat pentru dumneavoastră. Vă rugăm să apăsați butonul de mai jos pentru a finaliza procesul de înregistrare. În cazul în care aveți întrebări, vă rugăm să le adresați:",
             "button": "CONTINUĂ"
+        },
+        "contact": {
+            "subject": "contact: {0}",
+            "full-name": "Nume și prenume",
+            "email": "Adresa de e-mail",
+            "has-agreed-to-terms": "A fost de acord cu termenii",
+            "message": "Mesaj",
+            "yes": "DA",
+            "no": "NU"
         },
         "finish-registration": {
             "subject": "Înregistrare {0}",

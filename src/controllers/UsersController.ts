@@ -25,7 +25,8 @@ import { ChangePasswordRequestDTO,
    GetCommunityLayersResponse,
    ManagedUserRegistrationRequestDTO,
    ManagedUserRegistrationResponseDTO,
-   MeDTO, ProfileDTO, RegisterDTO,
+   MeDTO, ProfileDTO,
+   ContactEmailDTO, RegisterDTO,
    ResetPasswordRequestDTO,
    SettingsDTO,
    UpdateProfileSection }               from "../dtos";
@@ -152,6 +153,16 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     const educationSection: UpdateProfileSection<Education> = request.body as UpdateProfileSection<Education>;
 
     response.send(await this._userService.updateEducation(request.Principal.Email, educationSection));
+  }
+
+  public async contact (request: Request, response: Response): Promise<void> {
+    const model: ContactEmailDTO = request.body as ContactEmailDTO;
+
+    this._userService.setLocale(request.Locale);
+
+    await this._userService.contact(model);
+
+    response.sendStatus(200);
   }
 
   public async register(request: Request, response: Response): Promise<void> {

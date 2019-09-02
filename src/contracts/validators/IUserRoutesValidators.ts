@@ -1,7 +1,9 @@
 
 export interface IUserRoutesValidators {
 
-    getRegisterValidators(req: any): any;
+    getContactValidators (): any;
+
+    getRegisterValidators(): any;
 
     getManagedUserRegisterValidators(): any;
 
