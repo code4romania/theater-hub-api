@@ -12,7 +12,7 @@ export class ProjectNeed {
     Description: string;
 
     @Column("boolean")
-    IsImportant: boolean;
+    IsMandatory: boolean;
 
     @ManyToOne(type => Project, project => project.Needs, { onDelete: "CASCADE" })
     @JoinColumn({ name: "ProjectID" })

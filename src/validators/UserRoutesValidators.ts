@@ -1,7 +1,6 @@
 import { inject, injectable }      from "inversify";
 import { TYPES }                   from "../types";
 import { User }                    from "../models/User";
-import { UserImage }               from "../models/UserImage";
 import { UserVideo }               from "../models/UserVideo";
 import { Award }                   from "../models/Award";
 import { Education }               from "../models/Education";
@@ -44,6 +43,9 @@ export class UserRoutesValidators implements IUserRoutesValidators {
                 })
                 .isLength({ max: 100 }).withMessage((value: string, { req }: any) => {
                     return this._localizationService.getText("validation.contact-email.length", req.Locale);
+                })
+                .isEmail().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.contact-email.invalid", req.Locale);
                 }),
             check("Subject").not().isEmpty().withMessage((value: string, { req }: any) => {
                     return this._localizationService.getText("validation.contact-subject.required", req.Locale);
@@ -335,7 +337,7 @@ export class UserRoutesValidators implements IUserRoutesValidators {
        ];
    }
 
-    public getCreateProfile() {
+    public getCreateProfileValidators() {
 
         return [
             check("BirthDate").not().isEmpty().withMessage((value: string, { req }: any) => {

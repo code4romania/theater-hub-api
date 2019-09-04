@@ -12,10 +12,9 @@ export default (app: any) => {
 
     const usersController: IUsersController           = container.get<IUsersController>(TYPES.UsersController);
     const userRoutesValidators: IUserRoutesValidators = container.get<IUserRoutesValidators>(TYPES.UserRoutesValidators);
-    // const upload                                      = multer();
 
-    const storage = multer.memoryStorage();
-    const upload = multer({ storage: storage });
+    const storage   = multer.memoryStorage();
+    const upload    = multer({ storage: storage });
 
     app.get("/api", (req: Request, res: Response) => res.status(200).send({
         message: "Welcome to the Theater HUB API!",
@@ -49,33 +48,34 @@ export default (app: any) => {
                                               (req: Request, res: Response) => usersController.changePassword(req, res));
 
     app.post("/api/users/profile/create", authorizationMiddleware,
-                                            upload.fields([{name: "ProfileImage", maxCount: 1}, {name: "AddedPhotos", maxCount: 10}]),
-                                            userRoutesValidators.getCreateProfile(), validatorMiddleware,
-                                              (req: Request, res: Response) => usersController.createProfile(req, res));
+                                          upload.fields([{name: "ProfileImage", maxCount: 1}, {name: "AddedPhotos", maxCount: 10}]),
+                                          userRoutesValidators.getCreateProfileValidators(),
+                                          validatorMiddleware,
+                                          (req: Request, res: Response) => usersController.createProfile(req, res));
 
-    app.post("/api/users/me/general", authorizationMiddleware,
+    app.post("/api/users/me/general",   authorizationMiddleware,
                                         upload.single("ProfileImage"),
                                         userRoutesValidators.getGeneralInformationValidators(), validatorMiddleware,
-                                                    (req: Request, res: Response) => usersController.updateMyGeneralInformation(req, res));
+                                        (req: Request, res: Response) => usersController.updateMyGeneralInformation(req, res));
 
-    app.post("/api/users/me/skills", authorizationMiddleware, userRoutesValidators.getSkillsValidators(), validatorMiddleware,
-                                                    (req: Request, res: Response) => usersController.updateMySkills(req, res));
+    app.post("/api/users/me/skills",    authorizationMiddleware, userRoutesValidators.getSkillsValidators(), validatorMiddleware,
+                                        (req: Request, res: Response) => usersController.updateMySkills(req, res));
 
     app.post("/api/users/me/photogallery",  authorizationMiddleware,
                                             upload.array("AddedPhotos", 10),
                                             (req: Request, res: Response) => usersController.updateMyPhotoGallery(req, res));
 
-    app.post("/api/users/me/videogallery", authorizationMiddleware, userRoutesValidators.getVideoGalleryValidators(), validatorMiddleware,
-                                                    (req: Request, res: Response) => usersController.updateMyVideoGallery(req, res));
+    app.post("/api/users/me/videogallery",  authorizationMiddleware, userRoutesValidators.getVideoGalleryValidators(), validatorMiddleware,
+                                            (req: Request, res: Response) => usersController.updateMyVideoGallery(req, res));
 
-    app.post("/api/users/me/awards", authorizationMiddleware, userRoutesValidators.getAwardsValidators(), validatorMiddleware,
-                                                    (req: Request, res: Response) => usersController.updateMyAwards(req, res));
+    app.post("/api/users/me/awards",    authorizationMiddleware, userRoutesValidators.getAwardsValidators(), validatorMiddleware,
+                                        (req: Request, res: Response) => usersController.updateMyAwards(req, res));
 
-    app.post("/api/users/me/experience", authorizationMiddleware, userRoutesValidators.getExperienceValidators(), validatorMiddleware,
-                                                    (req: Request, res: Response) => usersController.updateMyExperience(req, res));
+    app.post("/api/users/me/experience",    authorizationMiddleware, userRoutesValidators.getExperienceValidators(), validatorMiddleware,
+                                            (req: Request, res: Response) => usersController.updateMyExperience(req, res));
 
     app.post("/api/users/me/education", authorizationMiddleware, userRoutesValidators.getEducationValidators(), validatorMiddleware,
-                                                    (req: Request, res: Response) => usersController.updateMyEducation(req, res));
+                                        (req: Request, res: Response) => usersController.updateMyEducation(req, res));
 
     app.get("/api/users/resume", authorizationMiddleware, (req: Request, res: Response) => usersController.generateResume(req, res));
 
@@ -83,14 +83,14 @@ export default (app: any) => {
 
     app.patch("/api/users/settings",   authorizationMiddleware, (req: Request, res: Response) => usersController.updateSettings(req, res));
 
-    app.get("/api/users/community/layers", getPrincipalIfRequestHasToken,
-                                             (req: Request, res: Response) => usersController.getCommunityLayers(req, res));
+    app.get("/api/users/community/layers",  getPrincipalIfRequestHasToken,
+                                            (req: Request, res: Response) => usersController.getCommunityLayers(req, res));
 
     app.get("/api/users/community/members", getPrincipalIfRequestHasToken,
-                                             (req: Request, res: Response) => usersController.getCommunityMembers(req, res));
+                                            (req: Request, res: Response) => usersController.getCommunityMembers(req, res));
 
     app.get("/api/users/profile/:username", getPrincipalIfRequestHasToken,
-                                              (req: Request, res: Response) => usersController.getCommunityMemberProfile(req, res));
+                                            (req: Request, res: Response) => usersController.getCommunityMemberProfile(req, res));
 
     app.post("/api/users",                    (req: Request, res: Response) => usersController.create(req, res));
 

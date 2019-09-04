@@ -1,6 +1,7 @@
 import * as moment                 from "moment";
 import * as validator              from "validator";
 import { SocialMediaCategoryType } from "../enums";
+import * as _                      from "lodash";
 
 export class Validators {
 
@@ -12,6 +13,10 @@ export class Validators {
 
     public static isValidUUID(value: string): boolean {
         return validator.isUUID(value);
+    }
+
+    public static isValidBudget (budget: any): boolean {
+      return _.isNumber(budget) && budget >= 0;
     }
 
     public static isValidEmail(value: string): boolean {

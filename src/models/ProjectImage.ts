@@ -1,7 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn,
-    ManyToOne, JoinColumn } from "typeorm";
-import { BaseEntity }                                           from "./BaseEntity";
-import { Project }                                              from "./Project";
+import { Entity, Column,
+    PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity }      from "./BaseEntity";
 
 @Entity("ProjectImage")
 export class ProjectImage extends BaseEntity {
@@ -20,9 +19,5 @@ export class ProjectImage extends BaseEntity {
 
     @Column("decimal", { scale: 2 })
     Size: number;
-
-    @ManyToOne(type => Project, project => project.Image, { onDelete: "CASCADE" })
-    @JoinColumn({ name: "ProjectID" })
-    Project: Project;
 
 }

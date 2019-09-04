@@ -3,7 +3,7 @@ export const commonConfig = {
         name: "Theater Hub",
         email: "",
         tokenSecret: "",
-        baseURL: "https://127.0.0.1:443",
+        baseURL: "http://127.0.0.1:8081",
         maxFileSize: 5, // MB
         maxPhotoGalleryFileCount: 10
     },

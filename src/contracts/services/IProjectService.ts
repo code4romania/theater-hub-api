@@ -4,6 +4,6 @@ import { CreateProjectDTO } from "../../dtos/projects";
 
 export interface IProjectService extends IBaseService<Project> {
 
-    createProject(email: string, createProjectDTO: CreateProjectDTO): Promise<void>;
+    createProject(email: string, createProjectDTO: CreateProjectDTO): Promise<Project>;
 
 }
