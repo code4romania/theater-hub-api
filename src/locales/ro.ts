@@ -38,7 +38,8 @@ export const roLocale = {
         },
         "contact-email": {
             "required": "Adresa de e-mail este obligatorie",
-            "length": "Adresa de e-mail trebuie să aibă cel mult 100 de caractere"
+            "length": "Adresa de e-mail trebuie să aibă cel mult 100 de caractere",
+            "invalid": "E-mail-ul trebuie să fie valid"
         },
         "contact-subject": {
             "required": "Subiectul este obligatoriu",
@@ -188,6 +189,41 @@ export const roLocale = {
             "non-existent-profile": "Profilul este privat sau nu există.",
             "not-found": "Utilizatorul nu a fost găsit.",
             "permission-denied": "Access refuzat."
+        },
+        "project": {
+            "name": {
+                "required": "Numele proiectului este obligatoriu",
+                "length": "Numele proiectului trebuie să aibă cel mult 100 de caractere"
+            },
+            "description": {
+                "length": "Descrierea trebuie să aibă cel mult 5000 de caractere"
+            },
+            "email": {
+                "length": "E-mail-ul trebuie să aibă cel mult 100 de caractere",
+                "invalid": "E-mail-ul trebuie să fie valid"
+            },
+            "phone-number": {
+                "invalid": "Numărul de telefon trebuie să fie valid"
+            },
+            "budget": {
+                "invalid": "Bugetul trebuie sa fie valid"
+            },
+            "city": {
+                "required": "Orașul este obligatoriu",
+                "length": "Orașul trebuie să aibă cel mult 100 de caractere"
+            },
+            "need": {
+                "description": {
+                    "required": "Descrierea este obligatorie",
+                    "length": "Descrierea trebuie să aibă cel mult 500 de caractere"
+                }
+            },
+            "update": {
+                "description": {
+                    "required": "Descrierea este obligatorie",
+                    "length": "Descrierea trebuie să aibă cel mult 500 de caractere"
+                }
+            }
         }
     },
     "emails": {
@@ -253,5 +289,8 @@ export const roLocale = {
     "errors": {
         "file-upload-error": "Fișierul nu a putut fi incărcat",
         "file-deletion-error": "Fișierul nu a putut fi șters"
+    },
+    "content": {
+        "project-created": "Proiectul a fost creat."
     }
 };

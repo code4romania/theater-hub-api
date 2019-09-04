@@ -15,7 +15,7 @@ export interface IUserRoutesValidators {
 
     getChangePasswordValidators(): any;
 
-    getCreateProfile(): any;
+    getCreateProfileValidators(): any;
 
     getGeneralInformationValidators(): any;
 

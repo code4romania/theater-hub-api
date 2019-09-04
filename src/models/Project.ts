@@ -28,7 +28,7 @@ export class Project extends BaseEntity {
   @Column("timestamp with time zone")
   Date: Date;
 
-  @Column("money", { nullable: true })
+  @Column("decimal", { scale: 2, nullable: true })
   Budget: number;
 
   @Column()

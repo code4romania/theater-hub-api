@@ -8,6 +8,7 @@ export * from "./Locale";
 export * from "./Professional";
 export * from "./ProfessionalSkill";
 export * from "./Project";
+export * from "./ProjectImage";
 export * from "./ProjectNeed";
 export * from "./ProjectUpdate";
 export * from "./Skill";

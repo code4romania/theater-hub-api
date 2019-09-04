@@ -1,5 +1,5 @@
 export enum CurrencyType {
-    RON     = 0,
-    USD     = 1,
-    EUR     = 2
+    "Romania Leu"   = "RON",
+    "US Dollar"     = "USD",
+    "Euro"          = "EUR"
 }

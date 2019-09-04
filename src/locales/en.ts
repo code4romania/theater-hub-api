@@ -38,7 +38,8 @@ export const enLocale = {
         },
         "contact-email": {
             "required": "E-mail address is required",
-            "length": "E-mail address should have at most 100 characters"
+            "length": "E-mail address should have at most 100 characters",
+            "invalid": "Email must be valid"
         },
         "contact-subject": {
             "required": "Subject is required",
@@ -188,6 +189,41 @@ export const enLocale = {
             "non-existent-profile": "Profile is private or does not exist.",
             "not-found": "User not found.",
             "permission-denied": "Permission denied."
+        },
+        "project": {
+            "name": {
+                "required": "Project name is required",
+                "length": "Project name should have at most 100 characters"
+            },
+            "description": {
+                "length": "Description's maximum length is of 5000 characters"
+            },
+            "email": {
+                "length": "E-mail should have at most 100 characters",
+                "invalid": "E-mail must be valid"
+            },
+            "phone-number": {
+                "invalid": "Phone number must be valid"
+            },
+            "budget": {
+                "invalid": "Budget must be valid"
+            },
+            "city": {
+                "required": "City is required",
+                "length": "City should have at most 100 characters"
+            },
+            "need": {
+                "description": {
+                    "required": "Description is required",
+                    "length": "Description's maximum length is of 500 characters"
+                }
+            },
+            "update": {
+                "description": {
+                    "required": "Description is required",
+                    "length": "Description's maximum length is of 500 characters"
+                }
+            }
         }
     },
     "emails": {
@@ -253,5 +289,8 @@ export const enLocale = {
     "errors": {
         "file-upload-error": "File could not be uploaded",
         "file-deletion-error": "File could not be deleted"
+    },
+    "content": {
+        "project-created": "Project was created."
     }
 };
