@@ -223,7 +223,8 @@ export const roLocale = {
                     "required": "Descrierea este obligatorie",
                     "length": "Descrierea trebuie să aibă cel mult 500 de caractere"
                 }
-            }
+            },
+            "non-existent-project": "Proiectul este privat sau nu există."
         }
     },
     "emails": {

@@ -12,7 +12,10 @@ import { Project,
     ProjectUpdate,
     User }                      from "../models";
 import { FileType }             from "../enums/FileType";
-import { CreateProjectDTO }     from "../dtos/projects";
+import { UserRoleType }         from "../enums/UserRoleType";
+import { VisibilityType }       from "../enums/VisibilityType";
+import { CreateProjectDTO,
+               ProjectDTO }     from "../dtos/projects";
 import { AWS }                  from "../utils";
 
 @injectable()
@@ -20,14 +23,16 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
 
     private readonly _userService: IUserService;
     private readonly _fileService: IFileService;
+    private readonly _projectRepository: IProjectRepository;
 
     constructor(@inject(TYPES.ProjectRepository) projectRepository: IProjectRepository,
                     @inject(TYPES.LocalizationService) localizationService: ILocalizationService,
                     @inject(TYPES.FileService) fileService: IFileService,
                     @inject(TYPES.UserService) userService: IUserService) {
         super(projectRepository, localizationService);
-        this._userService = userService;
-        this._fileService = fileService;
+        this._userService       = userService;
+        this._fileService       = fileService;
+        this._projectRepository = projectRepository;
     }
 
     public async createProject(email: string, createProjectDTO: CreateProjectDTO): Promise<Project> {
@@ -85,6 +90,94 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
         const dbProject: Project = await this.create(project);
 
         return dbProject;
+    }
+
+    public async getProject(email: string, id: string): Promise<ProjectDTO> {
+        let me: User;
+        let fullViewingRights: boolean;
+        const viewerIsVisitor: boolean = !email;
+        let project: Project;
+        let otherProjects: Project[];
+
+        try {
+            project = await this._projectRepository
+                .runCreateQueryBuilder()
+                .select("project")
+                .from(Project, "project")
+                .leftJoinAndSelect("project.Initiator", "initiator")
+                .leftJoinAndSelect("initiator.ProfileImage", "profileImage")
+                .leftJoinAndSelect("project.Image", "image")
+                .leftJoinAndSelect("project.Needs", "needs")
+                .leftJoinAndSelect("project.Updates", "updates")
+                .where("project.ID = :id", { id })
+                .getOne();
+
+            const initiatorId: string = project.Initiator.ID;
+
+            // if email is null then the person making the request is a visitor
+            if (!viewerIsVisitor) {
+                me                = await this._userService.getByEmail(email);
+                fullViewingRights = me.AccountSettings.Role === UserRoleType.Admin ||
+                                    me.AccountSettings.Role === UserRoleType.SuperAdmin ||
+                                    initiatorId === me.ID;
+            }
+
+            otherProjects = await this._projectRepository
+                .runCreateQueryBuilder()
+                .select("project")
+                .from(Project, "project")
+                .leftJoinAndSelect("project.Image", "image")
+                .leftJoinAndSelect("project.Initiator", "initiator")
+                .where("initiator.ID = :initiatorId AND project.ID != :id", { initiatorId, id })
+                .getMany();
+
+            otherProjects = otherProjects.filter(p => {
+
+                if (fullViewingRights) {
+                    return true;
+                }
+
+                if (p.Visibility === VisibilityType.Private && !viewerIsVisitor && initiatorId === me.ID) {
+                    return true;
+                }
+
+                if (p.Visibility === VisibilityType.Community && !viewerIsVisitor) {
+                    return true;
+                }
+
+                if (p.Visibility === VisibilityType.Everyone) {
+                    return true;
+                }
+
+                return false;
+            });
+
+            if (!project) {
+                throw new Error(this._localizationService.getText("validation.project.non-existent-project"));
+            }
+
+        } catch (error) {
+            return undefined;
+        }
+
+        if (project.Visibility === VisibilityType.Everyone) {
+            return new ProjectDTO(project, otherProjects);
+        }
+
+        // if the person has admin rights or is the owner of the project then return the project
+        if (fullViewingRights) {
+            return new ProjectDTO(project, otherProjects);
+        }
+
+        if (project.Visibility === VisibilityType.Private) {
+            return undefined;
+        }
+
+        if (project.Visibility === VisibilityType.Community && viewerIsVisitor) {
+            return undefined;
+        }
+
+        return new ProjectDTO(project, otherProjects);
     }
 
 }
