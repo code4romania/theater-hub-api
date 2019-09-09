@@ -5,7 +5,8 @@ import { TYPES }                     from "../types/custom-types";
 import { IProjectsController,
     IProjectRoutesValidators }       from "../contracts";
 import { validatorMiddleware,
-     authorizationMiddleware }       from "../middlewares";
+     authorizationMiddleware,
+     getPrincipalIfRequestHasToken } from "../middlewares";
 
 export default (app: any) => {
 
@@ -23,7 +24,8 @@ export default (app: any) => {
 
     app.get("/api/projects",                (req: Request, res: Response) => projectsController.getAll(req, res));
 
-    app.get("/api/projects/:projectID",     (req: Request, res: Response) => projectsController.getByID(req, res));
+    app.get("/api/projects/:projectID",     getPrincipalIfRequestHasToken,
+                                            (req: Request, res: Response) => projectsController.getByID(req, res));
 
     app.patch("/api/projects/:projectID",   (req: Request, res: Response) => projectsController.update(req, res));
 

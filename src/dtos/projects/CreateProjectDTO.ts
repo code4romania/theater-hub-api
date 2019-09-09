@@ -1,6 +1,6 @@
-import { ProjectNeed}   from "../../models";
+import { ProjectNeed }   from "../../models";
 import { CurrencyType,
-    VisibilityType }    from "../../enums";
+    VisibilityType }     from "../../enums";
 
 
 export class CreateProjectDTO {

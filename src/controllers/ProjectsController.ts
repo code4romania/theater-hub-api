@@ -5,7 +5,8 @@ import { Project }             from "../models/Project";
 import { IProjectsController,
          IProjectService }     from "../contracts";
 import { BaseApiController }   from "./BaseApiController";
-import { CreateProjectDTO }    from "../dtos";
+import { CreateProjectDTO,
+        ProjectDTO }           from "../dtos";
 
 @injectable()
 export class ProjectsController extends BaseApiController<Project> implements IProjectsController {
@@ -23,6 +24,13 @@ export class ProjectsController extends BaseApiController<Project> implements IP
         createProjectDTO.Image = request.file;
 
         const project: Project = await this._projectService.createProject(request.Principal.Email, createProjectDTO);
+
+        response.send(project);
+    }
+
+    public async getByID(request: Request, response: Response): Promise<void> {
+        const myEmail: string     = request.Principal ? request.Principal.Email : "";
+        const project: ProjectDTO = await this._projectService.getProject(myEmail, request.params.projectID);
 
         response.send(project);
     }
