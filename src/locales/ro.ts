@@ -224,7 +224,8 @@ export const roLocale = {
                     "length": "Descrierea trebuie să aibă cel mult 500 de caractere"
                 }
             },
-            "non-existent-project": "Proiectul este privat sau nu există."
+            "non-existent": "Proiectul este privat sau nu există.",
+            "not-found": "Proiectul nu a fost găsit.",
         }
     },
     "emails": {

@@ -12,7 +12,8 @@ import { IAdministrationController,
     IExperienceRepository, ILocaleRepository, ICurrencyRepository,
     IProfessionalRepository, IProfessionalSkillRepository, IProjectRepository,
     ISkillRepository, IUserAccountSettingsRepository,
-    IUserFileRepository, IUserImageRepository, IUserSocialMediaRepository,
+    IUserFileRepository, IUserImageRepository,
+    IProjectImageRepository, IUserSocialMediaRepository,
     IUserRepository, IUserVideoRepository,
     IAdministrationRoutesValidators, IAuthenticationRoutesValidators,
     IEntitiesValidators, IProjectRoutesValidators, IUserRoutesValidators }          from "../contracts";
@@ -34,7 +35,7 @@ import { AwardRepository,
     LocaleRepository, CurrencyRepository,
     ProfessionalRepository, ProfessionalSkillRepository, ProjectRepository,
     SkillRepository, UserAccountSettingsRepository,
-    UserFileRepository, UserImageRepository,
+    UserFileRepository, UserImageRepository, ProjectImageRepository,
     UserSocialMediaRepository, UserRepository, UserVideoRepository }                from "../repositories";
 
 const container = new Container();
@@ -82,6 +83,7 @@ container.bind<IUserFileRepository>(TYPES.UserFileRepository).to(UserFileReposit
 container.bind<IUserImageRepository>(TYPES.UserImageRepository).to(UserImageRepository);
 container.bind<IUserSocialMediaRepository>(TYPES.UserSocialMediaRepository).to(UserSocialMediaRepository);
 container.bind<ISkillRepository>(TYPES.SkillRepository).to(SkillRepository);
+container.bind<IProjectImageRepository>(TYPES.ProjectImageRepository).to(ProjectImageRepository);
 container.bind<IUserAccountSettingsRepository>(TYPES.UserAccountSettingsRepository).to(UserAccountSettingsRepository);
 container.bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
 container.bind<IUserVideoRepository>(TYPES.UserVideoRepository).to(UserVideoRepository);

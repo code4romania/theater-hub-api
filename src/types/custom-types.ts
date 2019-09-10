@@ -48,6 +48,7 @@ const TYPES = {
     ProfessionalSkillRepository: Symbol("ProfessionalSkillRepository"),
     ProjectRepository: Symbol("ProjectRepository"),
     SkillRepository: Symbol("SkillRepository"),
+    ProjectImageRepository: Symbol("ProjectImageRepository"),
     UserAccountSettingsRepository: Symbol("UserAccountSettingsRepository"),
     UserFileRepository: Symbol("UserFileRepository"),
     UserImageRepository: Symbol("UserImageRepository"),

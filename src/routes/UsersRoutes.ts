@@ -103,6 +103,4 @@ export default (app: any) => {
 
     app.patch("/api/users/:userID",           (req: Request, res: Response) => usersController.update(req, res));
 
-    app.delete("/api/users/:userID",          (req: Request, res: Response) => usersController.delete(req, res));
-
 };

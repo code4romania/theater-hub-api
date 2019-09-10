@@ -224,7 +224,8 @@ export const enLocale = {
                     "length": "Description's maximum length is of 500 characters"
                 }
             },
-            "non-existent-project": "Project is private or does not exist."
+            "non-existent": "Project is private or does not exist.",
+            "not-found": "Project not found."
         }
     },
     "emails": {
