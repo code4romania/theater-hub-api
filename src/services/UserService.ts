@@ -1160,7 +1160,6 @@ export class UserService extends BaseService<User> implements IUserService {
     public async getCommunityMembers(request: GetCommunityMembersRequest): Promise<GetCommunityMembersResponse> {
 
         let me: User;
-        let fullViewingRights: boolean;
         const viewerIsVisitor: boolean  = !request.MyEmail;
         const searchTerm: string        = `%${request.SearchTerm.toLowerCase()}%`;
         const sortOrientation: string   = request.SortOrientation === SortOrientationType.ASC ? "ASC" : "DESC";
@@ -1186,8 +1185,8 @@ export class UserService extends BaseService<User> implements IUserService {
                         .innerJoinAndSelect("user.AccountSettings", "accountSettings")
                         .where("user.Email = :email", { email: request.MyEmail })
                         .getOne();
-            fullViewingRights = me.AccountSettings.Role === UserRoleType.Admin || me.AccountSettings.Role === UserRoleType.SuperAdmin;
-            selectedUsers     = selectedUsers.filter(u => u.ID !== me.ID
+
+            selectedUsers = selectedUsers.filter(u => u.ID !== me.ID
                                                     && u.AccountSettings.ProfileVisibility !== VisibilityType.Private);
         } else {
             selectedUsers = selectedUsers.filter(u => u.AccountSettings.ProfileVisibility === VisibilityType.Everyone);

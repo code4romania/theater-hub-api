@@ -1,22 +1,25 @@
-import { inject, injectable }   from "inversify";
-import { TYPES }                from "../types";
+import { inject, injectable }       from "inversify";
+import { TYPES }                    from "../types";
 import { ILocalizationService,
         IFileService,
         IProjectService,
         IProjectRepository,
-        IUserService }          from "../contracts";
-import { BaseService }          from "./BaseService";
+        IUserService }              from "../contracts";
+import { BaseService }              from "./BaseService";
 import { Project,
     ProjectImage,
     ProjectNeed,
     ProjectUpdate,
-    User }                      from "../models";
-import { FileType }             from "../enums/FileType";
-import { UserRoleType }         from "../enums/UserRoleType";
-import { VisibilityType }       from "../enums/VisibilityType";
+    User }                          from "../models";
+import { FileType }                 from "../enums/FileType";
+import { UserRoleType }             from "../enums/UserRoleType";
+import { VisibilityType }           from "../enums/VisibilityType";
 import { CreateProjectDTO,
-               ProjectDTO }     from "../dtos/projects";
-import { AWS }                  from "../utils";
+         MyProjectDTO,
+         ProjectDTO,
+         ProjectListItem,
+         GetAllProjectsResponse }   from "../dtos/projects";
+import { AWS }                      from "../utils";
 
 @injectable()
 export class ProjectService extends BaseService<Project> implements IProjectService {
@@ -178,6 +181,89 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
         }
 
         return new ProjectDTO(project, otherProjects);
+    }
+
+    public async getMyProjects(email: string): Promise<MyProjectDTO[]> {
+        const dbUser: User = await this._userService.getByEmail(email);
+
+        return dbUser.Projects.map(p => {
+            return {
+                ID: p.ID,
+                Name: p.Name,
+                Image: p.Image ? p.Image.Location : "",
+                Date: p.Date,
+                City: p.City,
+                Budget: p.Budget,
+                Currency: p.Currency
+            } as MyProjectDTO;
+        });
+    }
+
+    public async getAllProjects(email: string, searchTerm: string, page: number, pageSize: number): Promise<GetAllProjectsResponse> {
+        let me: User;
+        let fullViewingRights: boolean;
+        const viewerIsVisitor: boolean = !email;
+        searchTerm = `%${searchTerm.toLowerCase()}%`;
+
+        // if email is null then the person making the request is a visitor
+        if (!viewerIsVisitor) {
+            me                = await this._userService.getByEmail(email);
+            fullViewingRights = me.AccountSettings.Role === UserRoleType.Admin ||
+                                me.AccountSettings.Role === UserRoleType.SuperAdmin;
+        }
+
+        const projects = await this._projectRepository
+            .runCreateQueryBuilder()
+            .select("project")
+            .from(Project, "project")
+            .leftJoinAndSelect("project.Initiator", "initiator")
+            .leftJoinAndSelect("project.Image", "image")
+            .where("LOWER(project.Name) like :searchTerm OR LOWER(project.Description) like :searchTerm", { searchTerm })
+            .getMany();
+
+        const filteredProjects: Project[] = projects
+            .filter((p: Project) => {
+                if (fullViewingRights) {
+                    return true;
+                }
+
+                if (p.Visibility === VisibilityType.Private && !viewerIsVisitor && p.Initiator.ID === me.ID) {
+                    return true;
+                }
+
+                if (p.Visibility === VisibilityType.Community && !viewerIsVisitor) {
+                    return true;
+                }
+
+                if (p.Visibility === VisibilityType.Everyone) {
+                    return true;
+                }
+
+                return false;
+            });
+
+            const items: ProjectListItem[] = filteredProjects
+                .splice(page * pageSize, pageSize)
+                .map((p: Project) => {
+                    const abstract: string = p.Description.length > 200 ?
+                        `${p.Description.substring(0, 200)}...` :
+                        p.Description;
+
+                    return {
+                        ID: p.ID,
+                        Name: p.Name,
+                        Image: p.Image ? p.Image.Location : "",
+                        Abstract: abstract,
+                        InitiatorUsername: p.Initiator.Username,
+                        InitiatorName: p.Initiator.Name,
+                        City: p.City
+                    } as ProjectListItem;
+                });
+
+            const pageCount: number = Math.ceil(filteredProjects.length / pageSize);
+
+            return new GetAllProjectsResponse(items, pageCount, page, pageSize);
+
     }
 
 }

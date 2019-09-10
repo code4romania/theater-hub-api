@@ -6,6 +6,7 @@ import { BaseApiController }           from "./BaseApiController";
 import { IUsersController,
          IFileService,
          ILocalizationService,
+         IProjectService,
          IUserService }                from "../contracts";
 import { FileType,
         LocaleType,
@@ -25,7 +26,7 @@ import { ChangePasswordRequestDTO,
    GetCommunityLayersResponse,
    ManagedUserRegistrationRequestDTO,
    ManagedUserRegistrationResponseDTO,
-   MeDTO, ProfileDTO,
+   MeDTO, ProfileDTO, MyProjectDTO,
    ContactEmailDTO, RegisterDTO,
    ResetPasswordRequestDTO,
    SettingsDTO,
@@ -39,14 +40,17 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
   private readonly _userService: IUserService;
   private readonly _localizationService: ILocalizationService;
   private readonly _fileService: IFileService;
+  private readonly _projectService: IProjectService;
 
   constructor(@inject(TYPES.UserService) userService: IUserService,
             @inject(TYPES.LocalizationService) localizationService: ILocalizationService,
-            @inject(TYPES.FileService) fileService: IFileService) {
+            @inject(TYPES.FileService) fileService: IFileService,
+            @inject(TYPES.ProjectService) projectService: IProjectService) {
     super(userService);
     this._userService           = userService;
     this._localizationService   = localizationService;
     this._fileService           = fileService;
+    this._projectService        = projectService;
   }
 
   public async getMe(request: Request, response: Response): Promise<void> {
@@ -153,6 +157,12 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     const educationSection: UpdateProfileSection<Education> = request.body as UpdateProfileSection<Education>;
 
     response.send(await this._userService.updateEducation(request.Principal.Email, educationSection));
+  }
+
+  public async getMyProjects(request: Request, response: Response): Promise<void> {
+    const myProjects: MyProjectDTO[] = await this._projectService.getMyProjects(request.Principal.Email);
+
+    response.send(myProjects);
   }
 
   public async contact (request: Request, response: Response): Promise<void> {
