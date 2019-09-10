@@ -5,7 +5,7 @@ export class CommunitySkillLayer {
 
     public constructor(skillID: number, users: User[], hasMore: boolean) {
         this.SkillID = skillID;
-        this.Members = users.map(u => new CommunityMemberDTO(u));
+        this.Members = users.map(u => new CommunityMemberDTO(u, true));
         this.HasMore = hasMore;
     }
 

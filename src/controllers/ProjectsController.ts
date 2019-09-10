@@ -53,6 +53,13 @@ export class ProjectsController extends BaseApiController<Project> implements IP
         response.send(projects);
     }
 
+    public async getRandom(request: Request, response: Response): Promise<void> {
+        const count: number = +request.query.count;
+        const projects      = await this._projectService.getRandomProjects(count);
+
+        response.send(projects);
+    }
+
     public async deleteByID(request: Request, response: Response): Promise<void> {
 
         this._projectService.setLocale(request.Locale);

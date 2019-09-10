@@ -6,7 +6,7 @@ import { CurrencyType}  from "../../enums";
 
 export class ProjectDTO {
 
-    public constructor (project: Project, otherProjects: Project[], includeID: boolean = false) {
+    public constructor (project: Project, otherProjects: Project[] = [], includeID: boolean = false) {
 
         if (includeID) {
             this.ID = project.ID;

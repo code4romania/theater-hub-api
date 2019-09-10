@@ -1,6 +1,7 @@
 import { IBaseService }                                                    from "./IBaseService";
 import { Award, Education, Experience, Skill, User, UserImage, UserVideo } from "../../models";
 import { ChangePasswordRequestDTO, ChangePasswordResponseDTO,
+        CommunityMemberDTO,
         CreateProfileResponseDTO,
         GenerateResumeRequestDTO,
         FinishRegistrationResponseDTO,
@@ -70,6 +71,8 @@ export interface IUserService extends IBaseService<User> {
     getCommunityMembers(request: GetCommunityMembersRequest): Promise<GetCommunityMembersResponse>;
 
     getCommunityMemberProfile(email: string, communityMemberUsername: string): Promise<ProfileDTO>;
+
+    getRandomCommunityMembers(count?: number): Promise<CommunityMemberDTO[]>;
 
     getVideoTitle (link: string): Promise<string>;
 
