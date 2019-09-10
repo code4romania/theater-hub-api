@@ -23,6 +23,8 @@ export interface IUsersController extends IBaseApiController {
 
     updateMyEducation(req: Request, res: Response): Promise<void>;
 
+    getMyProjects(req: Request, res: Response): Promise<void>;
+
     contact(req: Request, res: Response): Promise<void>;
 
     register(req: Request, res: Response): Promise<void>;

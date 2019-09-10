@@ -1,12 +1,13 @@
-import { inject, injectable }  from "inversify";
-import { Request, Response }   from "express";
-import { TYPES }               from "../types";
-import { Project }             from "../models/Project";
+import { inject, injectable }       from "inversify";
+import { Request, Response }        from "express";
+import { TYPES }                    from "../types";
+import { Project }                  from "../models/Project";
 import { IProjectsController,
-         IProjectService }     from "../contracts";
-import { BaseApiController }   from "./BaseApiController";
+         IProjectService }          from "../contracts";
+import { BaseApiController }        from "./BaseApiController";
 import { CreateProjectDTO,
-        ProjectDTO }           from "../dtos";
+        ProjectDTO,
+        GetAllProjectsResponse }    from "../dtos";
 
 @injectable()
 export class ProjectsController extends BaseApiController<Project> implements IProjectsController {
@@ -33,6 +34,17 @@ export class ProjectsController extends BaseApiController<Project> implements IP
         const project: ProjectDTO = await this._projectService.getProject(myEmail, request.params.projectID);
 
         response.send(project);
+    }
+
+    public async getAll(request: Request, response: Response): Promise<void> {
+        const myEmail: string       = request.Principal ? request.Principal.Email : "";
+        const searchTerm: string    = request.query.searchTerm;
+        const page: number          = +request.query.page;
+        const pageSize: number      = +request.query.pageSize;
+
+        const projects: GetAllProjectsResponse = await this._projectService.getAllProjects(myEmail, searchTerm, page, pageSize);
+
+        response.send(projects);
     }
 
 }
