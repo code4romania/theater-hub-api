@@ -29,6 +29,7 @@ export default (app: any) => {
 
     app.patch("/api/projects/:projectID",   (req: Request, res: Response) => projectsController.update(req, res));
 
-    app.delete("/api/projects/:projectID",  (req: Request, res: Response) => projectsController.delete(req, res));
+    app.delete("/api/projects/:projectID",  authorizationMiddleware,
+                                            (req: Request, res: Response) => projectsController.deleteByID(req, res));
 
 };

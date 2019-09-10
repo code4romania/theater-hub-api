@@ -15,4 +15,6 @@ export interface IProjectService extends IBaseService<Project> {
 
     getAllProjects(email: string, searchTerm: string, page: number, pageSize: number): Promise<GetAllProjectsResponse>;
 
+    deleteProjectByID(email: string, projectID: string): Promise<Project>;
+
 }

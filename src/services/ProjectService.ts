@@ -4,6 +4,7 @@ import { ILocalizationService,
         IFileService,
         IProjectService,
         IProjectRepository,
+        IProjectImageRepository,
         IUserService }              from "../contracts";
 import { BaseService }              from "./BaseService";
 import { Project,
@@ -27,15 +28,20 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
     private readonly _userService: IUserService;
     private readonly _fileService: IFileService;
     private readonly _projectRepository: IProjectRepository;
+    private readonly _projectImageRepository: IProjectImageRepository;
 
-    constructor(@inject(TYPES.ProjectRepository) projectRepository: IProjectRepository,
-                    @inject(TYPES.LocalizationService) localizationService: ILocalizationService,
-                    @inject(TYPES.FileService) fileService: IFileService,
-                    @inject(TYPES.UserService) userService: IUserService) {
+    constructor(
+        @inject(TYPES.ProjectRepository) projectRepository: IProjectRepository,
+        @inject(TYPES.ProjectImageRepository) projectImageRepository: IProjectImageRepository,
+        @inject(TYPES.LocalizationService) localizationService: ILocalizationService,
+        @inject(TYPES.FileService) fileService: IFileService,
+        @inject(TYPES.UserService) userService: IUserService
+    ) {
         super(projectRepository, localizationService);
-        this._userService       = userService;
-        this._fileService       = fileService;
-        this._projectRepository = projectRepository;
+        this._userService               = userService;
+        this._fileService               = fileService;
+        this._projectRepository         = projectRepository;
+        this._projectImageRepository    = projectImageRepository;
     }
 
     public async createProject(email: string, createProjectDTO: CreateProjectDTO): Promise<Project> {
@@ -264,6 +270,19 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
 
             return new GetAllProjectsResponse(items, pageCount, page, pageSize);
 
+    }
+
+    public async deleteProjectByID(email: string, projectID: string): Promise<Project> {
+        const dbUser: User = await this._userService.getByEmail(email);
+
+        if (!dbUser.Projects.find(p => p.ID === projectID)) {
+            throw new Error(this._localizationService.getText("validation.project.non-existent"));
+        }
+
+        const project =  await this.deleteByID(projectID);
+        await this._projectImageRepository.deleteByID(project.Image.ID);
+
+        return project;
     }
 
 }

@@ -108,7 +108,7 @@ export class UserService extends BaseService<User> implements IUserService {
         this._awardRepository                 = awardRepository;
         this._educationRepository             = educationRepository;
         this._experienceRepository            = experienceRepository;
-        this._professionalRepository           = professionalRepository;
+        this._professionalRepository          = professionalRepository;
         this._professionalSkillRepository     = professionalSkillRepository;
         this._userAccountSettingsRepository   = userAccountSettingsRepository;
         this._userFileRepository              = userFileRepository;

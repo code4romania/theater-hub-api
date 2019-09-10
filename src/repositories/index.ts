@@ -7,6 +7,7 @@ export * from "./ExperienceRepository";
 export * from "./LocaleRepository";
 export * from "./ProfessionalRepository";
 export * from "./ProfessionalSkillRepository";
+export * from "./ProjectImageRepository";
 export * from "./ProjectRepository";
 export * from "./SkillRepository";
 export * from "./UserAccountSettingsRepository";

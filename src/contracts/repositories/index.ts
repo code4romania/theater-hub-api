@@ -7,6 +7,7 @@ export * from "./IExperienceRepository";
 export * from "./ILocaleRepository";
 export * from "./IProfessionalRepository";
 export * from "./IProfessionalSkillRepository";
+export * from "./IProjectImageRepository";
 export * from "./IProjectRepository";
 export * from "./ISkillRepository";
 export * from "./IUserAccountSettingsRepository";

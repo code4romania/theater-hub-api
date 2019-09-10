@@ -397,21 +397,6 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     response.send(user);
   }
 
-  public async delete(request: Request, response: Response): Promise<void> {
-
-    let user: User = await this._userService.getByID(request.params.userID);
-
-    if (!user) {
-      response.status(404).json(this._localizationService.getText("validation.user.not-found", request.Locale));
-      response.end();
-      return;
-    }
-
-    user = await this._userService.deleteByID(request.params.userID);
-
-    response.send(user);
-  }
-
   private isUserValid(user: User, checkEmail: boolean = true, locale: LocaleType): string {
 
     this._localizationService.setLocale(locale);
