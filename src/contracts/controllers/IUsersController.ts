@@ -53,4 +53,6 @@ export interface IUsersController extends IBaseApiController {
 
     getCommunityMemberProfile(req: Request, res: Response): Promise<void>;
 
+    getRandom(request: Request, response: Response): Promise<void>;
+
 }

@@ -250,26 +250,26 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
 
             const items: ProjectListItem[] = filteredProjects
                 .splice(page * pageSize, pageSize)
-                .map((p: Project) => {
-                    const abstract: string = p.Description.length > 200 ?
-                        `${p.Description.substring(0, 200)}...` :
-                        p.Description;
-
-                    return {
-                        ID: p.ID,
-                        Name: p.Name,
-                        Image: p.Image ? p.Image.Location : "",
-                        Abstract: abstract,
-                        InitiatorUsername: p.Initiator.Username,
-                        InitiatorName: p.Initiator.Name,
-                        City: p.City
-                    } as ProjectListItem;
-                });
+                .map((p: Project) => new ProjectListItem(p));
 
             const pageCount: number = Math.ceil(filteredProjects.length / pageSize);
 
             return new GetAllProjectsResponse(items, pageCount, page, pageSize);
 
+    }
+
+    public async getRandomProjects(count: number = 2): Promise<ProjectListItem[]> {
+        const projects: Project[] = await this._projectRepository
+                            .runCreateQueryBuilder()
+                            .select("project")
+                            .from(Project, "project")
+                            .leftJoinAndSelect("project.Initiator", "initiator")
+                            .where("project.Visibility = :everyone", { everyone: VisibilityType.Everyone})
+                            .orderBy("random()")
+                            .limit(count)
+                            .getMany();
+
+        return projects.map(p => new ProjectListItem(p));
     }
 
     public async deleteProjectByID(email: string, projectID: string): Promise<Project> {

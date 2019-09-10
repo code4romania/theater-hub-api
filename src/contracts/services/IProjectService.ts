@@ -3,6 +3,7 @@ import { Project }                  from "../../models/Project";
 import { CreateProjectDTO,
         MyProjectDTO,
         ProjectDTO,
+        ProjectListItem,
         GetAllProjectsResponse }    from "../../dtos/projects";
 
 export interface IProjectService extends IBaseService<Project> {
@@ -14,6 +15,8 @@ export interface IProjectService extends IBaseService<Project> {
     getMyProjects(email: string): Promise<MyProjectDTO[]>;
 
     getAllProjects(email: string, searchTerm: string, page: number, pageSize: number): Promise<GetAllProjectsResponse>;
+
+    getRandomProjects(count?: number): Promise<ProjectListItem[]>;
 
     deleteProjectByID(email: string, projectID: string): Promise<Project>;
 

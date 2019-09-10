@@ -33,6 +33,7 @@ import { Skill }                               from "../models/Skill";
 import { ChangePasswordResponseDTO,
     ChangePasswordRequestDTO,
     CommunitySkillLayer,
+    CommunityMemberDTO,
     CreateProfileResponseDTO,
     GenerateResumeRequestDTO,
     CreateAccountEmailDTO,
@@ -1204,6 +1205,21 @@ export class UserService extends BaseService<User> implements IUserService {
         selectedUsers = selectedUsers.splice(request.Page * request.PageSize, request.PageSize);
 
         return new GetCommunityMembersResponse(selectedUsers, communitySize);
+    }
+
+    public async getRandomCommunityMembers(count: number = 5): Promise<CommunityMemberDTO[]> {
+        const users: User[] = await this._userRepository
+                            .runCreateQueryBuilder()
+                            .select("user")
+                            .from(User, "user")
+                            .innerJoinAndSelect("user.AccountSettings", "accountSettings")
+                            .innerJoinAndSelect("user.Professional", "professional")
+                            .where("accountSettings.ProfileVisibility = :everyone", { everyone: VisibilityType.Everyone})
+                            .orderBy("random()")
+                            .limit(count)
+                            .getMany();
+
+        return users.map(u => new CommunityMemberDTO(u));
     }
 
     public async getCommunityMemberProfile(email: string, communityMemberUsername: string): Promise<ProfileDTO> {

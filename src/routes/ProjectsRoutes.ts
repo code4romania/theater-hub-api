@@ -24,6 +24,8 @@ export default (app: any) => {
 
     app.get("/api/projects",                (req: Request, res: Response) => projectsController.getAll(req, res));
 
+    app.get("/api/projects/random",         (req: Request, res: Response) => projectsController.getRandom(req, res));
+
     app.get("/api/projects/:projectID",     getPrincipalIfRequestHasToken,
                                             (req: Request, res: Response) => projectsController.getByID(req, res));
 

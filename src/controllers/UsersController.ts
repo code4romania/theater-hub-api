@@ -344,6 +344,13 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     response.send(users);
   }
 
+  public async getRandom(request: Request, response: Response): Promise<void> {
+    const count: number = +request.query.count;
+    const members       = await this._userService.getRandomCommunityMembers(count);
+
+    response.send(members);
+  }
+
   public async getByID(request: Request, response: Response): Promise<void> {
 
     if (!request.params.userID || !Validators.isValidUUID(request.params.userID)) {

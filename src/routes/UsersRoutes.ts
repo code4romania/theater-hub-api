@@ -92,6 +92,8 @@ export default (app: any) => {
     app.get("/api/users/community/members", getPrincipalIfRequestHasToken,
                                             (req: Request, res: Response) => usersController.getCommunityMembers(req, res));
 
+    app.get("/api/users/community/members/random", (req: Request, res: Response) => usersController.getRandom(req, res));
+
     app.get("/api/users/profile/:username", getPrincipalIfRequestHasToken,
                                             (req: Request, res: Response) => usersController.getCommunityMemberProfile(req, res));
 
