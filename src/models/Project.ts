@@ -5,7 +5,7 @@ import { User }                                               from "./User";
 import { ProjectImage }                                       from "./ProjectImage";
 import { ProjectNeed }                                        from "./ProjectNeed";
 import { ProjectUpdate }                                      from "./ProjectUpdate";
-import { CurrencyType, VisibilityType }                       from "../enums";
+import { CurrencyType, ProjectStatusType, VisibilityType }    from "../enums";
 
 @Entity("Project")
 export class Project extends BaseEntity {
@@ -37,6 +37,9 @@ export class Project extends BaseEntity {
   @Column("varchar", { length: 100 })
   City: string;
 
+  @Column("tsvector", { nullable: true })
+  SearchTokens: string;
+
   @ManyToOne(type => User, initiator => initiator.Projects, { onDelete: "CASCADE" })
   @JoinColumn({ name: "InitiatorID" })
   Initiator: User;
@@ -50,6 +53,9 @@ export class Project extends BaseEntity {
 
   @OneToMany(type => ProjectUpdate, update => update.Project, { cascade: true, eager: true })
   Updates: ProjectUpdate[];
+
+  @Column()
+  Status: ProjectStatusType;
 
   @Column()
   Visibility: VisibilityType;

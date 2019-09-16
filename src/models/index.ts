@@ -10,6 +10,7 @@ export * from "./ProfessionalSkill";
 export * from "./Project";
 export * from "./ProjectImage";
 export * from "./ProjectNeed";
+export * from "./ProjectStatus";
 export * from "./ProjectUpdate";
 export * from "./Skill";
 export * from "./SocialMediaCategory";

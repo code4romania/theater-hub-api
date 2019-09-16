@@ -29,7 +29,7 @@ export class ProjectsController extends BaseApiController<Project> implements IP
         const createProjectDTO: CreateProjectDTO = request.body as CreateProjectDTO;
 
         createProjectDTO.Image = request.file;
-
+        this._projectService.setLocale(request.Locale);
         const project: Project = await this._projectService.createProject(request.Principal.Email, createProjectDTO);
 
         response.send(project);

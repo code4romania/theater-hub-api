@@ -1,6 +1,6 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class SeedMigration1567603705052 implements MigrationInterface {
+export class SeedMigration1568626883799 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.query(`INSERT INTO "EntityCategory"("ID", "Name", "ParentID") VALUES (0, 'Professional', null)`);
@@ -33,6 +33,10 @@ export class SeedMigration1567603705052 implements MigrationInterface {
         await queryRunner.query(`INSERT INTO "UserRole"("ID", "Name") VALUES (0, 'User')`);
         await queryRunner.query(`INSERT INTO "UserRole"("ID", "Name") VALUES (1, 'Admin')`);
         await queryRunner.query(`INSERT INTO "UserRole"("ID", "Name") VALUES (2, 'SuperAdmin')`);
+
+        await queryRunner.query(`INSERT INTO "ProjectStatus"("ID", "Name") VALUES (0, 'Enabled')`);
+        await queryRunner.query(`INSERT INTO "ProjectStatus"("ID", "Name") VALUES (1, 'Disabled')`);
+        await queryRunner.query(`INSERT INTO "ProjectStatus"("ID", "Name") VALUES (2, 'Deleted')`);
 
         await queryRunner.query(`INSERT INTO "Visibility"("ID", "Name") VALUES (0, 'Everyone')`);
         await queryRunner.query(`INSERT INTO "Visibility"("ID", "Name") VALUES (1, 'Community')`);

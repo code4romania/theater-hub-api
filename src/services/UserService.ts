@@ -1108,8 +1108,11 @@ export class UserService extends BaseService<User> implements IUserService {
         let me: User;
         let fullViewingRights: boolean;
         const viewerIsVisitor: boolean  = !request.MyEmail;
-        const searchTerm: string        = `%${request.SearchTerm.toLowerCase()}%`;
+        const searchTerm: string        = request.SearchTerm.toLowerCase().replace(/\s\s+/g, " ").trim();
         const skills: Skill[]           = await this._skillService.getAll();
+
+        const likeSearchTerm: string        = `%${searchTerm}%`;
+        const normalizedSearchTerm: string  = searchTerm.replace(/\s/g, " & ");
 
         let selectedUsers: User[] = await this._userRepository
                         .runCreateQueryBuilder()
@@ -1119,7 +1122,22 @@ export class UserService extends BaseService<User> implements IUserService {
                         .innerJoinAndSelect("user.Professional", "professional")
                         .innerJoinAndSelect("user.AccountSettings", "accountSettings")
                         .innerJoinAndSelect("professional.Skills", "skills")
-                        .where("LOWER(user.Name) like :searchTerm AND accountSettings.AccountStatus <> :disabledStatus", { searchTerm: searchTerm, disabledStatus: UserAccountStatusType.Disabled })
+                        .addSelect()
+                        .where(
+                            `accountSettings.AccountStatus <> :disabledStatus AND
+                            (
+                                (:searchTerm = '') IS NOT FALSE OR
+                                LOWER(user.Name) like :likeSearchTerm OR
+                                LOWER(user.Description) like :likeSearchTerm OR
+                                (user.SearchTokens @@ to_tsquery(:normalizedSearchTerm))
+                            )`,
+                            {
+                                disabledStatus: UserAccountStatusType.Disabled,
+                                searchTerm,
+                                likeSearchTerm,
+                                normalizedSearchTerm
+                            })
+                        .orderBy("LOWER(user.Name)", "ASC")
                         .getMany();
 
         // if email is null then the person making the request is a visitor
@@ -1162,8 +1180,11 @@ export class UserService extends BaseService<User> implements IUserService {
 
         let me: User;
         const viewerIsVisitor: boolean  = !request.MyEmail;
-        const searchTerm: string        = `%${request.SearchTerm.toLowerCase()}%`;
+        const searchTerm: string        = request.SearchTerm.toLowerCase().replace(/\s\s+/g, " ").trim();
         const sortOrientation: string   = request.SortOrientation === SortOrientationType.ASC ? "ASC" : "DESC";
+
+        const likeSearchTerm: string        = `%${searchTerm}%`;
+        const normalizedSearchTerm: string  = searchTerm.replace(/\s/g, " & ");
 
         let selectedUsers: User[] = await this._userRepository
                         .runCreateQueryBuilder()
@@ -1173,7 +1194,20 @@ export class UserService extends BaseService<User> implements IUserService {
                         .innerJoinAndSelect("user.Professional", "professional")
                         .innerJoinAndSelect("user.AccountSettings", "accountSettings")
                         .innerJoinAndSelect("professional.Skills", "skills")
-                        .where("LOWER(user.Name) like :searchTerm AND accountSettings.AccountStatus <> :disabledStatus", { searchTerm: searchTerm, disabledStatus: UserAccountStatusType.Disabled })
+                        .leftJoinAndSelect("user.SocialMedia", "socialMedia")
+                        .where(
+                            `accountSettings.AccountStatus <> :disabledStatus AND
+                            (
+                                (:searchTerm = '') IS NOT FALSE OR
+                                LOWER(user.Name) like :likeSearchTerm OR
+                                LOWER(user.Description) like :likeSearchTerm OR
+                                (user.SearchTokens @@ to_tsquery(:normalizedSearchTerm)))`,
+                            {
+                                disabledStatus: UserAccountStatusType.Disabled,
+                                searchTerm,
+                                likeSearchTerm,
+                                normalizedSearchTerm
+                            })
                         .orderBy("LOWER(user.Name)", sortOrientation)
                         .getMany();
 
@@ -1204,7 +1238,7 @@ export class UserService extends BaseService<User> implements IUserService {
 
         selectedUsers = selectedUsers.splice(request.Page * request.PageSize, request.PageSize);
 
-        return new GetCommunityMembersResponse(selectedUsers, communitySize);
+        return new GetCommunityMembersResponse(selectedUsers, communitySize, request.IncludePersonalInformation);
     }
 
     public async getRandomCommunityMembers(count: number = 5): Promise<CommunityMemberDTO[]> {
@@ -1293,17 +1327,19 @@ export class UserService extends BaseService<User> implements IUserService {
     }
 
     public async getUsername (firstName: string, lastName: string): Promise<string> {
+        const firstNameLower: string    = firstName.toLowerCase();
+        const lastNameLower: string     = lastName.toLowerCase();
 
         const similarUsernames: User[] = await this._userRepository
                         .runCreateQueryBuilder()
                         .select("user")
                         .from(User, "user")
                         .innerJoinAndSelect("user.Professional", "professional")
-                        .where("LOWER(professional.FirstName) = :firstName AND LOWER(professional.LastName) = :lastName", { firstName, lastName })
+                        .where("LOWER(professional.FirstName) = :firstName AND LOWER(professional.LastName) = :lastName", { firstName: firstNameLower, lastName: lastNameLower })
                         .getMany();
         const maximumUsernameID: number = similarUsernames.length !== 0 ?
                                                 similarUsernames.map(u => +(u.Username.split(".").pop())).sort().pop() : 0;
-        const username: string          = `${firstName}.${lastName}.${maximumUsernameID + 1}`;
+        const username: string          = `${firstNameLower}.${lastNameLower}.${maximumUsernameID + 1}`;
 
         return username;
     }

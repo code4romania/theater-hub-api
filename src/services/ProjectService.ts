@@ -13,6 +13,7 @@ import { Project,
     ProjectUpdate,
     User }                          from "../models";
 import { FileType }                 from "../enums/FileType";
+import { ProjectStatusType }        from "../enums/ProjectStatusType";
 import { UserRoleType }             from "../enums/UserRoleType";
 import { VisibilityType }           from "../enums/VisibilityType";
 import { CreateProjectDTO,
@@ -58,6 +59,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             Budget: budget,
             Currency: createProjectDTO.Currency,
             City: createProjectDTO.City,
+            Status: ProjectStatusType.Enabled,
             Visibility: createProjectDTO.Visibility,
             Initiator: dbUser
         } as Project;
@@ -118,8 +120,12 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                 .leftJoinAndSelect("project.Image", "image")
                 .leftJoinAndSelect("project.Needs", "needs")
                 .leftJoinAndSelect("project.Updates", "updates")
-                .where("project.ID = :id", { id })
+                .where("project.ID = :id AND project.Status = :status", { id, status: ProjectStatusType.Enabled })
                 .getOne();
+
+            if (!project) {
+                return undefined;
+            }
 
             const initiatorId: string = project.Initiator.ID;
 
@@ -137,7 +143,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                 .from(Project, "project")
                 .leftJoinAndSelect("project.Image", "image")
                 .leftJoinAndSelect("project.Initiator", "initiator")
-                .where("initiator.ID = :initiatorId AND project.ID != :id", { initiatorId, id })
+                .where("initiator.ID = :initiatorId AND project.ID != :id AND project.Status = :status", { initiatorId, id, status: ProjectStatusType.Enabled })
                 .getMany();
 
             otherProjects = otherProjects.filter(p => {
@@ -209,7 +215,10 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
         let me: User;
         let fullViewingRights: boolean;
         const viewerIsVisitor: boolean = !email;
-        searchTerm = `%${searchTerm.toLowerCase()}%`;
+
+        searchTerm                          = searchTerm.toLowerCase().replace(/\s\s+/g, " ").trim();
+        const likeSearchTerm: string        = `%${searchTerm}%`;
+        const normalizedSearchTerm: string  = searchTerm.replace(/\s/g, " & ");
 
         // if email is null then the person making the request is a visitor
         if (!viewerIsVisitor) {
@@ -218,14 +227,39 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                                 me.AccountSettings.Role === UserRoleType.SuperAdmin;
         }
 
-        const projects = await this._projectRepository
-            .runCreateQueryBuilder()
-            .select("project")
-            .from(Project, "project")
-            .leftJoinAndSelect("project.Initiator", "initiator")
-            .leftJoinAndSelect("project.Image", "image")
-            .where("LOWER(project.Name) like :searchTerm OR LOWER(project.Description) like :searchTerm", { searchTerm })
-            .getMany();
+        let projects: Project[];
+
+        try {
+
+            projects = await this._projectRepository
+                .runCreateQueryBuilder()
+                .select("project")
+                .from(Project, "project")
+                .leftJoinAndSelect("project.Initiator", "initiator")
+                .leftJoinAndSelect("project.Image", "image")
+                .leftJoinAndSelect("project.Needs", "needs")
+                .where(
+                    `project.Status = :status AND
+                    (
+                        (:searchTerm = '') IS NOT FALSE OR
+                        LOWER(project.Name) like :likeSearchTerm OR
+                        LOWER(project.Description) like :likeSearchTerm OR
+                        ((select COUNT(*) from public."ProjectNeed" pn where pn."ProjectID" = project.ID AND LOWER(pn."Description") like :likeSearchTerm) > 0) OR
+                        (project.SearchTokens @@ to_tsquery(:normalizedSearchTerm))
+                    )`,
+                    {
+                        status: ProjectStatusType.Enabled,
+                        searchTerm,
+                        likeSearchTerm,
+                        normalizedSearchTerm
+                    }
+                )
+                .getMany();
+
+            } catch (error) {
+                return new GetAllProjectsResponse([], 0, 0, pageSize);
+            }
+
 
         const filteredProjects: Project[] = projects
             .filter((p: Project) => {
@@ -264,7 +298,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                             .select("project")
                             .from(Project, "project")
                             .leftJoinAndSelect("project.Initiator", "initiator")
-                            .where("project.Visibility = :everyone", { everyone: VisibilityType.Everyone})
+                            .where("project.Visibility = :everyone AND project.Status = :status", { everyone: VisibilityType.Everyone, status: ProjectStatusType.Enabled})
                             .orderBy("random()")
                             .limit(count)
                             .getMany();
