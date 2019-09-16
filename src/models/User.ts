@@ -46,6 +46,9 @@ export class User extends BaseEntity {
   @Column("varchar", { nullable: true })
   Website: string;
 
+  @Column("tsvector", { nullable: true })
+  SearchTokens: string;
+
   @OneToMany(type => UserImage, userImage => userImage.User, { cascade: true, eager: true })
   PhotoGallery?: UserImage[];
 

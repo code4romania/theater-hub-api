@@ -80,15 +80,17 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
   }
 
   public async getCommunityMembers(request: Request, response: Response): Promise<void> {
-    const myEmail: string           = request.Principal ? request.Principal.Email : "";
-    const searchTerm: string        = request.query.searchTerm;
-    const skillsLiteral: string     = request.query.skills;
-    const sortOrientation: string   = request.query.sortOrientation;
-    const page: number              = request.query.page;
-    const pageSize: number          = request.query.pageSize;
+    const myEmail: string                     = request.Principal ? request.Principal.Email : "";
+    const searchTerm: string                  = request.query.searchTerm;
+    const skillsLiteral: string               = request.query.skills;
+    const sortOrientation: string             = request.query.sortOrientation;
+    const page: number                        = +request.query.page;
+    const pageSize: number                    = +request.query.pageSize;
+    const includePersonalInformation: boolean = !!request.query.includePersonalInformation;
 
     const getCommunityMembersRequest: GetCommunityMembersRequest =
-                       new GetCommunityMembersRequest(myEmail, searchTerm, skillsLiteral, sortOrientation, page, pageSize);
+                       new GetCommunityMembersRequest(myEmail, searchTerm, skillsLiteral, sortOrientation,
+                                                      page, pageSize, includePersonalInformation);
 
     const members: GetCommunityMembersResponse
                   = await this._userService.getCommunityMembers(getCommunityMembersRequest);
