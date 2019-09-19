@@ -14,16 +14,31 @@ export default (app: any) => {
     app.get("/api/administration/users", authorizationMiddleware,
                         (req: Request, res: Response) => administrationController.getUsers(req, res));
 
-    app.post("/api/administration/user/invite", authorizationMiddleware, administrationRoutesValidators.getInviteUserValidators(),  validatorMiddleware,
+    app.post("/api/administration/users/invite",
+                        authorizationMiddleware,
+                        administrationRoutesValidators.getInviteUserValidators(),
+                        validatorMiddleware,
                         (req: Request, res: Response) => administrationController.inviteUser(req, res));
 
-    app.post("/api/administration/user/:userID/enable", authorizationMiddleware,
+    app.post("/api/administration/users/:userID/enable", authorizationMiddleware,
                         (req: Request, res: Response) => administrationController.enableUser(req, res));
 
-    app.post("/api/administration/user/:userID/disable", authorizationMiddleware,
+    app.post("/api/administration/users/:userID/disable", authorizationMiddleware,
                         (req: Request, res: Response) => administrationController.disableUser(req, res));
 
-    app.post("/api/administration/user/:userID/delete", authorizationMiddleware,
+    app.post("/api/administration/users/:userID/delete", authorizationMiddleware,
                         (req: Request, res: Response) => administrationController.deleteUser(req, res));
+
+    app.get("/api/administration/projects", authorizationMiddleware,
+                        (req: Request, res: Response) => administrationController.getProjects(req, res));
+
+    app.post("/api/administration/projects/:projectID/enable", authorizationMiddleware,
+                        (req: Request, res: Response) => administrationController.enableProject(req, res));
+
+    app.post("/api/administration/projects/:projectID/disable", authorizationMiddleware,
+                        (req: Request, res: Response) => administrationController.disableProject(req, res));
+
+    app.post("/api/administration/projects/:projectID/delete", authorizationMiddleware,
+                        (req: Request, res: Response) => administrationController.deleteProject(req, res));
 
 };

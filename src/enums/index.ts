@@ -1,6 +1,7 @@
 export * from "./CurrencyType";
 export * from "./EntityCategoryType";
 export * from "./FileType";
+export * from "./ProjectSortCriterion";
 export * from "./ProfileSectionType";
 export * from "./ProjectStatusType";
 export * from "./SocialMediaCategoryType";

@@ -5,7 +5,8 @@ import { IEmailService,
         ILocalizationService }     from "../contracts";
 import {
         AdminInviteManagedUserEmailDTO,
-        AdminUpdateUserEmailDTO,
+        AdminUpdateEntityEmailDTO,
+        AdminUpdateProjectEmailDTO,
         ContactEmailDTO,
         CreateAccountEmailDTO,
         ResetPasswordEmailDTO }    from "../dtos";
@@ -192,7 +193,7 @@ export class EmailService implements IEmailService {
 
     }
 
-    public async sendAdminEnableUserEmail(model: AdminUpdateUserEmailDTO): Promise<void> {
+    public async sendAdminEnableUserEmail(model: AdminUpdateEntityEmailDTO): Promise<void> {
 
         const enableUserHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/html", "AdminEnableUser.html"), "utf8");
         let enableUserText: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/text", "AdminEnableUser.txt"), "utf8");
@@ -236,7 +237,7 @@ export class EmailService implements IEmailService {
 
     }
 
-    public async sendAdminDisableUserEmail(model: AdminUpdateUserEmailDTO): Promise<void> {
+    public async sendAdminDisableUserEmail(model: AdminUpdateEntityEmailDTO): Promise<void> {
 
         const disableUserHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/html", "AdminDisableUser.html"), "utf8");
         let disableUserText: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/text", "AdminDisableUser.txt"), "utf8");
@@ -280,7 +281,7 @@ export class EmailService implements IEmailService {
 
     }
 
-    public async sendAdminDeleteUserEmail(model: AdminUpdateUserEmailDTO): Promise<void> {
+    public async sendAdminDeleteUserEmail(model: AdminUpdateEntityEmailDTO): Promise<void> {
 
         const deleteUserHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/html", "AdminDeleteUser.html"), "utf8");
         let deleteUserText: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/text", "AdminDeleteUser.txt"), "utf8");
@@ -309,6 +310,141 @@ export class EmailService implements IEmailService {
             subject,
             html: template(context),
             text: deleteUserText,
+            attachments: [{
+                filename: "header_theater_hub.png",
+                path: path.join(process.cwd(), "public/images", "header_theater_hub.png"),
+                cid: "header-image"
+            }]
+        };
+
+        this._transporter.sendMail(mailOptions, (error: any, info: any) => {
+            if (error) {
+                return console.log(error);
+            }
+        });
+
+    }
+
+    public async sendAdminEnableProjectEmail(model: AdminUpdateProjectEmailDTO): Promise<void> {
+
+        const enableProjectHTML: string = fs.readFileSync(path.join(process.cwd(), "src/views/emails/html", "AdminEnableProject.html"), "utf8");
+        let enableProjectText: string   = fs.readFileSync(path.join(process.cwd(), "src/views/emails/text", "AdminEnableProject.txt"), "utf8");
+
+        const greeting: string  = this._localizationService.getText("emails.admin-enable-project.greeting").replace("{0}", model.ReceiverFullName);
+        const content: string   = this._localizationService.getText("emails.admin-enable-project.content").replace("{0}", model.ProjectName);
+
+        enableProjectText = enableProjectText
+                    .replace("{{greeting}}", greeting)
+                    .replace("{{content}}", content)
+                    .replace("{{senderEmailAddress}}", model.SenderEmailAddress)
+                    .replace("{{message}}", model.Message);
+
+        const template = handlebars.compile(enableProjectHTML);
+
+        const context = {
+            greeting,
+            content,
+            senderEmailAddress: model.SenderEmailAddress,
+            message: model.Message
+        };
+
+        const subject     = this._localizationService.getText("emails.admin-enable-project.subject").replace("{0}", config.application.name);
+        const mailOptions = {
+            from: `${config.application.name} <${config.application.email}>`,
+            to: model.ReceiverEmailAddress,
+            subject,
+            html: template(context),
+            text: enableProjectText,
+            attachments: [{
+                filename: "header_theater_hub.png",
+                path: path.join(process.cwd(), "public/images", "header_theater_hub.png"),
+                cid: "header-image"
+            }]
+        };
+
+        this._transporter.sendMail(mailOptions, (error: any, info: any) => {
+            if (error) {
+                return console.log(error);
+            }
+        });
+
+    }
+
+    public async sendAdminDisableProjectEmail(model: AdminUpdateProjectEmailDTO): Promise<void> {
+
+        const disableProjectHTML: string    = fs.readFileSync(path.join(process.cwd(), "src/views/emails/html", "AdminDisableProject.html"), "utf8");
+        let disableProjectText: string      = fs.readFileSync(path.join(process.cwd(), "src/views/emails/text", "AdminDisableProject.txt"), "utf8");
+
+        const greeting: string  = this._localizationService.getText("emails.admin-disable-project.greeting").replace("{0}", model.ReceiverFullName);
+        const content: string   = this._localizationService.getText("emails.admin-disable-project.content").replace("{0}", model.ProjectName);
+
+        disableProjectText = disableProjectText
+                        .replace("{{greeting}}", greeting)
+                        .replace("{{content}}", content)
+                        .replace("{{senderEmailAddress}}", model.SenderEmailAddress)
+                        .replace("{{message}}", model.Message);
+
+        const template = handlebars.compile(disableProjectHTML);
+
+        const context = {
+            greeting,
+            content,
+            senderEmailAddress: model.SenderEmailAddress,
+            message: model.Message
+        };
+
+        const subject     = this._localizationService.getText("emails.admin-disable-project.subject").replace("{0}", config.application.name);
+        const mailOptions = {
+            from: `${config.application.name} <${config.application.email}>`,
+            to: model.ReceiverEmailAddress,
+            subject,
+            html: template(context),
+            text: disableProjectText,
+            attachments: [{
+                filename: "header_theater_hub.png",
+                path: path.join(process.cwd(), "public/images", "header_theater_hub.png"),
+                cid: "header-image"
+            }]
+        };
+
+        this._transporter.sendMail(mailOptions, (error: any, info: any) => {
+            if (error) {
+                return console.log(error);
+            }
+        });
+
+    }
+
+    public async sendAdminDeleteProjectEmail(model: AdminUpdateProjectEmailDTO): Promise<void> {
+
+        const deleteProjectHTML: string    = fs.readFileSync(path.join(process.cwd(), "src/views/emails/html", "AdminDeleteProject.html"), "utf8");
+        let deleteProjectText: string      = fs.readFileSync(path.join(process.cwd(), "src/views/emails/text", "AdminDeleteProject.txt"), "utf8");
+
+        const greeting: string  = this._localizationService.getText("emails.admin-delete-project.greeting").replace("{0}", model.ReceiverFullName);
+        const content: string   = this._localizationService.getText("emails.admin-delete-project.content").replace("{0}", model.ProjectName);
+
+        deleteProjectText = deleteProjectText
+                    .replace("{{greeting}}", greeting)
+                    .replace("{{content}}", content)
+                    .replace("{{senderEmailAddress}}", model.SenderEmailAddress)
+                    .replace("{{message}}", model.Message);
+
+        const template = handlebars.compile(deleteProjectHTML);
+
+        const context = {
+            greeting,
+            content,
+            senderEmailAddress: model.SenderEmailAddress,
+            message: model.Message
+        };
+
+        const subject     = this._localizationService.getText("emails.admin-delete-project.subject").replace("{0}", config.application.name);
+        const mailOptions = {
+            from: `${config.application.name} <${config.application.email}>`,
+            to: model.ReceiverEmailAddress,
+            subject,
+            html: template(context),
+            text: deleteProjectText,
             attachments: [{
                 filename: "header_theater_hub.png",
                 path: path.join(process.cwd(), "public/images", "header_theater_hub.png"),

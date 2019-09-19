@@ -12,4 +12,12 @@ export interface IAdministrationController {
 
     deleteUser(req: Request, res: Response): Promise<void>;
 
+    getProjects(req: Request, res: Response): Promise<void>;
+
+    enableProject(req: Request, res: Response): Promise<void>;
+
+    disableProject(req: Request, res: Response): Promise<void>;
+
+    deleteProject(req: Request, res: Response): Promise<void>;
+
 }

@@ -251,6 +251,21 @@ export const enLocale = {
             "content-2": "A {0} account has been created for you. Please click on the button below to finish the registration process. If you have any questions please send them to:",
             "button": "CONTINUE"
         },
+        "admin-delete-project": {
+            "subject": "\"{0}\" project deleted",
+            "greeting": "Hi {0},",
+            "content": "Your project: \"{0}\" has been deleted. If you have any questions please send them to:"
+        },
+        "admin-disable-project": {
+            "subject": "\"{0}\" project disabled",
+            "greeting": "Hi {0},",
+            "content": "Your project: \"{0}\" has been disabled. If you have any questions please send them to:"
+        },
+        "admin-enable-project": {
+            "subject": "\"{0}\" project enabled",
+            "greeting": "Hi {0},",
+            "content": "Your project: \"{0}\" has been enabled. If you have any questions please send them to:"
+        },
         "contact": {
             "subject": "contact: {0}",
             "full-name": "Name and last name",

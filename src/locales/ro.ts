@@ -251,6 +251,21 @@ export const roLocale = {
             "content-2": "Un cont {0} a fost creat pentru dumneavoastră. Vă rugăm să apăsați butonul de mai jos pentru a finaliza procesul de înregistrare. În cazul în care aveți întrebări, vă rugăm să le adresați:",
             "button": "CONTINUĂ"
         },
+        "admin-delete-project": {
+            "subject": "Proiectul \"{0}\" șters",
+            "greeting": "Salut {0},",
+            "content": "Proiectul \"{0}\" a fost șters. În cazul în care aveți întrebări, vă rugăm să le adresați:"
+        },
+        "admin-disable-project": {
+            "subject": "Proiectul \"{0}\" dezactivat",
+            "greeting": "Salut {0},",
+            "content": "Proiectul \"{0}\" a fost dezactivat. În cazul în care aveți întrebări, vă rugăm să le adresați:"
+        },
+        "admin-enable-project": {
+            "subject": "Proiectul \"{0}\" activat",
+            "greeting": "Salut {0},",
+            "content": "Proiectul \"{0}\" a fost activat. În cazul în care aveți întrebări, vă rugăm să le adresați:"
+        },
         "contact": {
             "subject": "contact: {0}",
             "full-name": "Nume și prenume",
