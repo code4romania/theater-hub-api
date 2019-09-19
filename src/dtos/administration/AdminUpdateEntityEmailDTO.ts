@@ -1,5 +1,5 @@
 
-export class AdminUpdateUserEmailDTO {
+export class AdminUpdateEntityEmailDTO {
 
     public SenderEmailAddress: string;
 
