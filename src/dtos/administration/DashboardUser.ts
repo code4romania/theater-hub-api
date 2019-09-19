@@ -1,5 +1,6 @@
 import { User }                                                from "../../models";
-import { UserAccountStatusType, UserRoleType, VisibilityType } from "../../enums";
+import { UserAccountProviderType, UserAccountStatusType,
+                                UserRoleType, VisibilityType } from "../../enums";
 
 export class DashboardUser {
 
@@ -10,6 +11,8 @@ export class DashboardUser {
         this.FirstName          = user.Professional.FirstName;
         this.LastName           = user.Professional.LastName;
         this.Email              = user.Email;
+        this.AccountProvider    = user.AccountSettings.AccountProvider;
+        this.InviterEmail       = user.AccountSettings.InviterEmail;
         this.AccountStatus      = user.AccountSettings.AccountStatus;
         this.Role               = user.AccountSettings.Role;
         this.ProfileVisibility  = user.AccountSettings.ProfileVisibility;
@@ -26,6 +29,10 @@ export class DashboardUser {
     public LastName: string;
 
     public Email: string;
+
+    public AccountProvider: UserAccountProviderType;
+
+    public InviterEmail?: string;
 
     public AccountStatus: UserAccountStatusType;
 

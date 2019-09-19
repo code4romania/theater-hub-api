@@ -28,6 +28,9 @@ export class UserAccountSettings extends BaseEntity {
     @Column()
     AccountProvider: UserAccountProviderType;
 
+    @Column("varchar", { nullable: true })
+    InviterEmail: string;
+
     @Column()
     AccountStatus: UserAccountStatusType;
 

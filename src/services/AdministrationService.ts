@@ -177,13 +177,15 @@ export class AdministrationService implements IAdministrationService {
         const user: User = {
             Email:              managedUser.Email,
             Name:               "",
-            PasswordHash:       ""
+            PasswordHash:       "",
+            Username:           uuidv4()
         } as User;
 
         user.AccountSettings = {
             RegistrationIDHash:     registrationIDHash,
             EntityCategory:         EntityCategoryType.Professional,
             AccountProvider:        UserAccountProviderType.Local,
+            InviterEmail:           adminUser.Email,
             AccountStatus:          UserAccountStatusType.Managed,
             Role:                   managedUser.Role,
             ProfileVisibility:      VisibilityType.Private,

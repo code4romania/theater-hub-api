@@ -620,6 +620,8 @@ export class UserService extends BaseService<User> implements IUserService {
 
         dbUser.Name         = `${request.FirstName} ${request.LastName}`;
         dbUser.PasswordHash = passwordHash;
+        dbUser.Username     = await this.getUsername(request.FirstName, request.LastName);
+
         this._userRepository
             .runCreateQueryBuilder()
             .update(User)
