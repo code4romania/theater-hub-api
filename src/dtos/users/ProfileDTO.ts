@@ -2,10 +2,11 @@ import { Award, Experience, Education,
                  User, UserImage, UserVideo }         from "../../models";
 import { SocialMediaCategoryType,
                       VisibilityType, LocaleType }    from "../../enums";
+import { PofileProjectDTO }                           from "../projects";
 
 export class ProfileDTO {
 
-    public constructor (user: User, includeID: boolean = false) {
+    public constructor (user: User, includeID: boolean = false, includeProjects: boolean = false) {
 
         if (includeID) {
             this.ID = user.ID;
@@ -68,6 +69,10 @@ export class ProfileDTO {
         this.PhoneNumberVisibility = user.AccountSettings.PhoneNumberVisibility;
 
         this.Locale                = user.AccountSettings.Locale;
+
+        if (includeProjects && user.Projects) {
+            this.Projects = user.Projects.map(p => new PofileProjectDTO(p));
+        }
     }
 
     public ID?: string;
@@ -146,4 +151,7 @@ export class ProfileDTO {
 
     public Locale: LocaleType;
 
+    // Projects
+
+    public Projects?: PofileProjectDTO[];
 }
