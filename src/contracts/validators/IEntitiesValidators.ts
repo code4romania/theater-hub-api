@@ -9,4 +9,8 @@ export interface IEntitiesValidators {
 
     getUserVideoValidators(): any;
 
+    getProjectNeedsValidators(): any;
+
+    getProjectUpdatesValidators(): any;
+
 }

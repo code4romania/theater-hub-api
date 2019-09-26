@@ -171,7 +171,7 @@ export class UserService extends BaseService<User> implements IUserService {
                 User: dbUser
             } as UserImage;
 
-            await this._userImageRepository.insert(profileImage);
+            profileImage = await this._userImageRepository.insert(profileImage);
         } else if (profileImageFile && dbProfileImage) {
             const newProfileImageUploadPromise = this._fileService.uploadFile(profileImageFile, FileType.Image, userEmail);
             const oldProfileImageRemovePromise = this._fileService.deleteFile(dbProfileImage.Key);
@@ -183,7 +183,7 @@ export class UserService extends BaseService<User> implements IUserService {
             profileImage.Key                = updateProfileImageResults[0].Key;
             profileImage.Size               = Math.round(profileImageFile.size * 100 / (1000 * 1000)) / 100;
 
-            this._userImageRepository.update(profileImage);
+            profileImage = await this._userImageRepository.update(profileImage);
         } else if (!profileImageFile && !generalInformationSection.ProfileImage && dbProfileImage) {
             this._fileService.deleteFile(dbProfileImage.Key);
             this._userImageRepository.deleteByID(dbProfileImage.ID);
@@ -263,7 +263,8 @@ export class UserService extends BaseService<User> implements IUserService {
                     Description: generalInformationSection.Description,
                     Website: generalInformationSection.Website,
                     Name: `${generalInformationSection.FirstName} ${generalInformationSection.LastName}`,
-                    Username: username
+                    Username: username,
+                    ProfileImageID: profileImage ? profileImage.ID : undefined
                 })
                 .where("Email = :userEmail", { userEmail })
                 .execute();

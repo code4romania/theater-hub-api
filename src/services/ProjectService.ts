@@ -94,8 +94,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
 
         project.Updates = [];
         project.Updates.push({
-            Description: this._localizationService.getText("content.project-created"),
-            Date: createProjectDTO.DateCreated
+            Description: this._localizationService.getText("content.project-created")
         } as ProjectUpdate);
 
         const dbProject: Project = await this.create(project);
@@ -117,6 +116,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                 .from(Project, "project")
                 .leftJoinAndSelect("project.Initiator", "initiator")
                 .leftJoinAndSelect("initiator.ProfileImage", "profileImage")
+                .leftJoinAndSelect("initiator.PhotoGallery", "photoGallery")
                 .leftJoinAndSelect("project.Image", "image")
                 .leftJoinAndSelect("project.Needs", "needs")
                 .leftJoinAndSelect("project.Updates", "updates")
@@ -198,11 +198,13 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
     public async getMyProjects(email: string): Promise<MyProjectDTO[]> {
         const dbUser: User = await this._userService.getByEmail(email);
 
-        return dbUser.Projects.map(p => {
+        return dbUser.Projects
+        .sort((p1, p2) => p1.DateCreated > p2.DateCreated ? -1 : 1)
+        .map(p => {
             return {
                 ID: p.ID,
                 Name: p.Name,
-                Image: p.Image ? p.Image.Location : "",
+                Image: p.Image ? p.Image.ThumbnailLocation : "",
                 Date: p.Date,
                 City: p.City,
                 Budget: p.Budget,
@@ -304,6 +306,72 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                             .getMany();
 
         return projects.map(p => new ProjectListItem(p));
+    }
+
+    public async updateGeneralInformation(userEmail: string,
+            generalInformationSection: ProjectDTO,
+            projectImageFile: any): Promise<ProjectDTO> {
+
+        const dbProject: Project            = await this._projectRepository.getByID(generalInformationSection.ID);
+        const dbUser: User                  = await this._userService.getByEmail(userEmail);
+        const dbProjectImage: ProjectImage  = dbProject.Image;
+        let projectImage: ProjectImage      = dbProjectImage;
+
+        if (projectImageFile && !dbProjectImage) {
+            const uploadProjectImageResult: any
+                            = await this._fileService.uploadFile(projectImageFile, FileType.Image, userEmail);
+
+            projectImage = {
+                Key: uploadProjectImageResult.Key,
+                Location: uploadProjectImageResult.Location,
+                ThumbnailLocation: AWS.getThumbnailURL(uploadProjectImageResult.Key),
+                Size: Math.round(projectImageFile.size * 100 / (1000 * 1000)) / 100, // in MB
+            } as ProjectImage;
+
+            projectImage = await this._projectImageRepository.insert(projectImage);
+        } else if (projectImageFile && dbProjectImage) {
+            const newProjectImageUploadPromise = this._fileService.uploadFile(projectImageFile, FileType.Image, userEmail);
+            const oldProjectImageRemovePromise = this._fileService.deleteFile(dbProjectImage.Key);
+
+            const updateProjectImageResults: any  = await Promise.all([newProjectImageUploadPromise, oldProjectImageRemovePromise]);
+
+            projectImage.Location           = updateProjectImageResults[0].Location;
+            projectImage.ThumbnailLocation  = AWS.getThumbnailURL(updateProjectImageResults[0].Key);
+            projectImage.Key                = updateProjectImageResults[0].Key;
+            projectImage.Size               = Math.round(projectImageFile.size * 100 / (1000 * 1000)) / 100;
+
+            projectImage = await this._projectImageRepository.update(projectImage);
+        } else if (!projectImageFile && !generalInformationSection.Image && dbProjectImage) {
+            this._fileService.deleteFile(dbProjectImage.Key);
+            this._projectImageRepository.deleteByID(dbProjectImage.ID);
+            projectImage = undefined;
+        }
+
+        const budget: number = +generalInformationSection.Budget || 0;
+
+        await this._projectRepository
+            .runCreateQueryBuilder()
+            .update(Project)
+            .set({
+                Name: generalInformationSection.Name,
+                Description: generalInformationSection.Description,
+                Email: generalInformationSection.Email,
+                PhoneNumber: generalInformationSection.PhoneNumber,
+                Date: generalInformationSection.Date,
+                Budget: budget,
+                Currency: generalInformationSection.Currency,
+                City: generalInformationSection.City,
+                Visibility: generalInformationSection.Visibility,
+                Image: projectImage
+            })
+            .where("ID = :id", { id: generalInformationSection.ID })
+            .execute();
+
+        return {
+            ...generalInformationSection,
+            Budget: budget,
+            Image: projectImage
+        };
     }
 
     public async deleteProjectByID(email: string, projectID: string): Promise<Project> {

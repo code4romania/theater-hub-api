@@ -1,6 +1,6 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class SetupMigration1568893238850 implements MigrationInterface {
+export class SetupMigration1569431368794 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.query(
@@ -34,7 +34,8 @@ export class SetupMigration1568893238850 implements MigrationInterface {
         );
 
         await queryRunner.query(
-            `CREATE OR REPLACE PROCEDURE set_project_search_tokens(id UUID)
+            `CREATE OR REPLACE FUNCTION set_project_search_tokens(id UUID)
+                RETURNS VOID
                 AS $$
                 BEGIN
                     UPDATE "Project" p
@@ -64,7 +65,7 @@ export class SetupMigration1568893238850 implements MigrationInterface {
                 RETURNS TRIGGER AS $tr_update_project_search_tokens$
             BEGIN
                 IF (TG_OP = 'INSERT' OR OLD."Name" <> NEW."Name" OR (OLD."Description" IS NULL AND NEW."Description" IS NOT NULL) OR OLD."Description" <> NEW."Description") THEN
-                    CALL set_project_search_tokens(NEW."ID");
+                    PERFORM set_project_search_tokens(NEW."ID");
                 END IF;
 
                 RETURN NEW;
@@ -84,7 +85,7 @@ export class SetupMigration1568893238850 implements MigrationInterface {
                 RETURNS TRIGGER AS $tr_update_project_need_search_tokens$
             BEGIN
                 IF (TG_OP = 'INSERT' OR OLD."Description" <> NEW."Description") THEN
-                    CALL set_project_search_tokens(NEW."ProjectID");
+                    PERFORM set_project_search_tokens(NEW."ProjectID");
                 END IF;
 
                 RETURN NEW;
