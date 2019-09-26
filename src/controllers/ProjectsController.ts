@@ -37,7 +37,14 @@ export class ProjectsController extends BaseApiController<Project> implements IP
 
     public async getByID(request: Request, response: Response): Promise<void> {
         const myEmail: string     = request.Principal ? request.Principal.Email : "";
-        const project: ProjectDTO = await this._projectService.getProject(myEmail, request.params.projectID);
+        const project: ProjectDTO = await this._projectService.getProject(myEmail, request.params.projectID, false);
+
+        response.send(project);
+    }
+
+    public async getMyProject(request: Request, response: Response): Promise<void> {
+        const myEmail: string     = request.Principal ? request.Principal.Email : "";
+        const project: ProjectDTO = await this._projectService.getProject(myEmail, request.params.projectID, true);
 
         response.send(project);
     }
