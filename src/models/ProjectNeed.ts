@@ -1,9 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn,
-                    ManyToOne, JoinColumn }  from "typeorm";
-import { Project }                           from "./Project";
+import { Entity, Column,
+    PrimaryGeneratedColumn,
+    ManyToOne, JoinColumn }  from "typeorm";
+import { BaseEntity }        from "./BaseEntity";
+import { Project }           from "./Project";
 
 @Entity("ProjectNeed")
-export class ProjectNeed {
+export class ProjectNeed extends BaseEntity {
 
     @PrimaryGeneratedColumn("uuid")
     ID: string;

@@ -94,4 +94,26 @@ export class EntitiesValidators implements IEntitiesValidators {
         ];
     }
 
+    public getProjectNeedsValidators() {
+        return [
+            check("Description").not().isEmpty().withMessage((value: string, { req }: any) => {
+                return this._localizationService.getText("validation.project.need.description.required", req.Locale);
+            })
+            .isLength({ max: 500 }).withMessage((value: string, { req }: any) => {
+                return this._localizationService.getText("validation.project.need.description.length", req.Locale);
+            })
+        ];
+    }
+
+    public getProjectUpdatesValidators() {
+        return [
+            check("Description").not().isEmpty().withMessage((value: string, { req }: any) => {
+                return this._localizationService.getText("validation.project.update.description.required", req.Locale);
+            })
+            .isLength({ max: 500 }).withMessage((value: string, { req }: any) => {
+                return this._localizationService.getText("validation.project.update.description.length", req.Locale);
+            })
+        ];
+    }
+
 }

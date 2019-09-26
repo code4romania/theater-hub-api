@@ -60,6 +60,18 @@ export class ProjectsController extends BaseApiController<Project> implements IP
         response.send(projects);
     }
 
+    public async updateGeneralInformation(request: any, response: Response): Promise<void> {
+        const generalInformationSection: ProjectDTO = request.body as ProjectDTO;
+        generalInformationSection.ID                = request.params.projectID;
+
+        const project: ProjectDTO = await this._projectService.updateGeneralInformation(
+                                            request.Principal.Email,
+                                            generalInformationSection,
+                                            request.file);
+
+        response.send(project);
+    }
+
     public async deleteByID(request: Request, response: Response): Promise<void> {
 
         this._projectService.setLocale(request.Locale);

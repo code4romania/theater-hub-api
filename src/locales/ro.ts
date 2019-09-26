@@ -216,13 +216,15 @@ export const roLocale = {
                 "description": {
                     "required": "Descrierea este obligatorie",
                     "length": "Descrierea trebuie să aibă cel mult 500 de caractere"
-                }
+                },
+                "non-existent": "Nevoia nu există!"
             },
             "update": {
                 "description": {
                     "required": "Descrierea este obligatorie",
                     "length": "Descrierea trebuie să aibă cel mult 500 de caractere"
-                }
+                },
+                "non-existent": "Actualizarea nu există!"
             },
             "non-existent": "Proiectul este privat sau nu există.",
             "not-found": "Proiectul nu a fost găsit.",

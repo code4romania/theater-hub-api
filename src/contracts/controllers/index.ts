@@ -5,6 +5,8 @@ export * from "./IAuthenticationController";
 export * from "./IAwardsController";
 export * from "./IEducationController";
 export * from "./IExperienceController";
+export * from "./IProjectNeedsController";
 export * from "./IProjectsController";
+export * from "./IProjectUpdatesController";
 export * from "./IUsersController";
 export * from "./IUserVideosController";

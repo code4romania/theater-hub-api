@@ -216,13 +216,15 @@ export const enLocale = {
                 "description": {
                     "required": "Description is required",
                     "length": "Description's maximum length is of 500 characters"
-                }
+                },
+                "non-existent": "Project need does not exist!"
             },
             "update": {
                 "description": {
                     "required": "Description is required",
                     "length": "Description's maximum length is of 500 characters"
-                }
+                },
+                "non-existent": "Project update does not exist!"
             },
             "non-existent": "Project is private or does not exist.",
             "not-found": "Project not found."
