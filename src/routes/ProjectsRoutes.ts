@@ -29,6 +29,9 @@ export default (app: any) => {
     app.get("/api/projects/:projectID",     getPrincipalIfRequestHasToken,
                                             (req: Request, res: Response) => projectsController.getByID(req, res));
 
+    app.get("/api/projects/me/:projectID",  getPrincipalIfRequestHasToken,
+                                            (req: Request, res: Response) => projectsController.getMyProject(req, res));
+
     app.patch("/api/projects/:projectID",   (req: Request, res: Response) => projectsController.update(req, res));
 
     app.patch("/api/projects/:projectID/general", authorizationMiddleware,

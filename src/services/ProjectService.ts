@@ -102,7 +102,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
         return dbProject;
     }
 
-    public async getProject(email: string, id: string): Promise<ProjectDTO> {
+    public async getProject(email: string, id: string, checkIfOwner: boolean = false): Promise<ProjectDTO> {
         let me: User;
         let fullViewingRights: boolean;
         const viewerIsVisitor: boolean = !email;
@@ -128,6 +128,11 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             }
 
             const initiatorId: string = project.Initiator.ID;
+
+            // check if only the initator is allowed to get the project (e.g. for editing project)
+            if (checkIfOwner && project.Initiator.Email !== email) {
+                throw new Error(this._localizationService.getText("validation.project.non-existent-project"));
+            }
 
             // if email is null then the person making the request is a visitor
             if (!viewerIsVisitor) {
@@ -312,8 +317,14 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             generalInformationSection: ProjectDTO,
             projectImageFile: any): Promise<ProjectDTO> {
 
-        const dbProject: Project            = await this._projectRepository.getByID(generalInformationSection.ID);
-        const dbUser: User                  = await this._userService.getByEmail(userEmail);
+        const dbUser: User          = await this._userService.getByEmail(userEmail);
+        const dbProject: Project    = dbUser.Projects.find(p => p.ID === generalInformationSection.ID);
+
+        // only project initiator should be able to edit project information
+        if (!dbProject) {
+            throw new Error(this._localizationService.getText("validation.project.non-existent"));
+        }
+
         const dbProjectImage: ProjectImage  = dbProject.Image;
         let projectImage: ProjectImage      = dbProjectImage;
 
