@@ -10,7 +10,7 @@ export interface IProjectService extends IBaseService<Project> {
 
     createProject(email: string, createProjectDTO: CreateProjectDTO): Promise<Project>;
 
-    getProject(email: string, id: string): Promise<ProjectDTO>;
+    getProject(email: string, id: string, checkIfOwner: boolean): Promise<ProjectDTO>;
 
     getMyProjects(email: string): Promise<MyProjectDTO[]>;
 
