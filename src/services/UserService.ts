@@ -1281,7 +1281,7 @@ export class UserService extends BaseService<User> implements IUserService {
         const communityMemberEmailVisibility: VisibilityType        = communityMember.AccountSettings.EmailVisibility;
         const communityMemberBirthDateVisibility: VisibilityType    = communityMember.AccountSettings.BirthDateVisibility;
         const communityMemberPhoneNumberVisibility: VisibilityType  = communityMember.AccountSettings.PhoneNumberVisibility;
-        const communityMemberProfile: ProfileDTO                    = new ProfileDTO(communityMember);
+        const communityMemberProfile: ProfileDTO                    = new ProfileDTO(communityMember, false, true);
 
         // if email is null then the person making the request is a visitor
         if (!viewerIsVisitor) {
