@@ -3,7 +3,6 @@ import { Award } from "../../models";
 export class AwardDTO {
 
     public constructor(award: Award) {
-
         this.ID          = award.ID;
         this.Title       = award.Title;
         this.Issuer      = award.Issuer;

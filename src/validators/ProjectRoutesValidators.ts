@@ -22,6 +22,28 @@ export class ProjectRoutesValidators implements IProjectRoutesValidators {
     public getCreateProjectValidators() {
 
         return [
+            ...this.getGeneralInformationValidators(),
+            check("Needs").optional().custom((value: ProjectNeed[], { req }: any) => {
+
+                const needs: ProjectNeed[] = typeof value === "string" ? JSON.parse(value) : value;
+
+                for (const need of needs) {
+                    if (!need.Description ||
+                        need.Description.length === 0 ||
+                        need.Description.length > 500) {
+                            throw new Error(this._localizationService.getText("validation.experience.fileds-required", req.Locale));
+                    }
+                }
+
+                return true;
+            })
+        ];
+
+    }
+
+    public getGeneralInformationValidators() {
+
+        return [
             check("Name").not().isEmpty().withMessage((value: string, { req }: any) => {
                     return this._localizationService.getText("validation.project.name.required", req.Locale);
                 })
@@ -69,20 +91,6 @@ export class ProjectRoutesValidators implements IProjectRoutesValidators {
             check("Budget").optional().custom((value: string, { req }: any) => {
                 if (!Validators.isValidBudget(+value)) {
                     throw new Error(this._localizationService.getText("validation.project.budget.invalid", req.Locale));
-                }
-
-                return true;
-            }),
-            check("Needs").optional().custom((value: ProjectNeed[], { req }: any) => {
-
-                const needs: ProjectNeed[] = typeof value === "string" ? JSON.parse(value) : value;
-
-                for (const need of needs) {
-                    if (!need.Description ||
-                        need.Description.length === 0 ||
-                        need.Description.length > 500) {
-                            throw new Error(this._localizationService.getText("validation.experience.fileds-required", req.Locale));
-                    }
                 }
 
                 return true;

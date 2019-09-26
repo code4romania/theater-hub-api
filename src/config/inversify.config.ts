@@ -3,14 +3,16 @@ import { TYPES }                                                                
 import { IAdministrationController,
     IApplicationDataController, IAuthenticationController,
     IAwardsController, IEducationController, IExperienceController,
-    IProjectsController, IUsersController, IUserVideosController,
+    IProjectNeedsController, IProjectsController, IProjectUpdatesController,
+    IUsersController, IUserVideosController,
     IAuthenticationService, IAdministrationService, IApplicationDataService, IAwardService,
     IEducationService, IExperienceService, IFileService, ILocalizationService,
-    IProjectService, ISkillService,
-    IUserService, IUserVideoService, IEmailService,
+    IProjectNeedService, IProjectService, IProjectUpdateService,
+    ISkillService, IUserService, IUserVideoService, IEmailService,
     IAwardRepository, IEducationRepository, IEntityCategoryRepository,
     IExperienceRepository, ILocaleRepository, ICurrencyRepository,
-    IProfessionalRepository, IProfessionalSkillRepository, IProjectRepository,
+    IProfessionalRepository, IProfessionalSkillRepository,
+    IProjectNeedRepository, IProjectRepository, IProjectUpdateRepository,
     ISkillRepository, IUserAccountSettingsRepository,
     IUserFileRepository, IUserImageRepository,
     IProjectImageRepository, IUserSocialMediaRepository,
@@ -20,20 +22,22 @@ import { IAdministrationController,
 import { AdministrationController,
         ApplicationDataController, AuthenticationController,
         AwardsController, EducationController, ExperienceController,
-        ProjectsController, UsersController,
-        UserVideosController }                                                      from "../controllers";
+        ProjectNeedsController, ProjectsController, ProjectUpdatesController,
+        UsersController, UserVideosController }                                                      from "../controllers";
 import { AdministrationRoutesValidators, AuthenticationRoutesValidators,
          EntitiesValidators, ProjectRoutesValidators,
          UserRoutesValidators }                                                     from "../validators";
 import {
     AdministrationService, ApplicationDataService, AwardService,
     EducationService, ExperienceService, FileService, LocalizationService,
-    ProjectService, SkillService, UserService, UserVideoService,
+    ProjectNeedService, ProjectService, ProjectUpdateService,
+    SkillService, UserService, UserVideoService,
     EmailService, AuthenticationService }                                           from "../services";
 import { AwardRepository,
     EducationRepository, EntityCategoryRepository, ExperienceRepository,
     LocaleRepository, CurrencyRepository,
-    ProfessionalRepository, ProfessionalSkillRepository, ProjectRepository,
+    ProfessionalRepository, ProfessionalSkillRepository,
+    ProjectNeedRepository, ProjectRepository, ProjectUpdateRepository,
     SkillRepository, UserAccountSettingsRepository,
     UserFileRepository, UserImageRepository, ProjectImageRepository,
     UserSocialMediaRepository, UserRepository, UserVideoRepository }                from "../repositories";
@@ -46,7 +50,9 @@ container.bind<IAuthenticationController>(TYPES.AuthenticationController).to(Aut
 container.bind<IAwardsController>(TYPES.AwardsController).to(AwardsController);
 container.bind<IEducationController>(TYPES.EducationController).to(EducationController);
 container.bind<IExperienceController>(TYPES.ExperienceController).to(ExperienceController);
+container.bind<IProjectNeedsController>(TYPES.ProjectNeedsController).to(ProjectNeedsController);
 container.bind<IProjectsController>(TYPES.ProjectsController).to(ProjectsController);
+container.bind<IProjectUpdatesController>(TYPES.ProjectUpdatesController).to(ProjectUpdatesController);
 container.bind<IUsersController>(TYPES.UsersController).to(UsersController);
 container.bind<IUserVideosController>(TYPES.UserVideosController).to(UserVideosController);
 
@@ -64,7 +70,9 @@ container.bind<IEducationService>(TYPES.EducationService).to(EducationService);
 container.bind<IExperienceService>(TYPES.ExperienceService).to(ExperienceService);
 container.bind<IFileService>(TYPES.FileService).to(FileService);
 container.bind<ILocalizationService>(TYPES.LocalizationService).to(LocalizationService);
+container.bind<IProjectNeedService>(TYPES.ProjectNeedService).to(ProjectNeedService);
 container.bind<IProjectService>(TYPES.ProjectService).to(ProjectService);
+container.bind<IProjectUpdateService>(TYPES.ProjectUpdateService).to(ProjectUpdateService);
 container.bind<ISkillService>(TYPES.SkillService).to(SkillService);
 container.bind<IUserService>(TYPES.UserService).to(UserService);
 container.bind<IUserVideoService>(TYPES.UserVideoService).to(UserVideoService);
@@ -78,7 +86,9 @@ container.bind<ILocaleRepository>(TYPES.LocaleRepository).to(LocaleRepository);
 container.bind<ICurrencyRepository>(TYPES.CurrencyRepository).to(CurrencyRepository);
 container.bind<IProfessionalRepository>(TYPES.ProfessionalRepository).to(ProfessionalRepository);
 container.bind<IProfessionalSkillRepository>(TYPES.ProfessionalSkillRepository).to(ProfessionalSkillRepository);
+container.bind<IProjectNeedRepository>(TYPES.ProjectNeedRepository).to(ProjectNeedRepository);
 container.bind<IProjectRepository>(TYPES.ProjectRepository).to(ProjectRepository);
+container.bind<IProjectUpdateRepository>(TYPES.ProjectUpdateRepository).to(ProjectUpdateRepository);
 container.bind<IUserFileRepository>(TYPES.UserFileRepository).to(UserFileRepository);
 container.bind<IUserImageRepository>(TYPES.UserImageRepository).to(UserImageRepository);
 container.bind<IUserSocialMediaRepository>(TYPES.UserSocialMediaRepository).to(UserSocialMediaRepository);

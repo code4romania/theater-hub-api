@@ -1,46 +1,45 @@
-import { Project }      from "../../models";
-import { NeedDTO,
+import { Project, ProjectImage }            from "../../models";
+import { ProjectNeedDTO,
         OtherProjectDTO,
-        UpdateDTO }     from ".";
-import { CurrencyType}  from "../../enums";
+        UpdateDTO }                         from "../";
+import { CurrencyType, VisibilityType }     from "../../enums";
 
 export class ProjectDTO {
 
-    public constructor (project: Project, otherProjects: Project[] = [], includeID: boolean = false) {
+    public constructor (project: Project, otherProjects: Project[] = [], includeID: boolean = true) {
 
         if (includeID) {
             this.ID = project.ID;
         }
 
-        if (project.Initiator.ProfileImage) {
-            this.InitiatorImage = project.Initiator.ProfileImage.Location;
-        }
-
-        if (project.Image) {
-            this.Image = project.Image.Location;
-        }
+        const initiatorProfileImage = project.Initiator.ProfileImage || project.Initiator.PhotoGallery.find(p => p.IsProfileImage);
 
         this.Name           = project.Name;
         this.Description    = project.Description;
+        this.Image          = project.Image;
         this.InitiatorName  = project.Initiator.Name;
+        this.InitiatorImage = initiatorProfileImage;
         this.Email          = project.Email;
         this.PhoneNumber    = project.PhoneNumber;
         this.Date           = project.Date;
         this.Budget         = project.Budget;
         this.Currency       = project.Currency;
         this.City           = project.City;
+        this.Visibility     = project.Visibility;
         this.Needs          = project.Needs.map(n => {
             return {
                 ID: n.ID,
                 Description: n.Description,
-                IsMandatory: n.IsMandatory
+                IsMandatory: n.IsMandatory,
+                Date: n.DateCreated,
+                ProjectID:   project.ID
             };
         });
         this.Updates          = project.Updates.map(u => {
             return {
                 ID: u.ID,
                 Description: u.Description,
-                Date: u.Date
+                Date: u.DateCreated
             };
         });
         this.OtherProjects    = otherProjects
@@ -69,7 +68,7 @@ export class ProjectDTO {
 
     public Description: string;
 
-    public InitiatorImage: string;
+    public InitiatorImage: ProjectImage;
 
     public InitiatorName: string;
 
@@ -85,10 +84,12 @@ export class ProjectDTO {
 
     public City: string;
 
-    public Needs: NeedDTO[];
+    public Needs: ProjectNeedDTO[];
 
     public Updates: UpdateDTO[];
 
     public OtherProjects: OtherProjectDTO[];
+
+    Visibility: VisibilityType;
 
 }

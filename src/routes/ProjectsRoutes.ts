@@ -31,6 +31,12 @@ export default (app: any) => {
 
     app.patch("/api/projects/:projectID",   (req: Request, res: Response) => projectsController.update(req, res));
 
+    app.patch("/api/projects/:projectID/general", authorizationMiddleware,
+                                                upload.single("Image"),
+                                                projectRoutesValidators.getGeneralInformationValidators(),
+                                                validatorMiddleware,
+                                                (req: Request, res: Response) => projectsController.updateGeneralInformation(req, res));
+
     app.delete("/api/projects/:projectID",  authorizationMiddleware,
                                             (req: Request, res: Response) => projectsController.deleteByID(req, res));
 
