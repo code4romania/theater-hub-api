@@ -5,6 +5,7 @@ import { User }                                               from "./User";
 import { ProjectImage }                                       from "./ProjectImage";
 import { ProjectNeed }                                        from "./ProjectNeed";
 import { ProjectUpdate }                                      from "./ProjectUpdate";
+import { ProjectTag }                                         from "./ProjectTag";
 import { CurrencyType, ProjectStatusType, VisibilityType }    from "../enums";
 
 @Entity("Project")
@@ -48,16 +49,19 @@ export class Project extends BaseEntity {
   @JoinColumn({ name: "ImageID" })
   Image: ProjectImage;
 
+  @Column()
+  Status: ProjectStatusType;
+
+  @Column()
+  Visibility: VisibilityType;
+
   @OneToMany(type => ProjectNeed, need => need.Project, { cascade: true, eager: true })
   Needs: ProjectNeed[];
 
   @OneToMany(type => ProjectUpdate, update => update.Project, { cascade: true, eager: true })
   Updates: ProjectUpdate[];
 
-  @Column()
-  Status: ProjectStatusType;
-
-  @Column()
-  Visibility: VisibilityType;
+  @OneToMany(type => ProjectTag, projectTag => projectTag.Project, { cascade: true, eager: true })
+  Tags?: ProjectTag[];
 
 }

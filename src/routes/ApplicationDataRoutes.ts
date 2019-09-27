@@ -17,6 +17,9 @@ export default (app: any) => {
     app.get("/api/applicationdata/currencies",
                 (req: Request, res: Response) => applicationDataController.getCurrencies(req, res));
 
+    app.get("/api/applicationdata/tags",
+                (req: Request, res: Response) => applicationDataController.getTags(req, res));
+
     app.get("/api/applicationdata/general",
                 (req: Request, res: Response) => applicationDataController.getGeneralApplicationInformation(req, res));
 

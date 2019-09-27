@@ -37,6 +37,14 @@ export class ApplicationDataController implements IApplicationDataController {
 
     }
 
+    public async getTags(request: Request, response: Response): Promise<void> {
+
+        const tags = await this._applicationDataService.getTags();
+
+        response.send(tags);
+
+    }
+
     public async getGeneralApplicationInformation(request: Request, response: Response): Promise<void> {
 
         const generalApplicationInformation = await this._applicationDataService.getGeneralApplicationInformation();

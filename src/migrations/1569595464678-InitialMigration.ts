@@ -1,6 +1,6 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class InitialMigration1569431272282 implements MigrationInterface {
+export class InitialMigration1569595464678 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.query(`CREATE TABLE "UserFile" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "Key" character varying NOT NULL, "Location" character varying NOT NULL, "FileCategory" integer NOT NULL, "UserID" uuid, CONSTRAINT "PK_38196a9bc4691af4ca2c1ecaf6c" PRIMARY KEY ("ID"))`);
@@ -15,8 +15,12 @@ export class InitialMigration1569431272282 implements MigrationInterface {
         await queryRunner.query(`CREATE TABLE "Professional" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "FirstName" character varying(100) NOT NULL, "LastName" character varying(100) NOT NULL, "UserID" uuid, CONSTRAINT "REL_8ed7e58c98b95d0ae3cffaab4f" UNIQUE ("UserID"), CONSTRAINT "PK_454aa355f9b9ff32a15fc74c8e6" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "UserAccountSettings" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "RegistrationIDHash" character varying NOT NULL, "ResetForgottenPasswordIDHash" character varying, "ResetForgottenPasswordExpiration" TIMESTAMP WITH TIME ZONE, "AccountProvider" integer NOT NULL, "InviterEmail" character varying, "AccountStatus" integer NOT NULL, "Role" integer NOT NULL, "EntityCategory" integer NOT NULL, "ProfileVisibility" integer NOT NULL, "EmailVisibility" integer NOT NULL, "BirthDateVisibility" integer NOT NULL, "PhoneNumberVisibility" integer NOT NULL, "Locale" character varying NOT NULL, "UserID" uuid, CONSTRAINT "REL_5a7eb571f0bc1e9de185a6b63d" UNIQUE ("UserID"), CONSTRAINT "PK_9272ecdde0da589d97ea1d2e95d" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "ProjectImage" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "Key" character varying NOT NULL, "Location" character varying NOT NULL, "ThumbnailLocation" character varying NOT NULL, "Size" numeric NOT NULL, CONSTRAINT "PK_03444fde5df9645896a00e848a6" PRIMARY KEY ("ID"))`);
-        await queryRunner.query(`CREATE TABLE "ProjectNeed" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "Description" character varying(500) NOT NULL, "IsMandatory" boolean NOT NULL, "ProjectID" uuid, CONSTRAINT "PK_8952f563a39e0dd9a759bac286c" PRIMARY KEY ("ID"))`);
+        await queryRunner.query(`CREATE TABLE "ProjectNeedTagCategory" ("ID" character varying(20) NOT NULL, "Name" character varying(100) NOT NULL, "Color" character varying(20) NOT NULL, "BackgroundColor" character varying(20) NOT NULL, CONSTRAINT "PK_a6de81897e8c2b1584f2b3d6067" PRIMARY KEY ("ID"))`);
+        await queryRunner.query(`CREATE TABLE "ProjectNeedTag" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ProjectNeedID" uuid NOT NULL, "ProjectNeedTagCategoryID" character varying NOT NULL, CONSTRAINT "PK_c2c741d8a50d804f5a73141fa4e" PRIMARY KEY ("ProjectNeedID", "ProjectNeedTagCategoryID"))`);
+        await queryRunner.query(`CREATE TABLE "ProjectNeed" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "Description" character varying(500) NOT NULL, "ProjectID" uuid, CONSTRAINT "PK_8952f563a39e0dd9a759bac286c" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "ProjectUpdate" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "Description" character varying(500) NOT NULL, "ProjectID" uuid, CONSTRAINT "PK_13e35a1926f2312f03d1310ea54" PRIMARY KEY ("ID"))`);
+        await queryRunner.query(`CREATE TABLE "ProjectTagCategory" ("ID" character varying(20) NOT NULL, "Name" character varying(100) NOT NULL, "Color" character varying(20) NOT NULL, "BackgroundColor" character varying(20) NOT NULL, CONSTRAINT "PK_50bbea07d981e428ae579f55adc" PRIMARY KEY ("ID"))`);
+        await queryRunner.query(`CREATE TABLE "ProjectTag" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ProjectID" uuid NOT NULL, "ProjectTagCategoryID" character varying NOT NULL, CONSTRAINT "PK_72e7a395052cedb49514348957b" PRIMARY KEY ("ProjectID", "ProjectTagCategoryID"))`);
         await queryRunner.query(`CREATE TABLE "Project" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "Name" character varying(100) NOT NULL, "Description" character varying(500), "Email" character varying(100), "PhoneNumber" character varying(50), "Date" TIMESTAMP WITH TIME ZONE NOT NULL, "Budget" numeric, "Currency" character varying NOT NULL, "City" character varying(100) NOT NULL, "SearchTokens" tsvector, "Status" integer NOT NULL, "Visibility" integer NOT NULL, "InitiatorID" uuid, "ImageID" uuid, CONSTRAINT "REL_91b433e693d439d9ce40623f18" UNIQUE ("ImageID"), CONSTRAINT "PK_8d9b9f2cd4400b2861e2fa3f00d" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "User" ("DateCreated" TIMESTAMP NOT NULL DEFAULT now(), "DateUpdated" TIMESTAMP NOT NULL DEFAULT now(), "Version" integer NOT NULL, "ID" uuid NOT NULL DEFAULT uuid_generate_v4(), "Name" character varying NOT NULL, "Email" character varying(100) NOT NULL, "Username" character varying(100) NOT NULL, "PasswordHash" character varying NOT NULL, "Description" character varying, "BirthDate" TIMESTAMP WITH TIME ZONE, "PhoneNumber" character varying, "Website" character varying, "SearchTokens" tsvector, "ProfileImageID" uuid, CONSTRAINT "REL_6b519da47b33fb18d9db02d97e" UNIQUE ("ProfileImageID"), CONSTRAINT "PK_7c38bb872c3c617c80a311b81d0" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE UNIQUE INDEX "IDX_2f56f7040c2b05fc8f08a113f7" ON "User"  ("Email") `);
@@ -24,7 +28,7 @@ export class InitialMigration1569431272282 implements MigrationInterface {
         await queryRunner.query(`CREATE TABLE "Currency" ("ID" character varying(10) NOT NULL, "Name" character varying(100) NOT NULL, CONSTRAINT "PK_eefb5d87e298802d8c17beccf94" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "EntityCategory" ("ID" integer NOT NULL, "Name" character varying(100) NOT NULL, "ParentID" integer, CONSTRAINT "PK_029cde6c720b2d2a0c8a8383f22" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "FileCategory" ("ID" integer NOT NULL, "Name" character varying(100) NOT NULL, CONSTRAINT "PK_907c2a3a04bad851a27f6678f0c" PRIMARY KEY ("ID"))`);
-        await queryRunner.query(`CREATE TABLE "Locale" ("ID" character varying(10) NOT NULL, "Name" character varying(100) NOT NULL, CONSTRAINT "PK_0150618d9beeaaf5c3174449330" PRIMARY KEY ("ID"))`);
+        await queryRunner.query(`CREATE TABLE "Locale" ("ID" character varying(20) NOT NULL, "Name" character varying(100) NOT NULL, CONSTRAINT "PK_0150618d9beeaaf5c3174449330" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "ProjectStatus" ("ID" integer NOT NULL, "Name" character varying(100) NOT NULL, CONSTRAINT "PK_a6e01c7a8c2dd00c241bea328a7" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "UserAccountProvider" ("ID" integer NOT NULL, "Name" character varying(100) NOT NULL, CONSTRAINT "PK_43e9fba091dc9110517dc37e5d9" PRIMARY KEY ("ID"))`);
         await queryRunner.query(`CREATE TABLE "UserAccountStatus" ("ID" integer NOT NULL, "Name" character varying(100) NOT NULL, CONSTRAINT "PK_00e661e287613a84e9146e1791f" PRIMARY KEY ("ID"))`);
@@ -41,8 +45,12 @@ export class InitialMigration1569431272282 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "ProfessionalSkill" ADD CONSTRAINT "FK_fd463917344b48a4f8baf2e4329" FOREIGN KEY ("SkillID") REFERENCES "Skill"("ID")`);
         await queryRunner.query(`ALTER TABLE "Professional" ADD CONSTRAINT "FK_8ed7e58c98b95d0ae3cffaab4ff" FOREIGN KEY ("UserID") REFERENCES "User"("ID") ON DELETE CASCADE`);
         await queryRunner.query(`ALTER TABLE "UserAccountSettings" ADD CONSTRAINT "FK_5a7eb571f0bc1e9de185a6b63df" FOREIGN KEY ("UserID") REFERENCES "User"("ID") ON DELETE CASCADE`);
+        await queryRunner.query(`ALTER TABLE "ProjectNeedTag" ADD CONSTRAINT "FK_4b03804d26a472b7b9f7966a490" FOREIGN KEY ("ProjectNeedID") REFERENCES "ProjectNeed"("ID") ON DELETE CASCADE`);
+        await queryRunner.query(`ALTER TABLE "ProjectNeedTag" ADD CONSTRAINT "FK_806ecc48d7e0815ad7e3317fab1" FOREIGN KEY ("ProjectNeedTagCategoryID") REFERENCES "ProjectNeedTagCategory"("ID")`);
         await queryRunner.query(`ALTER TABLE "ProjectNeed" ADD CONSTRAINT "FK_064cc6a0d594b4ce4fb9e3d12f6" FOREIGN KEY ("ProjectID") REFERENCES "Project"("ID") ON DELETE CASCADE`);
         await queryRunner.query(`ALTER TABLE "ProjectUpdate" ADD CONSTRAINT "FK_21c6a4d8a159111832d4847bb21" FOREIGN KEY ("ProjectID") REFERENCES "Project"("ID") ON DELETE CASCADE`);
+        await queryRunner.query(`ALTER TABLE "ProjectTag" ADD CONSTRAINT "FK_e8592a6e4919af5aa6940c4a38a" FOREIGN KEY ("ProjectID") REFERENCES "Project"("ID") ON DELETE CASCADE`);
+        await queryRunner.query(`ALTER TABLE "ProjectTag" ADD CONSTRAINT "FK_0eb78f0d67941d2404409d2ed03" FOREIGN KEY ("ProjectTagCategoryID") REFERENCES "ProjectTagCategory"("ID")`);
         await queryRunner.query(`ALTER TABLE "Project" ADD CONSTRAINT "FK_a04b712fcb031615174cdf8ab35" FOREIGN KEY ("InitiatorID") REFERENCES "User"("ID") ON DELETE CASCADE`);
         await queryRunner.query(`ALTER TABLE "Project" ADD CONSTRAINT "FK_91b433e693d439d9ce40623f187" FOREIGN KEY ("ImageID") REFERENCES "ProjectImage"("ID")`);
         await queryRunner.query(`ALTER TABLE "User" ADD CONSTRAINT "FK_6b519da47b33fb18d9db02d97e1" FOREIGN KEY ("ProfileImageID") REFERENCES "UserImage"("ID")`);
@@ -56,8 +64,12 @@ export class InitialMigration1569431272282 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "User" DROP CONSTRAINT "FK_6b519da47b33fb18d9db02d97e1"`);
         await queryRunner.query(`ALTER TABLE "Project" DROP CONSTRAINT "FK_91b433e693d439d9ce40623f187"`);
         await queryRunner.query(`ALTER TABLE "Project" DROP CONSTRAINT "FK_a04b712fcb031615174cdf8ab35"`);
+        await queryRunner.query(`ALTER TABLE "ProjectTag" DROP CONSTRAINT "FK_0eb78f0d67941d2404409d2ed03"`);
+        await queryRunner.query(`ALTER TABLE "ProjectTag" DROP CONSTRAINT "FK_e8592a6e4919af5aa6940c4a38a"`);
         await queryRunner.query(`ALTER TABLE "ProjectUpdate" DROP CONSTRAINT "FK_21c6a4d8a159111832d4847bb21"`);
         await queryRunner.query(`ALTER TABLE "ProjectNeed" DROP CONSTRAINT "FK_064cc6a0d594b4ce4fb9e3d12f6"`);
+        await queryRunner.query(`ALTER TABLE "ProjectNeedTag" DROP CONSTRAINT "FK_806ecc48d7e0815ad7e3317fab1"`);
+        await queryRunner.query(`ALTER TABLE "ProjectNeedTag" DROP CONSTRAINT "FK_4b03804d26a472b7b9f7966a490"`);
         await queryRunner.query(`ALTER TABLE "UserAccountSettings" DROP CONSTRAINT "FK_5a7eb571f0bc1e9de185a6b63df"`);
         await queryRunner.query(`ALTER TABLE "Professional" DROP CONSTRAINT "FK_8ed7e58c98b95d0ae3cffaab4ff"`);
         await queryRunner.query(`ALTER TABLE "ProfessionalSkill" DROP CONSTRAINT "FK_fd463917344b48a4f8baf2e4329"`);
@@ -82,8 +94,12 @@ export class InitialMigration1569431272282 implements MigrationInterface {
         await queryRunner.query(`DROP INDEX "IDX_2f56f7040c2b05fc8f08a113f7"`);
         await queryRunner.query(`DROP TABLE "User"`);
         await queryRunner.query(`DROP TABLE "Project"`);
+        await queryRunner.query(`DROP TABLE "ProjectTag"`);
+        await queryRunner.query(`DROP TABLE "ProjectTagCategory"`);
         await queryRunner.query(`DROP TABLE "ProjectUpdate"`);
         await queryRunner.query(`DROP TABLE "ProjectNeed"`);
+        await queryRunner.query(`DROP TABLE "ProjectNeedTag"`);
+        await queryRunner.query(`DROP TABLE "ProjectNeedTagCategory"`);
         await queryRunner.query(`DROP TABLE "ProjectImage"`);
         await queryRunner.query(`DROP TABLE "UserAccountSettings"`);
         await queryRunner.query(`DROP TABLE "Professional"`);

@@ -1,6 +1,6 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class SeedMigration1569431299920 implements MigrationInterface {
+export class SeedMigration1569595479119 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.query(`INSERT INTO "EntityCategory"("ID", "Name", "ParentID") VALUES (0, 'Professional', null)`);
@@ -51,6 +51,12 @@ export class SeedMigration1569431299920 implements MigrationInterface {
         await queryRunner.query(`INSERT INTO "Currency"("ID", "Name") VALUES ('RON', 'Romania Leu')`);
         await queryRunner.query(`INSERT INTO "Currency"("ID", "Name") VALUES ('USD', 'US Dollar')`);
         await queryRunner.query(`INSERT INTO "Currency"("ID", "Name") VALUES ('EUR', 'Euro')`);
+
+        await queryRunner.query(`INSERT INTO "ProjectTagCategory"("ID", "Name", "Color", "BackgroundColor") VALUES ('done', 'DONE', '#FFF', '#27AE60')`);
+
+        await queryRunner.query(`INSERT INTO "ProjectNeedTagCategory"("ID", "Name", "Color", "BackgroundColor") VALUES ('done', 'DONE', '#FFF' , '#27AE60')`);
+        await queryRunner.query(`INSERT INTO "ProjectNeedTagCategory"("ID", "Name", "Color", "BackgroundColor") VALUES ('mandatory', 'MANDATORY', '#FFF' , '#9c27b0')`);
+        await queryRunner.query(`INSERT INTO "ProjectNeedTagCategory"("ID", "Name", "Color", "BackgroundColor") VALUES ('urgent', 'URGENT', '#FFF' , '#F00')`);
     }
 
     public async down(queryRunner: QueryRunner): Promise<any> {

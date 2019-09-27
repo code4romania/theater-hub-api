@@ -36,9 +36,9 @@ export class ProjectNeedsController extends BaseApiController<ProjectNeed> imple
 
         this._projectNeedService.setLocale(request.Locale);
 
-        const projectNeed = await this._projectNeedService.updateProjectNeed(request.Principal.Email, updateProjectNeedDTO);
+        await this._projectNeedService.updateProjectNeed(request.Principal.Email, updateProjectNeedDTO);
 
-        response.send(new ProjectNeedDTO(projectNeed));
+        response.sendStatus(200);
     }
 
     public async deleteByID(request: Request, response: Response): Promise<void> {

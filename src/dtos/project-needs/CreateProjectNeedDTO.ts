@@ -2,7 +2,7 @@ export class CreateProjectNeedDTO {
 
     public Description: string;
 
-    public IsMandatory: boolean;
+    public Tags: string[];
 
     public ProjectID: string;
 
