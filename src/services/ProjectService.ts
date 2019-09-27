@@ -84,8 +84,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             project.Needs = [];
             needs.forEach((n: ProjectNeed ) => {
                 const need: ProjectNeed = {
-                    Description: n.Description,
-                    IsMandatory: n.IsMandatory
+                    Description: n.Description
                 } as ProjectNeed;
 
                 project.Needs.push(need);
@@ -119,6 +118,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                 .leftJoinAndSelect("initiator.PhotoGallery", "photoGallery")
                 .leftJoinAndSelect("project.Image", "image")
                 .leftJoinAndSelect("project.Needs", "needs")
+                .leftJoinAndSelect("needs.Tags", "tags")
                 .leftJoinAndSelect("project.Updates", "updates")
                 .where("project.ID = :id AND project.Status = :status", { id, status: ProjectStatusType.Enabled })
                 .getOne();
