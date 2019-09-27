@@ -8,6 +8,8 @@ export interface IApplicationDataController {
 
     getCurrencies(req: Request, res: Response): Promise<void>;
 
+    getTags(request: Request, response: Response): Promise<void>;
+
     getGeneralApplicationInformation(req: Request, res: Response): Promise<void>;
 
 }

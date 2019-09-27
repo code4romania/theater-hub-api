@@ -26,22 +26,25 @@ export class ProjectDTO {
         this.Currency       = project.Currency;
         this.City           = project.City;
         this.Visibility     = project.Visibility;
+
         this.Needs          = project.Needs.map(n => {
             return {
                 ID: n.ID,
                 Description: n.Description,
-                IsMandatory: n.IsMandatory,
+                Tags: n.Tags ? n.Tags.map(t => t.ProjectNeedTagCategoryID) : [],
                 Date: n.DateCreated,
-                ProjectID:   project.ID
+                ProjectID: project.ID
             };
-        });
+        }).sort((n1, n2) => new Date(n1.Date).getTime() > new Date(n2.Date).getTime() ? -1 : 1);
+
         this.Updates          = project.Updates.map(u => {
             return {
                 ID: u.ID,
                 Description: u.Description,
                 Date: u.DateCreated
             };
-        });
+        }).sort((n1, n2) => new Date(n1.Date).getTime() > new Date(n2.Date).getTime() ? -1 : 1);
+
         this.OtherProjects    = otherProjects
                                 .filter(p => p.ID !== project.ID)
                                 .slice(0, 2)
@@ -57,6 +60,10 @@ export class ProjectDTO {
                                     } as OtherProjectDTO;
 
                                 });
+
+        if (project.Tags) {
+            this.Tags = project.Tags.map(t => t.ProjectTagCategoryID);
+        }
 
     }
 
@@ -90,6 +97,8 @@ export class ProjectDTO {
 
     public OtherProjects: OtherProjectDTO[];
 
-    Visibility: VisibilityType;
+    public Visibility: VisibilityType;
+
+    public Tags?: string[];
 
 }

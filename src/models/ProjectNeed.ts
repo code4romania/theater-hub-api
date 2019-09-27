@@ -1,8 +1,10 @@
 import { Entity, Column,
     PrimaryGeneratedColumn,
+    OneToMany,
     ManyToOne, JoinColumn }  from "typeorm";
 import { BaseEntity }        from "./BaseEntity";
 import { Project }           from "./Project";
+import { ProjectNeedTag }    from "./ProjectNeedTag";
 
 @Entity("ProjectNeed")
 export class ProjectNeed extends BaseEntity {
@@ -13,11 +15,11 @@ export class ProjectNeed extends BaseEntity {
     @Column("varchar", { length: 500 })
     Description: string;
 
-    @Column("boolean")
-    IsMandatory: boolean;
-
     @ManyToOne(type => Project, project => project.Needs, { onDelete: "CASCADE" })
     @JoinColumn({ name: "ProjectID" })
     Project: Project;
+
+    @OneToMany(type => ProjectNeedTag, projectNeedTag => projectNeedTag.ProjectNeed, { cascade: true, eager: true })
+    Tags?: ProjectNeedTag[];
 
 }

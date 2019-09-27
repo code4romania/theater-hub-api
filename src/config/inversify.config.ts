@@ -12,8 +12,12 @@ import { IAdministrationController,
     IAwardRepository, IEducationRepository, IEntityCategoryRepository,
     IExperienceRepository, ILocaleRepository, ICurrencyRepository,
     IProfessionalRepository, IProfessionalSkillRepository,
-    IProjectNeedRepository, IProjectRepository, IProjectUpdateRepository,
-    ISkillRepository, IUserAccountSettingsRepository,
+    IProjectNeedRepository, IProjectNeedTagCategoryRepository,
+    IProjectNeedTagRepository,
+    IProjectRepository, IProjectUpdateRepository,
+    ISkillRepository, IProjectTagCategoryRepository,
+    IProjectTagRepository,
+    IUserAccountSettingsRepository,
     IUserFileRepository, IUserImageRepository,
     IProjectImageRepository, IUserSocialMediaRepository,
     IUserRepository, IUserVideoRepository,
@@ -23,7 +27,7 @@ import { AdministrationController,
         ApplicationDataController, AuthenticationController,
         AwardsController, EducationController, ExperienceController,
         ProjectNeedsController, ProjectsController, ProjectUpdatesController,
-        UsersController, UserVideosController }                                                      from "../controllers";
+        UsersController, UserVideosController }                                     from "../controllers";
 import { AdministrationRoutesValidators, AuthenticationRoutesValidators,
          EntitiesValidators, ProjectRoutesValidators,
          UserRoutesValidators }                                                     from "../validators";
@@ -37,7 +41,10 @@ import { AwardRepository,
     EducationRepository, EntityCategoryRepository, ExperienceRepository,
     LocaleRepository, CurrencyRepository,
     ProfessionalRepository, ProfessionalSkillRepository,
-    ProjectNeedRepository, ProjectRepository, ProjectUpdateRepository,
+    ProjectNeedRepository, ProjectNeedTagCategoryRepository,
+    ProjectNeedTagRepository,
+    ProjectRepository, ProjectTagCategoryRepository,
+    ProjectTagRepository, ProjectUpdateRepository,
     SkillRepository, UserAccountSettingsRepository,
     UserFileRepository, UserImageRepository, ProjectImageRepository,
     UserSocialMediaRepository, UserRepository, UserVideoRepository }                from "../repositories";
@@ -87,7 +94,11 @@ container.bind<ICurrencyRepository>(TYPES.CurrencyRepository).to(CurrencyReposit
 container.bind<IProfessionalRepository>(TYPES.ProfessionalRepository).to(ProfessionalRepository);
 container.bind<IProfessionalSkillRepository>(TYPES.ProfessionalSkillRepository).to(ProfessionalSkillRepository);
 container.bind<IProjectNeedRepository>(TYPES.ProjectNeedRepository).to(ProjectNeedRepository);
+container.bind<IProjectNeedTagCategoryRepository>(TYPES.ProjectNeedTagCategoryRepository).to(ProjectNeedTagCategoryRepository);
+container.bind<IProjectNeedTagRepository>(TYPES.ProjectNeedTagRepository).to(ProjectNeedTagRepository);
 container.bind<IProjectRepository>(TYPES.ProjectRepository).to(ProjectRepository);
+container.bind<IProjectTagCategoryRepository>(TYPES.ProjectTagCategoryRepository).to(ProjectTagCategoryRepository);
+container.bind<IProjectTagRepository>(TYPES.ProjectTagRepository).to(ProjectTagRepository);
 container.bind<IProjectUpdateRepository>(TYPES.ProjectUpdateRepository).to(ProjectUpdateRepository);
 container.bind<IUserFileRepository>(TYPES.UserFileRepository).to(UserFileRepository);
 container.bind<IUserImageRepository>(TYPES.UserImageRepository).to(UserImageRepository);

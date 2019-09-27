@@ -4,7 +4,7 @@ export class UpdateProjectNeedDTO {
 
     public Description: string;
 
-    public IsMandatory: boolean;
+    public Tags: string[];
 
     public ProjectID: string;
 

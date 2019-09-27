@@ -1,5 +1,6 @@
-import { Currency, Locale, Skill }       from "../../models";
-import { GeneralApplicationInformation } from "../../dtos";
+import { Currency, Locale, Skill }      from "../../models";
+import { ApplicationTags,
+        GeneralApplicationInformation } from "../../dtos";
 
 export interface IApplicationDataService {
 
@@ -8,6 +9,8 @@ export interface IApplicationDataService {
     getLocales(): Promise<Locale[]>;
 
     getCurrencies(): Promise<Currency[]>;
+
+    getTags(): Promise<ApplicationTags>;
 
     getGeneralApplicationInformation(): Promise<GeneralApplicationInformation>;
 }
