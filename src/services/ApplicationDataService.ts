@@ -3,12 +3,10 @@ import { TYPES }                            from "../types";
 import { IApplicationDataService,
      ISkillService,
      ICurrencyRepository,
-     IProjectTagCategoryRepository,
-     IProjectNeedTagCategoryRepository,
+     ITagRepository,
      ILocaleRepository }                    from "../contracts";
 import { Currency, Skill, Locale,
-    ProjectTagCategory,
-    ProjectNeedTagCategory }                from "../models";
+    Tag }                                   from "../models";
 import { ApplicationTags,
          GeneralApplicationInformation }    from "../dtos";
 
@@ -20,21 +18,18 @@ export class ApplicationDataService implements IApplicationDataService {
 
     private readonly _localeRepository: ILocaleRepository;
     private readonly _currencyRepository: ICurrencyRepository;
-    private readonly _projectTagCategoryRepository: IProjectTagCategoryRepository;
-    private readonly _projectNeedTagCategoryRepository: IProjectNeedTagCategoryRepository;
+    private readonly _tagRepository: ITagRepository;
     private readonly _skillService: ISkillService;
 
     constructor(
         @inject(TYPES.LocaleRepository) localeRepository: ILocaleRepository,
         @inject(TYPES.CurrencyRepository) currencyRepository: ICurrencyRepository,
-        @inject(TYPES.ProjectTagCategoryRepository) projectTagCategoryRepository: IProjectTagCategoryRepository,
-        @inject(TYPES.ProjectNeedTagCategoryRepository) projectNeedTagCategoryRepository: IProjectNeedTagCategoryRepository,
+        @inject(TYPES.TagRepository) tagRepository: ITagRepository,
         @inject(TYPES.SkillService) skillService: ISkillService) {
 
         this._localeRepository                  = localeRepository;
         this._currencyRepository                = currencyRepository;
-        this._projectTagCategoryRepository      = projectTagCategoryRepository;
-        this._projectNeedTagCategoryRepository  = projectNeedTagCategoryRepository;
+        this._tagRepository                     = tagRepository;
         this._skillService                      = skillService;
     }
 
@@ -62,27 +57,18 @@ export class ApplicationDataService implements IApplicationDataService {
 
     }
 
-    public async getProjectTags(): Promise<ProjectTagCategory[]> {
+    public async getProjectNeedTags(): Promise<Tag[]> {
 
-        const tags: ProjectTagCategory[] = await this._projectTagCategoryRepository.getAll();
-
-        return tags;
-    }
-
-    public async getProjectNeedTags(): Promise<ProjectNeedTagCategory[]> {
-
-        const tags: ProjectNeedTagCategory[] = await this._projectNeedTagCategoryRepository.getAll();
+        const tags: Tag[] = await this._tagRepository.getAll();
 
         return tags;
     }
 
     public async getTags(): Promise<ApplicationTags> {
 
-        const projectTags: ProjectTagCategory[]         = await this._projectTagCategoryRepository.getAll();
-        const projectNeedTags: ProjectNeedTagCategory[] = await this._projectNeedTagCategoryRepository.getAll();
+        const projectNeedTags: Tag[] = await this._tagRepository.getAll();
 
         const applicationTags: ApplicationTags = {
-            ProjectTags: projectTags,
             ProjectNeedTags: projectNeedTags
         } as ApplicationTags;
 

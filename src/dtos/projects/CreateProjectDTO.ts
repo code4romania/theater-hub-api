@@ -1,6 +1,6 @@
-import { ProjectNeed }   from "../../models";
+import { CreateProjectNeedDTO }     from "../project-needs";
 import { CurrencyType,
-    VisibilityType }     from "../../enums";
+    VisibilityType }                from "../../enums";
 
 
 export class CreateProjectDTO {
@@ -25,7 +25,7 @@ export class CreateProjectDTO {
 
     public Visibility: VisibilityType;
 
-    public Needs?: ProjectNeed[];
+    public Needs?: CreateProjectNeedDTO[];
 
     public DateCreated: Date;
 

@@ -1,6 +1,6 @@
 import { Entity, PrimaryColumn,
       ManyToOne, JoinColumn }     from "typeorm";
-import { ProjectNeedTagCategory } from "./ProjectNeedTagCategory";
+import { Tag }                    from "./Tag";
 import { BaseEntity }             from "./BaseEntity";
 import { ProjectNeed}             from "./ProjectNeed";
 
@@ -11,13 +11,14 @@ export class ProjectNeedTag extends BaseEntity {
   ProjectNeedID: string;
 
   @PrimaryColumn()
-  ProjectNeedTagCategoryID: string;
+  TagID: string;
 
   @ManyToOne(type => ProjectNeed, projectNeed => projectNeed.Tags, { onDelete: "CASCADE" })
   @JoinColumn({ name: "ProjectNeedID" })
   ProjectNeed: ProjectNeed;
 
-  @ManyToOne(type => ProjectNeedTagCategory)
-  @JoinColumn({ name: "ProjectNeedTagCategoryID" })
-  ProjectNeedTagCategory: ProjectNeedTagCategory;
+  @ManyToOne(type => Tag)
+  @ManyToOne(type => Tag, tag => tag.ProjectNeeds, { eager: true })
+  @JoinColumn({ name: "TagID" })
+  Tag: Tag;
 }

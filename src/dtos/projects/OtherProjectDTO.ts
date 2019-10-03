@@ -7,4 +7,6 @@ export class OtherProjectDTO {
 
     public Image: string;
 
+    public IsCompleted: boolean;
+
 }

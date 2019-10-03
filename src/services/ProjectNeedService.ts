@@ -7,12 +7,12 @@ import {
     IProjectService,
     IUserService,
     IProjectNeedRepository,
-    IProjectNeedTagCategoryRepository,
+    ITagRepository,
     IProjectNeedTagRepository}              from "../contracts";
 import { BaseService }                      from "./BaseService";
 import { Project,
         ProjectNeed,
-        ProjectNeedTagCategory,
+        Tag,
         User,
         ProjectNeedTag }                    from "../models";
 import { CreateProjectNeedDTO,
@@ -21,19 +21,19 @@ import { CreateProjectNeedDTO,
 @injectable()
 export class ProjectNeedService extends BaseService<ProjectNeed> implements IProjectNeedService {
 
-    private readonly _projectNeedTagCategoryRepository: IProjectNeedTagCategoryRepository;
+    private readonly _tagRepository: ITagRepository;
     private readonly _projectNeedTagRepository: IProjectNeedTagRepository;
     private readonly _projectService: IProjectService;
     private readonly _userService: IUserService;
 
     constructor(@inject(TYPES.ProjectNeedRepository) projectNeedRepository: IProjectNeedRepository,
-                    @inject(TYPES.ProjectNeedTagCategoryRepository) projectNeedTagCategoryRepository: IProjectNeedTagCategoryRepository,
+                    @inject(TYPES.TagRepository) tagRepository: ITagRepository,
                     @inject(TYPES.ProjectNeedTagRepository) projectNeedTagRepository: IProjectNeedTagRepository,
                     @inject(TYPES.LocalizationService) localizationService: ILocalizationService,
                     @inject(TYPES.ProjectService) projectService: IProjectService,
                     @inject(TYPES.UserService) userService: IUserService) {
         super(projectNeedRepository, localizationService);
-        this._projectNeedTagCategoryRepository  = projectNeedTagCategoryRepository;
+        this._tagRepository                     = tagRepository;
         this._projectNeedTagRepository          = projectNeedTagRepository;
         this._projectService                    = projectService;
         this._userService                       = userService;
@@ -50,13 +50,12 @@ export class ProjectNeedService extends BaseService<ProjectNeed> implements IPro
 
         if (createProjectNeedDTO.Tags && createProjectNeedDTO.Tags.length !== 0) {
 
-            const tags: ProjectNeedTagCategory[] =
-                                await this._projectNeedTagCategoryRepository.getByIDs(createProjectNeedDTO.Tags);
+            const tags: Tag[] = await this._tagRepository.getByIDs(createProjectNeedDTO.Tags);
 
             tags.forEach(t => {
                 const projectNeedTag: ProjectNeedTag = {
                     ProjectNeed: projectNeed,
-                    ProjectNeedTagCategory: t
+                    Tag: t
                 } as ProjectNeedTag;
 
                 projectNeed.Tags.push(projectNeedTag);
@@ -79,22 +78,22 @@ export class ProjectNeedService extends BaseService<ProjectNeed> implements IPro
             throw new Error(this._localizationService.getText("validation.project.need.non-existent"));
         }
 
-        const tags: ProjectNeedTagCategory[]    = await this._projectNeedTagCategoryRepository.getAll();
-        const dbIDs: string[]                   = dbProjectNeed.Tags.map(t => t.ProjectNeedTagCategoryID);
+        const tags: Tag[]                       = await this._tagRepository.getAll();
+        const dbIDs: string[]                   = dbProjectNeed.Tags.map(t => t.TagID);
         const addedIDs: string[]                = updateProjectNeedDTO.Tags.filter(t => dbIDs.indexOf(t) === -1);
         const removedIDs: string[]              = dbIDs.filter(id => updateProjectNeedDTO.Tags.indexOf(id) === -1);
 
         addedIDs.forEach(async id => {
             const projectNeedTag: ProjectNeedTag = {
                 ProjectNeed: dbProjectNeed,
-                ProjectNeedTagCategory: tags.find(t => t.ID === id)
+                Tag: tags.find(t => t.ID === id)
             } as ProjectNeedTag;
 
             this._projectNeedTagRepository.insert(projectNeedTag);
         });
 
         removedIDs.forEach(async id => {
-            this._projectNeedTagRepository.delete(dbProjectNeed.Tags.find(t => t.ProjectNeedTagCategoryID === id));
+            this._projectNeedTagRepository.delete(dbProjectNeed.Tags.find(t => t.TagID === id));
         });
 
         this._repository

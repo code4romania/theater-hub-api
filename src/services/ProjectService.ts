@@ -4,12 +4,15 @@ import { ILocalizationService,
         IFileService,
         IProjectService,
         IProjectRepository,
+        ITagRepository,
         IProjectImageRepository,
         IUserService }              from "../contracts";
 import { BaseService }              from "./BaseService";
 import { Project,
     ProjectImage,
     ProjectNeed,
+    ProjectNeedTag,
+    Tag,
     ProjectUpdate,
     User }                          from "../models";
 import { FileType }                 from "../enums/FileType";
@@ -17,10 +20,11 @@ import { ProjectStatusType }        from "../enums/ProjectStatusType";
 import { UserRoleType }             from "../enums/UserRoleType";
 import { VisibilityType }           from "../enums/VisibilityType";
 import { CreateProjectDTO,
+         CreateProjectNeedDTO,
          MyProjectDTO,
          ProjectDTO,
          ProjectListItem,
-         GetAllProjectsResponse }   from "../dtos/projects";
+         GetAllProjectsResponse }   from "../dtos";
 import { AWS }                      from "../utils";
 
 @injectable()
@@ -29,20 +33,23 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
     private readonly _userService: IUserService;
     private readonly _fileService: IFileService;
     private readonly _projectRepository: IProjectRepository;
+    private readonly _tagRepository: ITagRepository;
     private readonly _projectImageRepository: IProjectImageRepository;
 
     constructor(
         @inject(TYPES.ProjectRepository) projectRepository: IProjectRepository,
+        @inject(TYPES.TagRepository) tagRepository: ITagRepository,
         @inject(TYPES.ProjectImageRepository) projectImageRepository: IProjectImageRepository,
         @inject(TYPES.LocalizationService) localizationService: ILocalizationService,
         @inject(TYPES.FileService) fileService: IFileService,
         @inject(TYPES.UserService) userService: IUserService
     ) {
         super(projectRepository, localizationService);
-        this._userService               = userService;
-        this._fileService               = fileService;
-        this._projectRepository         = projectRepository;
-        this._projectImageRepository    = projectImageRepository;
+        this._userService                       = userService;
+        this._fileService                       = fileService;
+        this._projectRepository                 = projectRepository;
+        this._tagRepository                     = tagRepository;
+        this._projectImageRepository            = projectImageRepository;
     }
 
     public async createProject(email: string, createProjectDTO: CreateProjectDTO): Promise<Project> {
@@ -61,6 +68,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             City: createProjectDTO.City,
             Status: ProjectStatusType.Enabled,
             Visibility: createProjectDTO.Visibility,
+            IsCompleted: false,
             Initiator: dbUser
         } as Project;
 
@@ -78,14 +86,30 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
         }
 
         if (createProjectDTO.Needs) {
-            const needs: ProjectNeed[] = typeof createProjectDTO.Needs === "string" ?
+            const dbTags: Tag[] = await this._tagRepository.getAll();
+
+            const needs: CreateProjectNeedDTO[] = typeof createProjectDTO.Needs === "string" ?
                                                     JSON.parse(createProjectDTO.Needs) : createProjectDTO.Needs;
 
             project.Needs = [];
-            needs.forEach((n: ProjectNeed ) => {
+            needs.forEach((n: CreateProjectNeedDTO ) => {
                 const need: ProjectNeed = {
                     Description: n.Description
                 } as ProjectNeed;
+
+                if (n.Tags && n.Tags.length !== 0) {
+                    need.Tags = [];
+                    // const tags: ProjectNeedTagCategory[] = dbTags.filter(t => n.Tags.indexOf(t.ID) !== -1);
+
+                    n.Tags.forEach(t => {
+                        const projectNeedTag: ProjectNeedTag = {
+                            ProjectNeedID: need.ID,
+                            TagID: t
+                        } as ProjectNeedTag;
+
+                        need.Tags.push(projectNeedTag);
+                    });
+                }
 
                 project.Needs.push(need);
             });
@@ -213,7 +237,8 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                 Date: p.Date,
                 City: p.City,
                 Budget: p.Budget,
-                Currency: p.Currency
+                Currency: p.Currency,
+                IsCompleted: p.IsCompleted
             } as MyProjectDTO;
         });
     }
@@ -266,7 +291,6 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             } catch (error) {
                 return new GetAllProjectsResponse([], 0, 0, pageSize);
             }
-
 
         const filteredProjects: Project[] = projects
             .filter((p: Project) => {
@@ -373,6 +397,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                 Currency: generalInformationSection.Currency,
                 City: generalInformationSection.City,
                 Visibility: generalInformationSection.Visibility,
+                IsCompleted: generalInformationSection.IsCompleted,
                 Image: projectImage
             })
             .where("ID = :id", { id: generalInformationSection.ID })
