@@ -12,6 +12,7 @@ export class ProjectListItem {
                                 project.Description;
         this.Image          = project.Image ? project.Image.Location : "";
         this.City           = project.City;
+        this.IsCompleted    = project.IsCompleted;
 
         if (project.Initiator) {
             this.InitiatorName      = project.Initiator.Name;
@@ -33,5 +34,7 @@ export class ProjectListItem {
     public InitiatorUsername: string;
 
     public InitiatorName: string;
+
+    public IsCompleted: boolean;
 
 }

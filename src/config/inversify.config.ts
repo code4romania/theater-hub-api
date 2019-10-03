@@ -12,11 +12,10 @@ import { IAdministrationController,
     IAwardRepository, IEducationRepository, IEntityCategoryRepository,
     IExperienceRepository, ILocaleRepository, ICurrencyRepository,
     IProfessionalRepository, IProfessionalSkillRepository,
-    IProjectNeedRepository, IProjectNeedTagCategoryRepository,
+    IProjectNeedRepository, ITagRepository,
     IProjectNeedTagRepository,
     IProjectRepository, IProjectUpdateRepository,
-    ISkillRepository, IProjectTagCategoryRepository,
-    IProjectTagRepository,
+    ISkillRepository,
     IUserAccountSettingsRepository,
     IUserFileRepository, IUserImageRepository,
     IProjectImageRepository, IUserSocialMediaRepository,
@@ -41,10 +40,9 @@ import { AwardRepository,
     EducationRepository, EntityCategoryRepository, ExperienceRepository,
     LocaleRepository, CurrencyRepository,
     ProfessionalRepository, ProfessionalSkillRepository,
-    ProjectNeedRepository, ProjectNeedTagCategoryRepository,
+    ProjectNeedRepository, TagRepository,
     ProjectNeedTagRepository,
-    ProjectRepository, ProjectTagCategoryRepository,
-    ProjectTagRepository, ProjectUpdateRepository,
+    ProjectRepository, ProjectUpdateRepository,
     SkillRepository, UserAccountSettingsRepository,
     UserFileRepository, UserImageRepository, ProjectImageRepository,
     UserSocialMediaRepository, UserRepository, UserVideoRepository }                from "../repositories";
@@ -94,11 +92,9 @@ container.bind<ICurrencyRepository>(TYPES.CurrencyRepository).to(CurrencyReposit
 container.bind<IProfessionalRepository>(TYPES.ProfessionalRepository).to(ProfessionalRepository);
 container.bind<IProfessionalSkillRepository>(TYPES.ProfessionalSkillRepository).to(ProfessionalSkillRepository);
 container.bind<IProjectNeedRepository>(TYPES.ProjectNeedRepository).to(ProjectNeedRepository);
-container.bind<IProjectNeedTagCategoryRepository>(TYPES.ProjectNeedTagCategoryRepository).to(ProjectNeedTagCategoryRepository);
+container.bind<ITagRepository>(TYPES.TagRepository).to(TagRepository);
 container.bind<IProjectNeedTagRepository>(TYPES.ProjectNeedTagRepository).to(ProjectNeedTagRepository);
 container.bind<IProjectRepository>(TYPES.ProjectRepository).to(ProjectRepository);
-container.bind<IProjectTagCategoryRepository>(TYPES.ProjectTagCategoryRepository).to(ProjectTagCategoryRepository);
-container.bind<IProjectTagRepository>(TYPES.ProjectTagRepository).to(ProjectTagRepository);
 container.bind<IProjectUpdateRepository>(TYPES.ProjectUpdateRepository).to(ProjectUpdateRepository);
 container.bind<IUserFileRepository>(TYPES.UserFileRepository).to(UserFileRepository);
 container.bind<IUserImageRepository>(TYPES.UserImageRepository).to(UserImageRepository);

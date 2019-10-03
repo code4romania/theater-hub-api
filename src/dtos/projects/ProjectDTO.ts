@@ -26,12 +26,13 @@ export class ProjectDTO {
         this.Currency       = project.Currency;
         this.City           = project.City;
         this.Visibility     = project.Visibility;
+        this.IsCompleted    = project.IsCompleted;
 
         this.Needs          = project.Needs.map(n => {
             return {
                 ID: n.ID,
                 Description: n.Description,
-                Tags: n.Tags ? n.Tags.map(t => t.ProjectNeedTagCategoryID) : [],
+                Tags: n.Tags ? n.Tags.map(t => t.TagID) : [],
                 Date: n.DateCreated,
                 ProjectID: project.ID
             };
@@ -60,10 +61,6 @@ export class ProjectDTO {
                                     } as OtherProjectDTO;
 
                                 });
-
-        if (project.Tags) {
-            this.Tags = project.Tags.map(t => t.ProjectTagCategoryID);
-        }
 
     }
 
@@ -98,6 +95,8 @@ export class ProjectDTO {
     public OtherProjects: OtherProjectDTO[];
 
     public Visibility: VisibilityType;
+
+    public IsCompleted?: boolean;
 
     public Tags?: string[];
 

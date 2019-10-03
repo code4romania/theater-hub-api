@@ -1224,8 +1224,7 @@ export class UserService extends BaseService<User> implements IUserService {
                         .where("user.Email = :email", { email: request.MyEmail })
                         .getOne();
 
-            selectedUsers = selectedUsers.filter(u => u.ID !== me.ID
-                                                    && u.AccountSettings.ProfileVisibility !== VisibilityType.Private);
+            selectedUsers = selectedUsers.filter(u => u.AccountSettings.ProfileVisibility !== VisibilityType.Private);
         } else {
             selectedUsers = selectedUsers.filter(u => u.AccountSettings.ProfileVisibility === VisibilityType.Everyone);
         }
