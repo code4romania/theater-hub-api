@@ -50,7 +50,7 @@ export const enLocale = {
         },
         "contact-message": {
             "required": "Message is required",
-            "length": "Message should have at most 500 characters"
+            "length": "Message should have at most 200 characters"
         },
         "contact-agree-to-terms": {
             "invalid": "You have to agree with the way the provided data is being used"
