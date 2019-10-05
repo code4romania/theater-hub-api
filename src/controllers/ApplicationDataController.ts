@@ -16,7 +16,14 @@ export class ApplicationDataController implements IApplicationDataController {
 
     public async getSkills(request: Request, response: Response): Promise<void> {
 
-        const skills: Skill[] = await this._applicationDataService.getSkills();
+        let skills: Skill[] = await this._applicationDataService.getSkills();
+
+        skills = skills.map(s => {
+            return {
+                ...s,
+                Image: s.Image ? s.Image.toString() : ''
+            };
+        });
 
         response.send(skills);
     }
