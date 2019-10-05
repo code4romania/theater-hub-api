@@ -50,13 +50,13 @@ export class UserRoutesValidators implements IUserRoutesValidators {
             check("Subject").not().isEmpty().withMessage((value: string, { req }: any) => {
                     return this._localizationService.getText("validation.contact-subject.required", req.Locale);
                 })
-                .isLength({ max: 100 }).withMessage((value: string, { req }: any) => {
+                .isLength({ max: 50 }).withMessage((value: string, { req }: any) => {
                     return this._localizationService.getText("validation.contact-subject.length", req.Locale);
                 }),
             check("Message").not().isEmpty().withMessage((value: string, { req }: any) => {
                     return this._localizationService.getText("validation.contact-message.required", req.Locale);
                 })
-                .isLength({ max: 100 }).withMessage((value: string, { req }: any) => {
+                .isLength({ max: 500 }).withMessage((value: string, { req }: any) => {
                     return this._localizationService.getText("validation.contact-message.length", req.Locale);
                 }),
             check("AgreeToTerms").custom((value: boolean, { req }: any) => {
