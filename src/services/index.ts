@@ -8,6 +8,7 @@ export * from "./EmailService";
 export * from "./ExperienceService";
 export * from "./FileService";
 export * from "./LocalizationService";
+export * from "./MailchimpService";
 export * from "./ProjectNeedService";
 export * from "./ProjectService";
 export * from "./ProjectUpdateService";

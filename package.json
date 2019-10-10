@@ -67,6 +67,7 @@
     "jsonwebtoken": "^8.4.0",
     "lodash": "^4.17.11",
     "lusca": "^1.4.1",
+    "mailchimp-api-v3": "^1.13.1",
     "merge": "^1.2.1",
     "mime": "^2.4.0",
     "moment": "^2.22.2",

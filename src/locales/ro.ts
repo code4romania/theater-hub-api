@@ -310,7 +310,8 @@ export const roLocale = {
     },
     "errors": {
         "file-upload-error": "Fișierul nu a putut fi incărcat",
-        "file-deletion-error": "Fișierul nu a putut fi șters"
+        "file-deletion-error": "Fișierul nu a putut fi șters",
+        "subscribe-to-newsletter-error": "E-mail-ul nu a fost adăugat la newsletter"
     },
     "content": {
         "project-created": "Proiectul a fost creat."

@@ -310,7 +310,8 @@ export const enLocale = {
     },
     "errors": {
         "file-upload-error": "File could not be uploaded",
-        "file-deletion-error": "File could not be deleted"
+        "file-deletion-error": "File could not be deleted",
+        "subscribe-to-newsletter-error": "E-mail could not be added to newsletter"
     },
     "content": {
         "project-created": "Project was created."

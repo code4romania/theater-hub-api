@@ -46,5 +46,10 @@ export const commonConfig = {
             user: "",
             pass: ""
         }
+    },
+    mailchimp: {
+        api_key: "",
+        audience_id: "",
+        subscribe_url: "/lists/{0}/members"
     }
 };

@@ -27,6 +27,8 @@ export interface IUsersController extends IBaseApiController {
 
     contact(req: Request, res: Response): Promise<void>;
 
+    subcribeToNewsletter(req: Request, res: Response): Promise<void>;
+
     register(req: Request, res: Response): Promise<void>;
 
     managedUserRegister(req: Request, res: Response): Promise<void>;
