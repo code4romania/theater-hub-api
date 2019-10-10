@@ -7,6 +7,7 @@ import { IAdministrationController,
     IUsersController, IUserVideosController,
     IAuthenticationService, IAdministrationService, IApplicationDataService, IAwardService,
     IEducationService, IExperienceService, IFileService, ILocalizationService,
+    IMailchimpService,
     IProjectNeedService, IProjectService, IProjectUpdateService,
     ISkillService, IUserService, IUserVideoService, IEmailService,
     IAwardRepository, IEducationRepository, IEntityCategoryRepository,
@@ -33,6 +34,7 @@ import { AdministrationRoutesValidators, AuthenticationRoutesValidators,
 import {
     AdministrationService, ApplicationDataService, AwardService,
     EducationService, ExperienceService, FileService, LocalizationService,
+    MailchimpService,
     ProjectNeedService, ProjectService, ProjectUpdateService,
     SkillService, UserService, UserVideoService,
     EmailService, AuthenticationService }                                           from "../services";
@@ -75,6 +77,7 @@ container.bind<IEducationService>(TYPES.EducationService).to(EducationService);
 container.bind<IExperienceService>(TYPES.ExperienceService).to(ExperienceService);
 container.bind<IFileService>(TYPES.FileService).to(FileService);
 container.bind<ILocalizationService>(TYPES.LocalizationService).to(LocalizationService);
+container.bind<IMailchimpService>(TYPES.MailchimpService).to(MailchimpService);
 container.bind<IProjectNeedService>(TYPES.ProjectNeedService).to(ProjectNeedService);
 container.bind<IProjectService>(TYPES.ProjectService).to(ProjectService);
 container.bind<IProjectUpdateService>(TYPES.ProjectUpdateService).to(ProjectUpdateService);

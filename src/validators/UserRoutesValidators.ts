@@ -69,6 +69,21 @@ export class UserRoutesValidators implements IUserRoutesValidators {
         ];
     }
 
+    public getSubcribeToNewsletterValidators () {
+
+        return [
+            check("Email").not().isEmpty().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.email.required", req.Locale);
+                })
+                .isLength({ max: 100 }).withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.email.length", req.Locale);
+                })
+                .isEmail().withMessage((value: string, { req }: any) => {
+                    return this._localizationService.getText("validation.email.invalid", req.Locale);
+                })
+        ];
+    }
+
     public getRegisterValidators() {
 
         return [

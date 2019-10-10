@@ -35,6 +35,7 @@ const TYPES = {
     ExperienceService: Symbol("ExperienceService"),
     FileService: Symbol("FileService"),
     LocalizationService: Symbol("LocalizationService"),
+    MailchimpService: Symbol("MailchimpService"),
     ProjectNeedService: Symbol("ProjectNeedService"),
     ProjectService: Symbol("ProjectService"),
     ProjectUpdateService: Symbol("ProjectUpdateService"),

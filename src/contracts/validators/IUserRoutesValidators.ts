@@ -3,6 +3,8 @@ export interface IUserRoutesValidators {
 
     getContactValidators (): any;
 
+    getSubcribeToNewsletterValidators (): any;
+
     getRegisterValidators(): any;
 
     getManagedUserRegisterValidators(): any;
