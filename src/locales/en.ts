@@ -50,7 +50,7 @@ export const enLocale = {
         },
         "contact-message": {
             "required": "Message is required",
-            "length": "Message should have at most 200 characters"
+            "length": "Message should have at most 500 characters"
         },
         "contact-agree-to-terms": {
             "invalid": "You have to agree with the way the provided data is being used"
@@ -310,7 +310,8 @@ export const enLocale = {
     },
     "errors": {
         "file-upload-error": "File could not be uploaded",
-        "file-deletion-error": "File could not be deleted"
+        "file-deletion-error": "File could not be deleted",
+        "subscribe-to-newsletter-error": "E-mail could not be added to newsletter"
     },
     "content": {
         "project-created": "Project was created."

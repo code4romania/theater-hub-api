@@ -16,4 +16,6 @@ export class MyProjectDTO {
 
     public Currency: CurrencyType;
 
+    public IsCompleted: boolean;
+
 }

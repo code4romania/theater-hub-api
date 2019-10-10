@@ -19,4 +19,6 @@ export class PofileProjectDTO {
 
     public Image?: any;
 
+    public IsCompleted: boolean;
+
 }

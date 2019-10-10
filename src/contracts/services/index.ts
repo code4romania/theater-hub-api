@@ -8,6 +8,7 @@ export * from "./IEmailService";
 export * from "./IExperienceService";
 export * from "./IFileService";
 export * from "./ILocalizationService";
+export * from "./IMailchimpService";
 export * from "./IProjectNeedService";
 export * from "./IProjectService";
 export * from "./IProjectUpdateService";

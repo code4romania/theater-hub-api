@@ -6,6 +6,7 @@ import { BaseApiController }           from "./BaseApiController";
 import { IUsersController,
          IFileService,
          ILocalizationService,
+         IMailchimpService,
          IProjectService,
          IUserService }                from "../contracts";
 import { FileType,
@@ -26,7 +27,9 @@ import { ChangePasswordRequestDTO,
    ManagedUserRegistrationRequestDTO,
    ManagedUserRegistrationResponseDTO,
    MeDTO, ProfileDTO, MyProjectDTO,
-   ContactEmailDTO, RegisterDTO,
+   ContactEmailDTO,
+   SubcribeToNewsletterDTO,
+   RegisterDTO,
    ResetPasswordRequestDTO,
    SettingsDTO,
    UpdateProfileSection }               from "../dtos";
@@ -38,16 +41,19 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
 
   private readonly _userService: IUserService;
   private readonly _localizationService: ILocalizationService;
+  private readonly _mailchimpService: IMailchimpService;
   private readonly _fileService: IFileService;
   private readonly _projectService: IProjectService;
 
   constructor(@inject(TYPES.UserService) userService: IUserService,
             @inject(TYPES.LocalizationService) localizationService: ILocalizationService,
+            @inject(TYPES.MailchimpService) mailchimpService: IMailchimpService,
             @inject(TYPES.FileService) fileService: IFileService,
             @inject(TYPES.ProjectService) projectService: IProjectService) {
     super(userService);
     this._userService           = userService;
     this._localizationService   = localizationService;
+    this._mailchimpService      = mailchimpService;
     this._fileService           = fileService;
     this._projectService        = projectService;
   }
@@ -174,6 +180,19 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
     await this._userService.contact(model);
 
     response.sendStatus(200);
+  }
+
+  public async subcribeToNewsletter (request: Request, response: Response): Promise<void> {
+    const model: SubcribeToNewsletterDTO = request.body as SubcribeToNewsletterDTO;
+
+    try {
+      await this._mailchimpService.subscribe(model, request.Locale);
+
+      response.sendStatus(200);
+    } catch (error) {
+      response.send(500, this._localizationService.getText("errors.subscribe-to-newsletter-error", request.Locale));
+    }
+
   }
 
   public async register(request: Request, response: Response): Promise<void> {

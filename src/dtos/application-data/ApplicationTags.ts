@@ -1,8 +1,6 @@
-import { ProjectTagCategory,  ProjectNeedTagCategory } from "../../models";
+import { Tag } from "../../models";
 
 export class ApplicationTags {
 
-    public ProjectTags: ProjectTagCategory[];
-
-    public ProjectNeedTags: ProjectNeedTagCategory[];
+    public ProjectNeedTags: Tag[];
 }

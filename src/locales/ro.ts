@@ -50,7 +50,7 @@ export const roLocale = {
         },
         "contact-message": {
             "required": "Mesajul este obligatoriu",
-            "length": "Mesajul trebuie să aibă cel mult 200 de caractere"
+            "length": "Mesajul trebuie să aibă cel mult 500 de caractere"
         },
         "contact-agree-to-terms": {
             "invalid": "Trebuie să fiți de acord cu modul de utilizare al datelor furnizate"
@@ -67,7 +67,7 @@ export const roLocale = {
             "required": "E-mail-ul este obligatoriu",
             "length": "E-mail-ul trebuie să aibă cel mult 100 de caractere",
             "invalid": "E-mail-ul trebuie să fie valid",
-            "in-use": "Adresa de e-mail există deja",
+            "in-use": "Adresa de e-mail există deja în baza de date",
             "non-existent": "Utilizatorul nu există"
         },
         "password": {
@@ -80,9 +80,9 @@ export const roLocale = {
         },
         "confirm-password": {
             "required": "Confirmarea parolei este obligatorie",
-            "invalid": "Confirmarea parolei trebuie să se potrivească cu parola",
+            "invalid": "Cele două parole trebuie să fie identice",
             "confirm-new-password-required": "Confirmarea noii parole este obligatorie",
-            "confirm-new-password-invalid": "Confirmarea noii parole trebuie să se potrivească cu noua parolă"
+            "confirm-new-password-invalid": "Cele două parole trebuie să fie identice"
         },
         "date-of-birth": {
             "required": "Data nașterii este obligatorie",
@@ -115,8 +115,8 @@ export const roLocale = {
         },
         "award": {
             "title": {
-                "required": "Titlul este obligatoriu",
-                "length": "Titlul trebuie să aibă cel mult 50 de caractere"
+                "required": "Denumirea premiului este obligatorie",
+                "length": "Denumirea trebuie să aibă cel mult 50 de caractere"
             },
             "issuer": {
                 "required": "Emitentul este obligatoriu",
@@ -125,13 +125,13 @@ export const roLocale = {
             "description": {
                 "length": "Descrierea trebuie să aibă cel mult 500 de caractere"
             },
-            "fileds-required": "Titlul și emitentul premiului sunt obligatorii",
+            "fileds-required": "Denumirea și emitentul premiului sunt obligatorii",
             "non-existent": "Premiul nu există!"
         },
         "education": {
             "title": {
-                "required": "Titlul este obligatoriu",
-                "length": "Titlul trebuie să aibă cel mult 50 de caractere"
+                "required": "Specializarea este obligatorie",
+                "length": "Specializarea trebuie să aibă cel mult 50 de caractere"
             },
             "institution": {
                 "required": "Numele instituției este obligatoriu",
@@ -140,7 +140,7 @@ export const roLocale = {
             "description": {
                 "length": "Descrierea trebuie să aibă cel mult 500 de caractere"
             },
-            "fileds-required": "Titlul si numele instituției sunt obligatorii",
+            "fileds-required": "Specializarea si numele instituției sunt obligatorii",
             "non-existent": "Experiența educațională nu există!"
         },
         "experience": {
@@ -212,8 +212,8 @@ export const roLocale = {
                 "invalid": "Bugetul trebuie sa fie valid"
             },
             "city": {
-                "required": "Orașul este obligatoriu",
-                "length": "Orașul trebuie să aibă cel mult 100 de caractere"
+                "required": "Numele orașului este obligatoriu",
+                "length": "Numele orașului trebuie să aibă cel mult 100 de caractere"
             },
             "need": {
                 "description": {
@@ -237,39 +237,39 @@ export const roLocale = {
         "admin-delete-user": {
             "subject": "Contul {0} șters",
             "greeting": "Salut {0},",
-            "content": "Contul dumneavoastră a fost șters. În cazul în care aveți întrebări, vă rugăm să le adresați:"
+            "content": "Contul dumneavoastră a fost șters. În cazul în care aveți întrebări cu privire la această acțiune, vă rugăm să le adresați la:"
         },
         "admin-disable-user": {
             "subject": "Contul {0} dezactivat",
             "greeting": "Salut {0},",
-            "content": "Contul dumneavoastră a fost dezactivat. În cazul în care aveți întrebări, vă rugăm să le adresați:"
+            "content": "Contul dumneavoastră a fost dezactivat. În cazul în care aveți întrebări cu privire la această acțiune, vă rugăm să le adresați la:"
         },
         "admin-enable-user": {
             "subject": "Contul {0} activat",
             "greeting": "Salut {0},",
-            "content": "Contul dumneavoastră a fost activat. În cazul în care aveți întrebări, vă rugăm să le adresați:"
+            "content": "Contul dumneavoastră a fost activat. În cazul în care aveți întrebări cu privire la această acțiune, vă rugăm să le adresați la:"
         },
         "admin-invite-user": {
             "subject": "Înregistrare {0}",
             "greeting": "Salut,",
             "content-1": "Bine ați venit la ",
-            "content-2": "Un cont {0} a fost creat pentru dumneavoastră. Vă rugăm să apăsați butonul de mai jos pentru a finaliza procesul de înregistrare. În cazul în care aveți întrebări, vă rugăm să le adresați:",
+            "content-2": "Un cont {0} a fost creat pentru dumneavoastră. Vă rugăm să apăsați butonul de mai jos pentru a finaliza procesul de înregistrare. În cazul în care aveți întrebări, vă rugăm să le adresați la:",
             "button": "CONTINUĂ"
         },
         "admin-delete-project": {
             "subject": "Proiectul \"{0}\" șters",
             "greeting": "Salut {0},",
-            "content": "Proiectul \"{0}\" a fost șters. În cazul în care aveți întrebări, vă rugăm să le adresați:"
+            "content": "Proiectul \"{0}\" a fost șters. În cazul în care aveți întrebări, vă rugăm să le adresați la:"
         },
         "admin-disable-project": {
             "subject": "Proiectul \"{0}\" dezactivat",
             "greeting": "Salut {0},",
-            "content": "Proiectul \"{0}\" a fost dezactivat. În cazul în care aveți întrebări, vă rugăm să le adresați:"
+            "content": "Proiectul \"{0}\" a fost dezactivat. În cazul în care aveți întrebări, vă rugăm să le adresați la:"
         },
         "admin-enable-project": {
             "subject": "Proiectul \"{0}\" activat",
             "greeting": "Salut {0},",
-            "content": "Proiectul \"{0}\" a fost activat. În cazul în care aveți întrebări, vă rugăm să le adresați:"
+            "content": "Proiectul \"{0}\" a fost activat. În cazul în care aveți întrebări, vă rugăm să le adresați la:"
         },
         "contact": {
             "subject": "contact: {0}",
@@ -310,7 +310,8 @@ export const roLocale = {
     },
     "errors": {
         "file-upload-error": "Fișierul nu a putut fi incărcat",
-        "file-deletion-error": "Fișierul nu a putut fi șters"
+        "file-deletion-error": "Fișierul nu a putut fi șters",
+        "subscribe-to-newsletter-error": "E-mail-ul nu a fost adăugat la newsletter"
     },
     "content": {
         "project-created": "Proiectul a fost creat."

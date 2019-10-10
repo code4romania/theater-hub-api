@@ -5,7 +5,6 @@ import { User }                                               from "./User";
 import { ProjectImage }                                       from "./ProjectImage";
 import { ProjectNeed }                                        from "./ProjectNeed";
 import { ProjectUpdate }                                      from "./ProjectUpdate";
-import { ProjectTag }                                         from "./ProjectTag";
 import { CurrencyType, ProjectStatusType, VisibilityType }    from "../enums";
 
 @Entity("Project")
@@ -38,6 +37,9 @@ export class Project extends BaseEntity {
   @Column("varchar", { length: 100 })
   City: string;
 
+  @Column("boolean")
+  IsCompleted: boolean;
+
   @Column("tsvector", { nullable: true })
   SearchTokens: string;
 
@@ -60,8 +62,5 @@ export class Project extends BaseEntity {
 
   @OneToMany(type => ProjectUpdate, update => update.Project, { cascade: true, eager: true })
   Updates: ProjectUpdate[];
-
-  @OneToMany(type => ProjectTag, projectTag => projectTag.Project, { cascade: true, eager: true })
-  Tags?: ProjectTag[];
 
 }

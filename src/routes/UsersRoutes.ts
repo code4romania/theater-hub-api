@@ -29,6 +29,9 @@ export default (app: any) => {
     app.post("/api/users/contact",          userRoutesValidators.getContactValidators(), validatorMiddleware,
                                             (req: Request, res: Response) => usersController.contact(req, res));
 
+    app.post("/api/users/newsletter",       userRoutesValidators.getSubcribeToNewsletterValidators(), validatorMiddleware,
+                                            (req: Request, res: Response) => usersController.subcribeToNewsletter(req, res));
+
     app.post("/api/users/register",         userRoutesValidators.getRegisterValidators(), validatorMiddleware,
                                             (req: Request, res: Response) => usersController.register(req, res));
 

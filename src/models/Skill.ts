@@ -10,6 +10,9 @@ export class Skill {
     @Column("varchar", { length: 100 })
     Name: string;
 
+    @Column("bytea", { nullable: true })
+    Image: string;
+
     @OneToMany(type => ProfessionalSkill, professionalSkill => professionalSkill.Skill)
     Professionals: ProfessionalSkill[];
 
