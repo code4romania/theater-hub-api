@@ -39,6 +39,7 @@ export const commonConfig = {
         region: "",
         files_bucket: "",
         cloudFrontURL: "",
+        files_ACL: "public-read",
         ses: {
             host: "",
             port: 465,

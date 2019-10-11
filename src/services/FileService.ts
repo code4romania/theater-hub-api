@@ -52,7 +52,7 @@ export class FileService implements IFileService {
             Bucket: config.aws.files_bucket,
             Key: `${userEmail}/${fileName}.${fileExtension}`,
             Body: stream,
-            ACL: "public-read",
+            ACL: config.aws.files_ACL
         };
 
         return this._s3.upload(objectParams).promise();
@@ -70,7 +70,7 @@ export class FileService implements IFileService {
             Bucket: config.aws.files_bucket,
             Key: `${userEmail}/${key}.${fileExtension}`,
             Body: file.buffer,
-            ACL: "public-read",
+            ACL: config.aws.files_ACL
         };
 
         return this._s3.upload(objectParams).promise();
