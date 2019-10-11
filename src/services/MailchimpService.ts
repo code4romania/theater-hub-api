@@ -19,7 +19,7 @@ export class MailchimpService implements IMailchimpService {
     public async subscribe(request: SubcribeToNewsletterDTO, locale: LocaleType): Promise<void> {
         await this._mailchimp.post(config.mailchimp.subscribe_url.replace("{0}", config.mailchimp.audience_id), {
                 email_address: request.Email,
-                status: "subscribed",
+                status: "pending",
                 merge_fields: {
                     "PREFLANG": locale
                 }
