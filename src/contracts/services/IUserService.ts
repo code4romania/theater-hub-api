@@ -76,6 +76,4 @@ export interface IUserService extends IBaseService<User> {
 
     getVideoTitle (link: string): Promise<string>;
 
-    publishUpdatedResume(email: string, locale: LocaleType): Promise<void>;
-
 }
