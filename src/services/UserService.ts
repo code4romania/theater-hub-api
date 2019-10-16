@@ -1074,7 +1074,7 @@ export class UserService extends BaseService<User> implements IUserService {
             educationTitle: this._localizationService.getText("resume.education-title")
         };
 
-        const options  = { "renderDelay": 2000, "width": "1020px", "border": "40px" };
+        const options  = { "renderDelay": 100, "width": "1020px", "border": "40px" };
         const template = handlebars.compile(resumeHTML);
 
         return pdf.create(template(context), options);
