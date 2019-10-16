@@ -126,8 +126,9 @@
 			}
 
 			.skill {
-				width: 119px;
+				min-width: 80px;
 				height: 26px;
+				padding: 0px 12px;
 				display: inline-block;
 				list-style: none;
 				text-align: center;
@@ -476,12 +477,11 @@
 						</div>
 					</div>
 				</div>
+				<div class="divider-container">
+					<hr>
+				</div>
 			{{/if}}
 
-			<div class="divider-container">
-				<hr>
-			</div>
-			
 			{{#if photoGalleryImages}}
 				<div id="photo-gallery-section" class="atomic">
 					<h2>{{photoGalleryTitle}}</h2>
