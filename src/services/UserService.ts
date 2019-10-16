@@ -1004,7 +1004,9 @@ export class UserService extends BaseService<User> implements IUserService {
         const currentDateMoment       = moment(new Date());
         const birthDateMoment         = moment(dbUser.BirthDate);
         const age                     = Math.floor(moment.duration(currentDateMoment.diff(birthDateMoment)).asYears());
-        const skills                  = dbUser.Professional.Skills.map(s => this._localizationService.getText(`application-data.${s.Skill.Name.toLowerCase()}`));
+        const skills                  = dbUser.Professional.Skills
+                                        .map(s => this._localizationService.getText(`application-data.skills.${s.Skill.ID}`))
+                                        .sort();
         const awards                  = profile.Awards.map(a => {
             return {
                 title: a.Title,
@@ -1371,32 +1373,4 @@ export class UserService extends BaseService<User> implements IUserService {
 
         return title;
     }
-
-    // TODO: When the user profile is updated, a new CV should be published to AWS S3.
-    public async publishUpdatedResume(email: string, locale: LocaleType): Promise<void> {
-        return;
-        const generateResumeRequest: GenerateResumeRequestDTO = {
-            Email: email,
-            Locale: locale
-          } as GenerateResumeRequestDTO;
-
-          const fileName: string = "CV";
-
-        (await this.generateResume(generateResumeRequest)).toStream(async (err: any, stream: any) => {
-            const dbUser: User      = await this.getByEmail(email);
-            const uploadResult: any = await this._fileService.uploadFromStream(stream, FileType.PDF, email, fileName);
-
-            const userFile = {
-                Key: uploadResult.Key,
-                Location: uploadResult.Location,
-                FileCategory: FileCategoryType.Resume,
-                User: dbUser
-            } as UserFile;
-
-            await this._userFileRepository.insert(userFile);
-          });
-
-    }
-
-
 }
