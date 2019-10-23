@@ -19,12 +19,12 @@ export const commonConfig = {
     facebook: {
         app_id: "",
         app_secret: "",
-        callback_url: "https://127.0.0.1:443/api/authentication/facebook/callback"
+        callback_resource: "api/authentication/facebook/callback"
     },
     google: {
         app_id: "",
         app_secret: "",
-        callback_url: "https://127.0.0.1:443/api/authentication/google/callback"
+        callback_resource: "api/authentication/google/callback"
     },
     youtube: {
        api_key: "",
