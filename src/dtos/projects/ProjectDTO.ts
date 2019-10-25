@@ -6,18 +6,29 @@ import { CurrencyType, VisibilityType }     from "../../enums";
 
 export class ProjectDTO {
 
-    public constructor (project: Project, otherProjects: Project[] = [], includeID: boolean = true) {
+    public constructor (
+        project: Project,
+        otherProjects: Project[] = [],
+        includeID: boolean = true,
+        includeInitiator: boolean = true
+    ) {
 
         if (includeID) {
             this.ID = project.ID;
         }
 
-        const initiatorProfileImage = project.Initiator.ProfileImage || project.Initiator.PhotoGallery.find(p => p.IsProfileImage);
+        let initiatorProfileImage: ProjectImage;
+        let initiatorName: string;
+
+        if (includeInitiator && project.Initiator) {
+            initiatorProfileImage   = project.Initiator.ProfileImage || project.Initiator.PhotoGallery.find(p => p.IsProfileImage);
+            initiatorName           = project.Initiator.Name;
+        }
 
         this.Name           = project.Name;
         this.Description    = project.Description;
         this.Image          = project.Image;
-        this.InitiatorName  = project.Initiator.Name;
+        this.InitiatorName  = initiatorName;
         this.InitiatorImage = initiatorProfileImage;
         this.Email          = project.Email;
         this.PhoneNumber    = project.PhoneNumber;

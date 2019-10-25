@@ -17,6 +17,7 @@ import { Project,
     User }                          from "../models";
 import { FileType }                 from "../enums/FileType";
 import { ProjectStatusType }        from "../enums/ProjectStatusType";
+import { UserAccountStatusType }    from "../enums/UserAccountStatusType";
 import { UserRoleType }             from "../enums/UserRoleType";
 import { VisibilityType }           from "../enums/VisibilityType";
 import { CreateProjectDTO,
@@ -138,6 +139,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                 .select("project")
                 .from(Project, "project")
                 .leftJoinAndSelect("project.Initiator", "initiator")
+                .leftJoinAndSelect("initiator.AccountSettings", "accountSettings")
                 .leftJoinAndSelect("initiator.ProfileImage", "profileImage")
                 .leftJoinAndSelect("initiator.PhotoGallery", "photoGallery")
                 .leftJoinAndSelect("project.Image", "image")
@@ -147,7 +149,11 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                 .where("project.ID = :id AND project.Status = :status", { id, status: ProjectStatusType.Enabled })
                 .getOne();
 
-            if (!project) {
+            if (
+                !project ||
+                project.Status !== ProjectStatusType.Enabled ||
+                project.Initiator.AccountSettings.AccountStatus !== UserAccountStatusType.Enabled
+            ) {
                 return undefined;
             }
 
@@ -181,6 +187,10 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                     return true;
                 }
 
+                if (p.Status !== ProjectStatusType.Enabled) {
+                    return false;
+                }
+
                 if (p.Visibility === VisibilityType.Private && !viewerIsVisitor && initiatorId === me.ID) {
                     return true;
                 }
@@ -204,13 +214,24 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             return undefined;
         }
 
+        const initiatorProfileVisibility: VisibilityType    = project.Initiator.AccountSettings.ProfileVisibility;
+        const initiatorStatus: UserAccountStatusType        = project.Initiator.AccountSettings.AccountStatus;
+
+        let hideInitiator: boolean;
+
+        if (!fullViewingRights) {
+            hideInitiator = initiatorProfileVisibility === VisibilityType.Private ||
+                            (initiatorProfileVisibility === VisibilityType.Community && viewerIsVisitor) ||
+                            initiatorStatus !== UserAccountStatusType.Enabled;
+        }
+
         if (project.Visibility === VisibilityType.Everyone) {
-            return new ProjectDTO(project, otherProjects);
+            return new ProjectDTO(project, otherProjects, true, !hideInitiator);
         }
 
         // if the person has admin rights or is the owner of the project then return the project
         if (fullViewingRights) {
-            return new ProjectDTO(project, otherProjects);
+            return new ProjectDTO(project, otherProjects, true, !hideInitiator);
         }
 
         if (project.Visibility === VisibilityType.Private) {
@@ -221,7 +242,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             return undefined;
         }
 
-        return new ProjectDTO(project, otherProjects);
+        return new ProjectDTO(project, otherProjects, true, !hideInitiator);
     }
 
     public async getMyProjects(email: string): Promise<MyProjectDTO[]> {
@@ -268,6 +289,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                 .select("project")
                 .from(Project, "project")
                 .leftJoinAndSelect("project.Initiator", "initiator")
+                .leftJoinAndSelect("initiator.AccountSettings", "accountSettings")
                 .leftJoinAndSelect("project.Image", "image")
                 .leftJoinAndSelect("project.Needs", "needs")
                 .where(
@@ -298,6 +320,10 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                     return true;
                 }
 
+                if (p.Status !== ProjectStatusType.Enabled) {
+                    return false;
+                }
+
                 if (p.Visibility === VisibilityType.Private && !viewerIsVisitor && p.Initiator.ID === me.ID) {
                     return true;
                 }
@@ -315,7 +341,15 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
 
             const items: ProjectListItem[] = filteredProjects
                 .splice(page * pageSize, pageSize)
-                .map((p: Project) => new ProjectListItem(p));
+                .map((p: Project) => {
+                    const initiatorProfileVisibility: VisibilityType    = p.Initiator.AccountSettings.ProfileVisibility;
+                    const initiatorStatus: UserAccountStatusType        = p.Initiator.AccountSettings.AccountStatus;
+                    const hideInitiator: boolean = initiatorProfileVisibility === VisibilityType.Private ||
+                            (initiatorProfileVisibility === VisibilityType.Community && viewerIsVisitor) ||
+                            initiatorStatus !== UserAccountStatusType.Enabled;
+
+                    return new ProjectListItem(p, !hideInitiator);
+                });
 
             const pageCount: number = Math.ceil(filteredProjects.length / pageSize);
 
@@ -329,12 +363,21 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                             .select("project")
                             .from(Project, "project")
                             .leftJoinAndSelect("project.Initiator", "initiator")
+                            .leftJoinAndSelect("initiator.AccountSettings", "accountSettings")
                             .where("project.Visibility = :everyone AND project.Status = :status", { everyone: VisibilityType.Everyone, status: ProjectStatusType.Enabled})
                             .orderBy("random()")
                             .limit(count)
                             .getMany();
 
-        return projects.map(p => new ProjectListItem(p));
+        return projects.map((p: Project) => {
+            const initiatorProfileVisibility: VisibilityType    = p.Initiator.AccountSettings.ProfileVisibility;
+            const initiatorStatus: UserAccountStatusType        = p.Initiator.AccountSettings.AccountStatus;
+
+            const hideInitiator: boolean = initiatorProfileVisibility !== VisibilityType.Everyone ||
+                                                        initiatorStatus !== UserAccountStatusType.Enabled;
+
+            return new ProjectListItem(p, !hideInitiator);
+        });
     }
 
     public async updateGeneralInformation(userEmail: string,

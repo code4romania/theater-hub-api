@@ -1155,7 +1155,7 @@ export class UserService extends BaseService<User> implements IUserService {
                             .where("user.Email = :email", { email: request.MyEmail })
                             .getOne();
             fullViewingRights = me.AccountSettings.Role === UserRoleType.Admin || me.AccountSettings.Role === UserRoleType.SuperAdmin;
-            selectedUsers     = selectedUsers.filter(u => u.AccountSettings.ProfileVisibility !== VisibilityType.Private);
+            selectedUsers     = selectedUsers.filter(u => u.AccountSettings.ProfileVisibility !== VisibilityType.Private || u.ID === me.ID);
         } else {
             selectedUsers = selectedUsers.filter(u => u.AccountSettings.ProfileVisibility === VisibilityType.Everyone);
         }
