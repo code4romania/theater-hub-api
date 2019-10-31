@@ -3,7 +3,10 @@ import { Project } from "../../models";
 
 export class ProjectListItem {
 
-    public constructor(project: Project) {
+    public constructor (
+        project: Project,
+        includeInitiator: boolean = true
+    ) {
 
         this.ID             = project.ID;
         this.Name           = project.Name;
@@ -14,7 +17,7 @@ export class ProjectListItem {
         this.City           = project.City;
         this.IsCompleted    = project.IsCompleted;
 
-        if (project.Initiator) {
+        if (includeInitiator && project.Initiator) {
             this.InitiatorName      = project.Initiator.Name;
             this.InitiatorUsername  = project.Initiator.Username;
         }

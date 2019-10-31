@@ -70,7 +70,7 @@ const strategyHandler = async (request: any, accessToken: any, refreshToken: any
 passport.use(new GoogleStrategy({
     clientID: config.google.app_id,
     clientSecret: config.google.app_secret,
-    callbackURL: config.google.callback_url,
+    callbackURL: `${config.application.baseURL}/${config.google.callback_resource}`,
     passReqToCallback: true
   }, (request: any, accessToken: any, refreshToken: any, profile: any, done: any) => strategyHandler(request, accessToken, refreshToken, profile, done, UserAccountProviderType.Google)));
 
@@ -80,7 +80,7 @@ passport.use(new GoogleStrategy({
 passport.use(new FacebookStrategy({
     clientID: config.facebook.app_id,
     clientSecret: config.facebook.app_secret,
-    callbackURL: config.facebook.callback_url,
+    callbackURL: `${config.application.baseURL}/${config.facebook.callback_resource}`,
     profileFields: ["name", "email", "link", "locale", "timezone"],
     passReqToCallback: true
   }, (request: any, accessToken: any, refreshToken: any, profile: any, done: any) => strategyHandler(request, accessToken, refreshToken, profile, done, UserAccountProviderType.Facebook)));

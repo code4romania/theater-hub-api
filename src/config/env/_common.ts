@@ -19,12 +19,12 @@ export const commonConfig = {
     facebook: {
         app_id: "",
         app_secret: "",
-        callback_url: "https://127.0.0.1:443/api/authentication/facebook/callback"
+        callback_resource: "api/authentication/facebook/callback"
     },
     google: {
         app_id: "",
         app_secret: "",
-        callback_url: "https://127.0.0.1:443/api/authentication/google/callback"
+        callback_resource: "api/authentication/google/callback"
     },
     youtube: {
        api_key: "",
@@ -38,8 +38,14 @@ export const commonConfig = {
         secretAccessKey: "",
         region: "",
         files_bucket: "",
-        cloudFrontURL: "",
-        files_ACL: "public-read",
+        cloudFront: {
+            url: "",
+            accessKeyId: "",
+            privateKeyFileName: "cloudfront.pem"
+        },
+        files_ACL: "private",
+        signed_url_expiry: 86400,
+        cache_control_max_age: 86400,
         ses: {
             host: "",
             port: 465,

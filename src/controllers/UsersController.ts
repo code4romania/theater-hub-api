@@ -13,7 +13,7 @@ import { FileType,
         LocaleType,
         UserAccountProviderType,
         UserRoleType }                 from "../enums";
-import { AWS, Validators }             from "../utils";
+import { Validators }                  from "../utils";
 import { ChangePasswordRequestDTO,
    ChangePasswordResponseDTO,
    CreateProfileResponseDTO,
@@ -273,7 +273,7 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
       profileDTO.ProfileImage = {
         Key: uploadPhotosResults[0].Key,
         Location: uploadPhotosResults[0].Location,
-        ThumbnailLocation: AWS.getThumbnailURL(uploadPhotosResults[0].Key),
+        ThumbnailLocation: this._fileService.getThumbnailURL(uploadPhotosResults[0].Key),
         Size: profileImageFile.size,
         IsProfileImage: true
       } as UserImage;
@@ -284,7 +284,7 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
         return {
           Key: r.Key,
           Location: r.Location,
-          ThumbnailLocation: AWS.getThumbnailURL(r.Key),
+          ThumbnailLocation: this._fileService.getThumbnailURL(r.Key),
           Size: photoGalleryFiles[index].size,
           IsProfileImage: false
         } as UserImage;

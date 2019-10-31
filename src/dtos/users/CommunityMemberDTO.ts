@@ -4,7 +4,10 @@ import { SocialMediaCategoryType,
 
 export class CommunityMemberDTO {
 
-    public constructor(user: User, includeID: boolean = false, includePersonalInformation: boolean = false) {
+    public constructor(user: User,
+            includeID: boolean = false,
+            includePersonalInformation: boolean = false
+    ) {
         if (includeID) {
             this.ID = user.ID;
         }

@@ -17,15 +17,16 @@ import { Project,
     User }                          from "../models";
 import { FileType }                 from "../enums/FileType";
 import { ProjectStatusType }        from "../enums/ProjectStatusType";
+import { UserAccountStatusType }    from "../enums/UserAccountStatusType";
 import { UserRoleType }             from "../enums/UserRoleType";
 import { VisibilityType }           from "../enums/VisibilityType";
 import { CreateProjectDTO,
          CreateProjectNeedDTO,
          MyProjectDTO,
+         OtherProjectDTO,
          ProjectDTO,
          ProjectListItem,
          GetAllProjectsResponse }   from "../dtos";
-import { AWS }                      from "../utils";
 
 @injectable()
 export class ProjectService extends BaseService<Project> implements IProjectService {
@@ -78,7 +79,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             const projectImage = {
                 Key: uploadProjectImageResult.Key,
                 Location: uploadProjectImageResult.Location,
-                ThumbnailLocation: AWS.getThumbnailURL(uploadProjectImageResult.Key),
+                ThumbnailLocation: this._fileService.getThumbnailURL(uploadProjectImageResult.Key),
                 Size: Math.round(createProjectDTO.Image.size * 100 / (1000 * 1000)) / 100, // in MB
             } as ProjectImage;
 
@@ -131,6 +132,8 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
         const viewerIsVisitor: boolean = !email;
         let project: Project;
         let otherProjects: Project[];
+        let otherProjectsDTO: OtherProjectDTO[];
+        let response: ProjectDTO;
 
         try {
             project = await this._projectRepository
@@ -138,6 +141,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                 .select("project")
                 .from(Project, "project")
                 .leftJoinAndSelect("project.Initiator", "initiator")
+                .leftJoinAndSelect("initiator.AccountSettings", "accountSettings")
                 .leftJoinAndSelect("initiator.ProfileImage", "profileImage")
                 .leftJoinAndSelect("initiator.PhotoGallery", "photoGallery")
                 .leftJoinAndSelect("project.Image", "image")
@@ -147,7 +151,11 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                 .where("project.ID = :id AND project.Status = :status", { id, status: ProjectStatusType.Enabled })
                 .getOne();
 
-            if (!project) {
+            if (
+                !project ||
+                project.Status !== ProjectStatusType.Enabled ||
+                project.Initiator.AccountSettings.AccountStatus !== UserAccountStatusType.Enabled
+            ) {
                 return undefined;
             }
 
@@ -175,10 +183,18 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                 .where("initiator.ID = :initiatorId AND project.ID != :id AND project.Status = :status", { initiatorId, id, status: ProjectStatusType.Enabled })
                 .getMany();
 
-            otherProjects = otherProjects.filter(p => {
+            otherProjectsDTO = otherProjects.filter(p => {
+
+                if (p.ID === project.ID) {
+                    return false;
+                }
 
                 if (fullViewingRights) {
                     return true;
+                }
+
+                if (p.Status !== ProjectStatusType.Enabled) {
+                    return false;
                 }
 
                 if (p.Visibility === VisibilityType.Private && !viewerIsVisitor && initiatorId === me.ID) {
@@ -194,6 +210,19 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                 }
 
                 return false;
+            })
+            .slice(0, 2)
+            .map(p => {
+                const image: string = p.Image ?
+                    this._fileService.getPresignedURL(p.Image.Key) :
+                    "";
+
+                return {
+                    ID: p.ID,
+                    Name: p.Name,
+                    Image: image
+                } as OtherProjectDTO;
+
             });
 
             if (!project) {
@@ -204,16 +233,18 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             return undefined;
         }
 
-        if (project.Visibility === VisibilityType.Everyone) {
-            return new ProjectDTO(project, otherProjects);
+        const initiatorProfileVisibility: VisibilityType    = project.Initiator.AccountSettings.ProfileVisibility;
+        const initiatorStatus: UserAccountStatusType        = project.Initiator.AccountSettings.AccountStatus;
+
+        let hideInitiator: boolean;
+
+        if (!fullViewingRights) {
+            hideInitiator = initiatorProfileVisibility === VisibilityType.Private ||
+                            (initiatorProfileVisibility === VisibilityType.Community && viewerIsVisitor) ||
+                            initiatorStatus !== UserAccountStatusType.Enabled;
         }
 
-        // if the person has admin rights or is the owner of the project then return the project
-        if (fullViewingRights) {
-            return new ProjectDTO(project, otherProjects);
-        }
-
-        if (project.Visibility === VisibilityType.Private) {
+        if (project.Visibility === VisibilityType.Private && !fullViewingRights) {
             return undefined;
         }
 
@@ -221,7 +252,18 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             return undefined;
         }
 
-        return new ProjectDTO(project, otherProjects);
+        response                = new ProjectDTO (project, otherProjectsDTO, true, !hideInitiator);
+        response.InitiatorImage = response.InitiatorImage ? this._fileService.getSignedCloudFrontUrl(response.InitiatorImage) : "";
+
+        if (project.Image) {
+            response.Image = {
+                ...project.Image,
+                Location: this._fileService.getPresignedURL(project.Image.Key),
+                ThumbnailLocation: this._fileService.getSignedCloudFrontUrl(project.Image.ThumbnailLocation)
+            };
+        }
+
+        return response;
     }
 
     public async getMyProjects(email: string): Promise<MyProjectDTO[]> {
@@ -233,7 +275,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             return {
                 ID: p.ID,
                 Name: p.Name,
-                Image: p.Image ? p.Image.ThumbnailLocation : "",
+                Image: p.Image ? this._fileService.getSignedCloudFrontUrl(p.Image.ThumbnailLocation) : "",
                 Date: p.Date,
                 City: p.City,
                 Budget: p.Budget,
@@ -268,6 +310,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                 .select("project")
                 .from(Project, "project")
                 .leftJoinAndSelect("project.Initiator", "initiator")
+                .leftJoinAndSelect("initiator.AccountSettings", "accountSettings")
                 .leftJoinAndSelect("project.Image", "image")
                 .leftJoinAndSelect("project.Needs", "needs")
                 .where(
@@ -298,6 +341,10 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                     return true;
                 }
 
+                if (p.Status !== ProjectStatusType.Enabled) {
+                    return false;
+                }
+
                 if (p.Visibility === VisibilityType.Private && !viewerIsVisitor && p.Initiator.ID === me.ID) {
                     return true;
                 }
@@ -315,7 +362,18 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
 
             const items: ProjectListItem[] = filteredProjects
                 .splice(page * pageSize, pageSize)
-                .map((p: Project) => new ProjectListItem(p));
+                .map((p: Project) => {
+                    const initiatorProfileVisibility: VisibilityType    = p.Initiator.AccountSettings.ProfileVisibility;
+                    const initiatorStatus: UserAccountStatusType        = p.Initiator.AccountSettings.AccountStatus;
+                    const hideInitiator: boolean = initiatorProfileVisibility === VisibilityType.Private ||
+                            (initiatorProfileVisibility === VisibilityType.Community && viewerIsVisitor) ||
+                            initiatorStatus !== UserAccountStatusType.Enabled;
+
+                    const item = new ProjectListItem(p, !hideInitiator);
+                    item.Image = p.Image ? this._fileService.getPresignedURL(p.Image.Key) : "";
+
+                    return item;
+                });
 
             const pageCount: number = Math.ceil(filteredProjects.length / pageSize);
 
@@ -329,12 +387,21 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                             .select("project")
                             .from(Project, "project")
                             .leftJoinAndSelect("project.Initiator", "initiator")
+                            .leftJoinAndSelect("initiator.AccountSettings", "accountSettings")
                             .where("project.Visibility = :everyone AND project.Status = :status", { everyone: VisibilityType.Everyone, status: ProjectStatusType.Enabled})
                             .orderBy("random()")
                             .limit(count)
                             .getMany();
 
-        return projects.map(p => new ProjectListItem(p));
+        return projects.map((p: Project) => {
+            const initiatorProfileVisibility: VisibilityType    = p.Initiator.AccountSettings.ProfileVisibility;
+            const initiatorStatus: UserAccountStatusType        = p.Initiator.AccountSettings.AccountStatus;
+
+            const hideInitiator: boolean = initiatorProfileVisibility !== VisibilityType.Everyone ||
+                                                        initiatorStatus !== UserAccountStatusType.Enabled;
+
+            return new ProjectListItem(p, !hideInitiator);
+        });
     }
 
     public async updateGeneralInformation(userEmail: string,
@@ -359,7 +426,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             projectImage = {
                 Key: uploadProjectImageResult.Key,
                 Location: uploadProjectImageResult.Location,
-                ThumbnailLocation: AWS.getThumbnailURL(uploadProjectImageResult.Key),
+                ThumbnailLocation: this._fileService.getThumbnailURL(uploadProjectImageResult.Key),
                 Size: Math.round(projectImageFile.size * 100 / (1000 * 1000)) / 100, // in MB
             } as ProjectImage;
 
@@ -371,7 +438,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             const updateProjectImageResults: any  = await Promise.all([newProjectImageUploadPromise, oldProjectImageRemovePromise]);
 
             projectImage.Location           = updateProjectImageResults[0].Location;
-            projectImage.ThumbnailLocation  = AWS.getThumbnailURL(updateProjectImageResults[0].Key);
+            projectImage.ThumbnailLocation  = this._fileService.getThumbnailURL(updateProjectImageResults[0].Key);
             projectImage.Key                = updateProjectImageResults[0].Key;
             projectImage.Size               = Math.round(projectImageFile.size * 100 / (1000 * 1000)) / 100;
 
@@ -402,6 +469,11 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             })
             .where("ID = :id", { id: generalInformationSection.ID })
             .execute();
+
+        if (projectImage) {
+            projectImage.Location           = this._fileService.getPresignedURL(projectImage.Key);
+            projectImage.ThumbnailLocation  = this._fileService.getSignedCloudFrontUrl(projectImage.ThumbnailLocation);
+        }
 
         return {
             ...generalInformationSection,

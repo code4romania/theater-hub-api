@@ -4,6 +4,12 @@ import { FileType, LocaleType } from "../../enums";
 
 export interface IFileService {
 
+    getPresignedURL (fileKey: string): string;
+
+    getThumbnailURL (key: string): string;
+
+    getSignedCloudFrontUrl (url: string, privateKey?: string): string;
+
     uploadFromStream (stream: any, fileType: FileType, userEmail: string, fileName: string): Promise<void>;
 
     uploadFile(file: File, fileType: FileType, userEmail: string): Promise<void>;

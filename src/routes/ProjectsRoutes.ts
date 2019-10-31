@@ -22,7 +22,8 @@ export default (app: any) => {
                                             validatorMiddleware,
                                             (req: Request, res: Response) => projectsController.create(req, res));
 
-    app.get("/api/projects",                (req: Request, res: Response) => projectsController.getAll(req, res));
+    app.get("/api/projects",                getPrincipalIfRequestHasToken,
+                                            (req: Request, res: Response) => projectsController.getAll(req, res));
 
     app.get("/api/projects/random",         (req: Request, res: Response) => projectsController.getRandom(req, res));
 

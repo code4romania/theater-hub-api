@@ -10,11 +10,7 @@ export class MeDTO {
         this.Email          = user.Email;
         this.Username       = user.Username;
 
-        if (user.ProfileImage) {
-            this.ProfileImage       = {
-                ...user.ProfileImage
-            };
-        }
+        this.ProfileImage  = user.ProfileImage || user.PhotoGallery.find(p => p.IsProfileImage);
 
         this.Role           = user.AccountSettings.Role;
         this.AccountStatus  = user.AccountSettings.AccountStatus;
@@ -28,7 +24,7 @@ export class MeDTO {
 
     public Username: string;
 
-    public ProfileImage: UserImage;
+    public ProfileImage?: UserImage;
 
     public Role: UserRoleType;
 
