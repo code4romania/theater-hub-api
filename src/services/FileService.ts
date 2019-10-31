@@ -1,5 +1,6 @@
 import { inject, injectable }   from "inversify";
 import * as uuid                from "uuid/v4";
+import * as path                from "path";
 import { TYPES }                from "../types";
 import { IFileService,
         ILocalizationService }  from "../contracts";
@@ -8,6 +9,7 @@ import { FileType, LocaleType } from "../enums";
 import { FileManager }          from "../utils";
 
 const AWS       = require("aws-sdk");
+const fs        = require("fs");
 const config    = require("../config/env").getConfig();
 
 @injectable()
@@ -44,6 +46,49 @@ export class FileService implements IFileService {
         });
     }
 
+    public getPresignedURL (fileKey: string): string {
+
+        return this._s3.getSignedUrl("getObject", {
+            Bucket: config.aws.files_bucket,
+            Key: fileKey,
+            Expires: config.aws.signed_url_expiry
+        });
+    }
+
+    public getThumbnailURL (key: string): string {
+
+        const imageRequest = JSON.stringify({
+            bucket: config.aws.files_bucket,
+            key,
+            edits: {
+                resize: {
+                    height: 200,
+                    fit: "contain"
+                }
+            }
+        });
+
+        return `${config.aws.cloudFront.url}/${Buffer.from(imageRequest).toString("base64")}`;
+    }
+
+    public getSignedCloudFrontUrl (url: string, privateKey?: string): string {
+
+        if (!privateKey) {
+            privateKey = fs.readFileSync(path.join(process.cwd(), "certificate", config.aws.cloudFront.privateKeyFileName), "utf8");
+        }
+
+        const cloudFront = new AWS.CloudFront.Signer (
+            config.aws.cloudFront.accessKeyId,
+            privateKey
+        );
+
+        return cloudFront.getSignedUrl({
+            url,
+            expires: Math.floor((new Date()).getTime() / 1000) + config.aws.signed_url_expiry
+        });
+
+    }
+
     public async uploadFromStream (stream: any, fileType: FileType, userEmail: string, fileName: string): Promise<void> {
 
         const fileExtension: string = FileManager.getFileExtension(fileType);
@@ -70,7 +115,10 @@ export class FileService implements IFileService {
             Bucket: config.aws.files_bucket,
             Key: `${userEmail}/${key}.${fileExtension}`,
             Body: file.buffer,
-            ACL: config.aws.files_ACL
+            ACL: config.aws.files_ACL,
+            Metadata: {
+                "Cache-Control": `max-age=${config.aws.cache_control_max_age}`
+            }
         };
 
         return this._s3.upload(objectParams).promise();

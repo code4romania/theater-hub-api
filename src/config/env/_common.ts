@@ -38,8 +38,14 @@ export const commonConfig = {
         secretAccessKey: "",
         region: "",
         files_bucket: "",
-        cloudFrontURL: "",
-        files_ACL: "public-read",
+        cloudFront: {
+            url: "",
+            accessKeyId: "",
+            privateKeyFileName: "cloudfront.pem"
+        },
+        files_ACL: "private",
+        signed_url_expiry: 86400,
+        cache_control_max_age: 86400,
         ses: {
             host: "",
             port: 465,
