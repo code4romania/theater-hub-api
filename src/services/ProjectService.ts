@@ -23,10 +23,10 @@ import { VisibilityType }           from "../enums/VisibilityType";
 import { CreateProjectDTO,
          CreateProjectNeedDTO,
          MyProjectDTO,
+         OtherProjectDTO,
          ProjectDTO,
          ProjectListItem,
          GetAllProjectsResponse }   from "../dtos";
-import { AWS }                      from "../utils";
 
 @injectable()
 export class ProjectService extends BaseService<Project> implements IProjectService {
@@ -79,7 +79,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             const projectImage = {
                 Key: uploadProjectImageResult.Key,
                 Location: uploadProjectImageResult.Location,
-                ThumbnailLocation: AWS.getThumbnailURL(uploadProjectImageResult.Key),
+                ThumbnailLocation: this._fileService.getThumbnailURL(uploadProjectImageResult.Key),
                 Size: Math.round(createProjectDTO.Image.size * 100 / (1000 * 1000)) / 100, // in MB
             } as ProjectImage;
 
@@ -132,6 +132,8 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
         const viewerIsVisitor: boolean = !email;
         let project: Project;
         let otherProjects: Project[];
+        let otherProjectsDTO: OtherProjectDTO[];
+        let response: ProjectDTO;
 
         try {
             project = await this._projectRepository
@@ -181,7 +183,11 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                 .where("initiator.ID = :initiatorId AND project.ID != :id AND project.Status = :status", { initiatorId, id, status: ProjectStatusType.Enabled })
                 .getMany();
 
-            otherProjects = otherProjects.filter(p => {
+            otherProjectsDTO = otherProjects.filter(p => {
+
+                if (p.ID === project.ID) {
+                    return false;
+                }
 
                 if (fullViewingRights) {
                     return true;
@@ -204,6 +210,19 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                 }
 
                 return false;
+            })
+            .slice(0, 2)
+            .map(p => {
+                const image: string = p.Image ?
+                    this._fileService.getPresignedURL(p.Image.Key) :
+                    "";
+
+                return {
+                    ID: p.ID,
+                    Name: p.Name,
+                    Image: image
+                } as OtherProjectDTO;
+
             });
 
             if (!project) {
@@ -225,16 +244,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                             initiatorStatus !== UserAccountStatusType.Enabled;
         }
 
-        if (project.Visibility === VisibilityType.Everyone) {
-            return new ProjectDTO(project, otherProjects, true, !hideInitiator);
-        }
-
-        // if the person has admin rights or is the owner of the project then return the project
-        if (fullViewingRights) {
-            return new ProjectDTO(project, otherProjects, true, !hideInitiator);
-        }
-
-        if (project.Visibility === VisibilityType.Private) {
+        if (project.Visibility === VisibilityType.Private && !fullViewingRights) {
             return undefined;
         }
 
@@ -242,7 +252,18 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             return undefined;
         }
 
-        return new ProjectDTO(project, otherProjects, true, !hideInitiator);
+        response                = new ProjectDTO (project, otherProjectsDTO, true, !hideInitiator);
+        response.InitiatorImage = response.InitiatorImage ? this._fileService.getSignedCloudFrontUrl(response.InitiatorImage) : "";
+
+        if (project.Image) {
+            response.Image = {
+                ...project.Image,
+                Location: this._fileService.getPresignedURL(project.Image.Key),
+                ThumbnailLocation: this._fileService.getSignedCloudFrontUrl(project.Image.ThumbnailLocation)
+            };
+        }
+
+        return response;
     }
 
     public async getMyProjects(email: string): Promise<MyProjectDTO[]> {
@@ -254,7 +275,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             return {
                 ID: p.ID,
                 Name: p.Name,
-                Image: p.Image ? p.Image.ThumbnailLocation : "",
+                Image: p.Image ? this._fileService.getSignedCloudFrontUrl(p.Image.ThumbnailLocation) : "",
                 Date: p.Date,
                 City: p.City,
                 Budget: p.Budget,
@@ -348,7 +369,10 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                             (initiatorProfileVisibility === VisibilityType.Community && viewerIsVisitor) ||
                             initiatorStatus !== UserAccountStatusType.Enabled;
 
-                    return new ProjectListItem(p, !hideInitiator);
+                    const item = new ProjectListItem(p, !hideInitiator);
+                    item.Image = p.Image ? this._fileService.getPresignedURL(p.Image.Key) : "";
+
+                    return item;
                 });
 
             const pageCount: number = Math.ceil(filteredProjects.length / pageSize);
@@ -402,7 +426,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             projectImage = {
                 Key: uploadProjectImageResult.Key,
                 Location: uploadProjectImageResult.Location,
-                ThumbnailLocation: AWS.getThumbnailURL(uploadProjectImageResult.Key),
+                ThumbnailLocation: this._fileService.getThumbnailURL(uploadProjectImageResult.Key),
                 Size: Math.round(projectImageFile.size * 100 / (1000 * 1000)) / 100, // in MB
             } as ProjectImage;
 
@@ -414,7 +438,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             const updateProjectImageResults: any  = await Promise.all([newProjectImageUploadPromise, oldProjectImageRemovePromise]);
 
             projectImage.Location           = updateProjectImageResults[0].Location;
-            projectImage.ThumbnailLocation  = AWS.getThumbnailURL(updateProjectImageResults[0].Key);
+            projectImage.ThumbnailLocation  = this._fileService.getThumbnailURL(updateProjectImageResults[0].Key);
             projectImage.Key                = updateProjectImageResults[0].Key;
             projectImage.Size               = Math.round(projectImageFile.size * 100 / (1000 * 1000)) / 100;
 
@@ -445,6 +469,11 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
             })
             .where("ID = :id", { id: generalInformationSection.ID })
             .execute();
+
+        if (projectImage) {
+            projectImage.Location           = this._fileService.getPresignedURL(projectImage.Key);
+            projectImage.ThumbnailLocation  = this._fileService.getSignedCloudFrontUrl(projectImage.ThumbnailLocation);
+        }
 
         return {
             ...generalInformationSection,

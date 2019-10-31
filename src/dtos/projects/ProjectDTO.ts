@@ -8,7 +8,7 @@ export class ProjectDTO {
 
     public constructor (
         project: Project,
-        otherProjects: Project[] = [],
+        otherProjects: OtherProjectDTO[] = [],
         includeID: boolean = true,
         includeInitiator: boolean = true
     ) {
@@ -29,7 +29,7 @@ export class ProjectDTO {
         this.Description    = project.Description;
         this.Image          = project.Image;
         this.InitiatorName  = initiatorName;
-        this.InitiatorImage = initiatorProfileImage;
+        this.InitiatorImage = initiatorProfileImage ? initiatorProfileImage.ThumbnailLocation : "";
         this.Email          = project.Email;
         this.PhoneNumber    = project.PhoneNumber;
         this.Date           = project.Date;
@@ -38,6 +38,7 @@ export class ProjectDTO {
         this.City           = project.City;
         this.Visibility     = project.Visibility;
         this.IsCompleted    = project.IsCompleted;
+        this.OtherProjects  = otherProjects;
 
         this.Needs          = project.Needs.map(n => {
             return {
@@ -57,22 +58,6 @@ export class ProjectDTO {
             };
         }).sort((n1, n2) => new Date(n1.Date).getTime() > new Date(n2.Date).getTime() ? -1 : 1);
 
-        this.OtherProjects    = otherProjects
-                                .filter(p => p.ID !== project.ID)
-                                .slice(0, 2)
-                                .map(p => {
-                                    const image: string = p.Image ?
-                                        p.Image.Location :
-                                        "";
-
-                                    return {
-                                        ID: p.ID,
-                                        Name: p.Name,
-                                        Image: image
-                                    } as OtherProjectDTO;
-
-                                });
-
     }
 
     public ID?: string;
@@ -83,7 +68,7 @@ export class ProjectDTO {
 
     public Description: string;
 
-    public InitiatorImage: ProjectImage;
+    public InitiatorImage: string;
 
     public InitiatorName: string;
 

@@ -60,7 +60,7 @@ import { UserAccountProviderType }             from "../enums/UserAccountProvide
 import { UserAccountStatusType }               from "../enums/UserAccountStatusType";
 import { UserRoleType }                        from "../enums/UserRoleType";
 import { VisibilityType }                      from "../enums/VisibilityType";
-import { AWS, SocialMediaManager, Validators } from "../utils";
+import { SocialMediaManager, Validators }      from "../utils";
 const bcrypt                                   = require("bcrypt");
 const config                                   = require("../config/env").getConfig();
 const jwt                                      = require("jsonwebtoken");
@@ -133,15 +133,35 @@ export class UserService extends BaseService<User> implements IUserService {
     }
 
     public async getMe(email: string): Promise<MeDTO> {
-        const user: User = await this.getByEmail(email);
+        const user: User    = await this.getByEmail(email);
+        const me            = new MeDTO(user);
 
-        return new MeDTO(user);
+        if (me.ProfileImage) {
+            me.ProfileImage.Location           = this._fileService.getPresignedURL(me.ProfileImage.Key);
+            me.ProfileImage.ThumbnailLocation  = this._fileService.getSignedCloudFrontUrl(me.ProfileImage.ThumbnailLocation);
+        }
+
+        return me;
     }
 
     public async getMyProfile(email: string): Promise<ProfileDTO> {
         const user: User = await this.getByEmail(email);
 
-        return new ProfileDTO(user, true);
+        const profile           = new ProfileDTO(user, true);
+        if (profile.ProfileImage) {
+            profile.ProfileImage.Location           = this._fileService.getPresignedURL(profile.ProfileImage.Key);
+            profile.ProfileImage.ThumbnailLocation  = this._fileService.getSignedCloudFrontUrl(profile.ProfileImage.ThumbnailLocation);
+        }
+        profile.PhotoGallery    = profile.PhotoGallery.map(p => {
+
+            return {
+                ...p,
+                Location: this._fileService.getPresignedURL(p.Key),
+                ThumbnailLocation: this._fileService.getSignedCloudFrontUrl(p.ThumbnailLocation)
+            };
+        });
+
+        return profile;
     }
 
     public async deleteMe(email: string): Promise<ProfileDTO> {
@@ -165,7 +185,7 @@ export class UserService extends BaseService<User> implements IUserService {
             profileImage = {
                 Key: uploadProfileImageResult.Key,
                 Location: uploadProfileImageResult.Location,
-                ThumbnailLocation: AWS.getThumbnailURL(uploadProfileImageResult.Key),
+                ThumbnailLocation: this._fileService.getThumbnailURL(uploadProfileImageResult.Key),
                 Size: Math.round(profileImageFile.size * 100 / (1000 * 1000)) / 100, // in MB
                 IsProfileImage: true,
                 User: dbUser
@@ -179,7 +199,7 @@ export class UserService extends BaseService<User> implements IUserService {
             const updateProfileImageResults: any  = await Promise.all([newProfileImageUploadPromise, oldProfileImageRemovePromise]);
 
             profileImage.Location           = updateProfileImageResults[0].Location;
-            profileImage.ThumbnailLocation  = AWS.getThumbnailURL(updateProfileImageResults[0].Key);
+            profileImage.ThumbnailLocation  = this._fileService.getThumbnailURL(updateProfileImageResults[0].Key);
             profileImage.Key                = updateProfileImageResults[0].Key;
             profileImage.Size               = Math.round(profileImageFile.size * 100 / (1000 * 1000)) / 100;
 
@@ -279,6 +299,11 @@ export class UserService extends BaseService<User> implements IUserService {
             .where("ID = :ID", { ID: dbUser.Professional.ID })
             .execute();
 
+        if (profileImage) {
+            profileImage.Location           = this._fileService.getPresignedURL(profileImage.Key);
+            profileImage.ThumbnailLocation  = this._fileService.getSignedCloudFrontUrl(profileImage.ThumbnailLocation);
+        }
+
         const response: MeDTO = {
             FirstName: generalInformationSection.FirstName,
             LastName: generalInformationSection.LastName,
@@ -319,7 +344,7 @@ export class UserService extends BaseService<User> implements IUserService {
 
     public async updatePhotoGallery(userEmail: string, photoGallerySection: UserImage[], addedPhotos: any): Promise<UpdatePhotoGalleryResponse> {
         const dbUser                        = await this.getByEmail(userEmail);
-        const dbPhotoGalleryIDs: string[]   = dbUser.PhotoGallery.map(p => p.ID);
+        const dbPhotoGalleryIDs: string[]   = dbUser.PhotoGallery.filter(p => !p.IsProfileImage).map(p => p.ID);
         const photoGalleryIDs: string[]     = photoGallerySection.map(p => p.ID);
         const removedEntitiesIDs: string[]  = dbPhotoGalleryIDs.filter(id => photoGalleryIDs.indexOf(id) === -1);
         const addedEntities: UserImageDTO[] = [];
@@ -344,13 +369,16 @@ export class UserService extends BaseService<User> implements IUserService {
             const photo: UserImage = {
                 Key: updatePhotoGalleryResults[0][index].Key,
                 Location: updatePhotoGalleryResults[0][index].Location,
-                ThumbnailLocation: AWS.getThumbnailURL(updatePhotoGalleryResults[0][index].Key),
+                ThumbnailLocation: this._fileService.getThumbnailURL(updatePhotoGalleryResults[0][index].Key),
                 Size: Math.round(addedPhotos[index].size * 100 / (1000 * 1000)) / 100, // in MB
                 IsProfileImage: false,
                 User: dbUser
             } as UserImage;
 
-            const addedEntity = await this._userImageRepository.insert(photo);
+            const addedEntity               = await this._userImageRepository.insert(photo);
+            addedEntity.Location            = this._fileService.getPresignedURL(addedEntity.Key);
+            addedEntity.ThumbnailLocation   = this._fileService.getSignedCloudFrontUrl(addedEntity.ThumbnailLocation);
+
             addedEntities.push(addedEntity);
         }
 
@@ -978,6 +1006,12 @@ export class UserService extends BaseService<User> implements IUserService {
 
         this.update(user);
 
+        const me = new MeDTO(user);
+        if (me.ProfileImage) {
+            me.ProfileImage.Location           = this._fileService.getPresignedURL(me.ProfileImage.Key);
+            me.ProfileImage.ThumbnailLocation  = this._fileService.getSignedCloudFrontUrl(me.ProfileImage.ThumbnailLocation);
+        }
+
         const response: CreateProfileResponseDTO = {
             Token: jwt.sign({
                 firstName: user.Professional.FirstName,
@@ -986,7 +1020,7 @@ export class UserService extends BaseService<User> implements IUserService {
                 role: user.AccountSettings.Role,
                 accountStatus: user.AccountSettings.AccountStatus
             }, config.application.tokenSecret),
-            Me: new MeDTO(user),
+            Me: me,
             Locale: profile.Locale
         };
 
@@ -1160,19 +1194,26 @@ export class UserService extends BaseService<User> implements IUserService {
             selectedUsers = selectedUsers.filter(u => u.AccountSettings.ProfileVisibility === VisibilityType.Everyone);
         }
 
+        const communityMembers  = selectedUsers.map(u => {
+            const member        = new CommunityMemberDTO(u, true);
+            member.ProfileImage = member.ProfileImage ? this._fileService.getSignedCloudFrontUrl(member.ProfileImage) : "";
+
+            return member;
+        });
+
         const response: GetCommunityLayersResponse = new GetCommunityLayersResponse();
 
         for (const skill of skills) {
-            const skillUsers = selectedUsers.filter(u => u.Professional.Skills.map(s => s.SkillID).indexOf(skill.ID) !== -1);
+            const skillCommunityMembers = communityMembers.filter(m => m.SkillIDs.indexOf(skill.ID) !== -1);
 
-            if (skillUsers.length === 0) {
+            if (skillCommunityMembers.length === 0) {
                 continue;
             }
 
-            if (skillUsers.length <= request.PageSize) {
-                response.Layers.push(new CommunitySkillLayer(skill.ID, skillUsers, false));
+            if (skillCommunityMembers.length <= request.PageSize) {
+                response.Layers.push(new CommunitySkillLayer(skill.ID, skillCommunityMembers, false));
             } else {
-                response.Layers.push(new CommunitySkillLayer(skill.ID, skillUsers.slice(0, request.PageSize), true));
+                response.Layers.push(new CommunitySkillLayer(skill.ID, skillCommunityMembers.slice(0, request.PageSize), true));
             }
         }
 
@@ -1239,9 +1280,16 @@ export class UserService extends BaseService<User> implements IUserService {
 
         communitySize = selectedUsers.length;
 
-        selectedUsers = selectedUsers.splice(request.Page * request.PageSize, request.PageSize);
+        selectedUsers           = selectedUsers.splice(request.Page * request.PageSize, request.PageSize);
 
-        return new GetCommunityMembersResponse(selectedUsers, communitySize, request.IncludePersonalInformation);
+        const communityMembers  = selectedUsers.map(u => {
+            const member        = new CommunityMemberDTO(u, true, request.IncludePersonalInformation);
+            member.ProfileImage = member.ProfileImage ? this._fileService.getSignedCloudFrontUrl(member.ProfileImage) : "";
+
+            return member;
+        });
+
+        return new GetCommunityMembersResponse (communityMembers, communitySize);
     }
 
     public async getRandomCommunityMembers(count: number = 5): Promise<CommunityMemberDTO[]> {
@@ -1256,7 +1304,15 @@ export class UserService extends BaseService<User> implements IUserService {
                             .limit(count)
                             .getMany();
 
-        return users.map(u => new CommunityMemberDTO(u));
+        const communityMembers =  users.map(u => new CommunityMemberDTO(u));
+
+        for (const member of communityMembers) {
+            if (member.ProfileImage) {
+                member.ProfileImage = this._fileService.getSignedCloudFrontUrl(member.ProfileImage);
+            }
+        }
+
+        return communityMembers;
     }
 
     public async getCommunityMemberProfile(email: string, communityMemberUsername: string): Promise<ProfileDTO> {
@@ -1276,6 +1332,20 @@ export class UserService extends BaseService<User> implements IUserService {
         } catch (error) {
             return undefined;
         }
+
+        if (communityMember.ProfileImage) {
+            communityMember.ProfileImage.Location           = this._fileService.getPresignedURL(communityMember.ProfileImage.Key);
+            communityMember.ProfileImage.ThumbnailLocation  = this._fileService.getSignedCloudFrontUrl(communityMember.ProfileImage.ThumbnailLocation);
+        }
+
+        communityMember.PhotoGallery = communityMember.PhotoGallery.map(p => {
+
+            return {
+                ...p,
+                Location: this._fileService.getPresignedURL(p.Key),
+                ThumbnailLocation: this._fileService.getSignedCloudFrontUrl(p.ThumbnailLocation)
+            };
+        });
 
         const communityMemberProfileVisibility: VisibilityType      = communityMember.AccountSettings.ProfileVisibility;
         const communityMemberEmailVisibility: VisibilityType        = communityMember.AccountSettings.EmailVisibility;
@@ -1325,6 +1395,11 @@ export class UserService extends BaseService<User> implements IUserService {
         communityMemberProfile.EmailVisibility       = undefined;
         communityMemberProfile.BirthDateVisibility   = undefined;
         communityMemberProfile.PhoneNumberVisibility = undefined;
+
+        communityMemberProfile.Projects = communityMemberProfile.Projects.map(p => ({
+            ...p,
+            Image: this._fileService.getSignedCloudFrontUrl(p.Image)
+        }));
 
         return communityMemberProfile;
     }
