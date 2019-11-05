@@ -99,6 +99,16 @@ export class SetupMigration1572961570025 implements MigrationInterface {
                 FOR EACH ROW
                 EXECUTE PROCEDURE update_project_need_search_tokens();`
         );
+
+        await queryRunner.query(
+            `CREATE OR REPLACE PROCEDURE elevate_to_super_admin(email varchar)
+				LANGUAGE SQL
+				AS $$
+				UPDATE public."UserAccountSettings" uas SET "Role" = 2
+				FROM public."User" u
+				WHERE uas."UserID" = u."ID" AND u."Email" = email
+				$$;`
+        );
     }
 
     public async down(queryRunner: QueryRunner): Promise<any> {
