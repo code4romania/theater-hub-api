@@ -31,7 +31,7 @@ export class ProfileDTO {
         this.Website      = user.Website;
 
         if (user.Professional.Skills) {
-            this.Skills = user.Professional.Skills.map(s => s.Skill.ID.toString());
+            this.Skills = user.Professional.Skills.map(s => s.ID.toString());
         }
 
         this.PhotoGallery   = user.PhotoGallery.filter(p => !p.IsProfileImage).map(p => {

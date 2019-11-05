@@ -7,14 +7,12 @@ import {
     IProjectService,
     IUserService,
     IProjectNeedRepository,
-    ITagRepository,
-    IProjectNeedTagRepository}              from "../contracts";
+    ITagRepository}                         from "../contracts";
 import { BaseService }                      from "./BaseService";
 import { Project,
         ProjectNeed,
         Tag,
-        User,
-        ProjectNeedTag }                    from "../models";
+        User }                              from "../models";
 import { CreateProjectNeedDTO,
     UpdateProjectNeedDTO }                  from "../dtos";
 
@@ -22,19 +20,16 @@ import { CreateProjectNeedDTO,
 export class ProjectNeedService extends BaseService<ProjectNeed> implements IProjectNeedService {
 
     private readonly _tagRepository: ITagRepository;
-    private readonly _projectNeedTagRepository: IProjectNeedTagRepository;
     private readonly _projectService: IProjectService;
     private readonly _userService: IUserService;
 
     constructor(@inject(TYPES.ProjectNeedRepository) projectNeedRepository: IProjectNeedRepository,
                     @inject(TYPES.TagRepository) tagRepository: ITagRepository,
-                    @inject(TYPES.ProjectNeedTagRepository) projectNeedTagRepository: IProjectNeedTagRepository,
                     @inject(TYPES.LocalizationService) localizationService: ILocalizationService,
                     @inject(TYPES.ProjectService) projectService: IProjectService,
                     @inject(TYPES.UserService) userService: IUserService) {
         super(projectNeedRepository, localizationService);
         this._tagRepository                     = tagRepository;
-        this._projectNeedTagRepository          = projectNeedTagRepository;
         this._projectService                    = projectService;
         this._userService                       = userService;
     }
@@ -52,14 +47,9 @@ export class ProjectNeedService extends BaseService<ProjectNeed> implements IPro
 
             const tags: Tag[] = await this._tagRepository.getByIDs(createProjectNeedDTO.Tags);
 
-            tags.forEach(t => {
-                const projectNeedTag: ProjectNeedTag = {
-                    ProjectNeed: projectNeed,
-                    Tag: t
-                } as ProjectNeedTag;
-
-                projectNeed.Tags.push(projectNeedTag);
-            });
+            projectNeed.Tags = [
+                ...tags
+            ];
         }
 
         const response = await this._repository.insert(projectNeed);
@@ -72,38 +62,28 @@ export class ProjectNeedService extends BaseService<ProjectNeed> implements IPro
         const dbUser: User                  = await this._userService.getByEmail(email);
         const dbProject: Project            = dbUser.Projects.find(p => p.ID === updateProjectNeedDTO.ProjectID);
         const dbProjectNeed: ProjectNeed    = dbProject.Needs.find(n => n.ID === updateProjectNeedDTO.ID);
-        dbProjectNeed.Tags = [];
 
         if (!dbProjectNeed) {
             throw new Error(this._localizationService.getText("validation.project.need.non-existent"));
         }
 
-        const tags: Tag[]                       = await this._tagRepository.getAll();
-        const dbIDs: string[]                   = dbProjectNeed.Tags.map(t => t.TagID);
-        const addedIDs: string[]                = updateProjectNeedDTO.Tags.filter(t => dbIDs.indexOf(t) === -1);
-        const removedIDs: string[]              = dbIDs.filter(id => updateProjectNeedDTO.Tags.indexOf(id) === -1);
+        if (!dbProjectNeed.Tags) {
+            dbProjectNeed.Tags = [];
+        }
 
-        addedIDs.forEach(async id => {
-            const projectNeedTag: ProjectNeedTag = {
-                ProjectNeed: dbProjectNeed,
-                Tag: tags.find(t => t.ID === id)
-            } as ProjectNeedTag;
+        const dbTagIDs: string[]                = dbProjectNeed.Tags.map(t => t.ID);
+        const addedIDs: string[]                = updateProjectNeedDTO.Tags.filter(t => dbTagIDs.indexOf(t) === -1);
+        const addedTags: Tag[]                  = await this._tagRepository.getByIDs(addedIDs);
+        const removedIDs: string[]              = dbTagIDs.filter(id => updateProjectNeedDTO.Tags.indexOf(id) === -1);
 
-            this._projectNeedTagRepository.insert(projectNeedTag);
-        });
+        dbProjectNeed.Tags = [
+            ...dbProjectNeed.Tags.filter(t => removedIDs.indexOf(t.ID) === -1),
+            ...addedTags
+        ];
 
-        removedIDs.forEach(async id => {
-            this._projectNeedTagRepository.delete(dbProjectNeed.Tags.find(t => t.TagID === id));
-        });
+        dbProjectNeed.Description = updateProjectNeedDTO.Description;
 
-        this._repository
-                .runCreateQueryBuilder()
-                .update(ProjectNeed)
-                .set({
-                    Description: updateProjectNeedDTO.Description
-                })
-                .where("ID = :id", { id: updateProjectNeedDTO.ID })
-                .execute();
+        this._repository.update(dbProjectNeed);
 
     }
 
@@ -116,9 +96,6 @@ export class ProjectNeedService extends BaseService<ProjectNeed> implements IPro
         if (!isValidRequest) {
             throw new Error(this._localizationService.getText("validation.project.need.non-existent"));
         }
-        dbProjectNeed.Tags.forEach(t => {
-            this._projectNeedTagRepository.delete(t);
-        });
 
         return this._repository.deleteByID(projectNeedID);
 

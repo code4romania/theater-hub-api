@@ -16,7 +16,7 @@ export class CommunityMemberDTO {
         this.FirstName      = user.Professional.FirstName;
         this.LastName       = user.Professional.LastName;
         this.Username       = user.Username;
-        this.SkillIDs       = user.Professional.Skills ? user.Professional.Skills.map(s => s.SkillID) : [];
+        this.SkillIDs       = user.Professional.Skills ? user.Professional.Skills.map(s => s.ID) : [];
 
         if (includePersonalInformation) {
             this.Email          = user.AccountSettings.EmailVisibility === VisibilityType.Everyone ? user.Email : undefined;

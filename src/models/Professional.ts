@@ -1,10 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne,
-       OneToMany, JoinColumn }     from "typeorm";
+import { Entity, Column,
+       PrimaryGeneratedColumn,
+       OneToOne, OneToMany,
+       ManyToMany, JoinColumn,
+       JoinTable }                 from "typeorm";
 import { BaseEntity }              from "./BaseEntity";
 import { Experience }              from "./Experience";
 import { Education }               from "./Education";
+import { Skill }                   from "./Skill";
 import { User }                    from "./User";
-import { ProfessionalSkill }       from "./ProfessionalSkill";
 
 @Entity("Professional")
 export class Professional extends BaseEntity {
@@ -22,8 +25,9 @@ export class Professional extends BaseEntity {
   @JoinColumn({ name: "UserID" })
   User: User;
 
-  @OneToMany(type => ProfessionalSkill, professionalSkill => professionalSkill.Professional, { cascade: true, eager: true })
-  Skills: ProfessionalSkill[];
+  @ManyToMany(type => Skill, { eager: true })
+  @JoinTable({ name: "ProfessionalSkill" })
+  Skills: Skill[];
 
   @OneToMany(type => Experience, experience => experience.Professional, { cascade: true, eager: true })
   Experience: Experience[];
