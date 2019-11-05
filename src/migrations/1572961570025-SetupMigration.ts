@@ -101,13 +101,14 @@ export class SetupMigration1572961570025 implements MigrationInterface {
         );
 
         await queryRunner.query(
-            `CREATE OR REPLACE PROCEDURE elevate_to_super_admin(email varchar)
-				LANGUAGE SQL
-				AS $$
+            `CREATE OR REPLACE FUNCTION elevate_to_super_admin(email varchar)
+                RETURNS void AS $$
+            BEGIN
 				UPDATE public."UserAccountSettings" uas SET "Role" = 2
 				FROM public."User" u
-				WHERE uas."UserID" = u."ID" AND u."Email" = email
-				$$;`
+				WHERE uas."UserID" = u."ID" AND u."Email" = email;
+            END;
+            $$ LANGUAGE plpgsql;`
         );
     }
 
