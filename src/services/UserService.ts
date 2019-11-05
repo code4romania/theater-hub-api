@@ -10,7 +10,6 @@ import { IUserService, IEmailService,
     IEducationRepository,
     IExperienceRepository,
     IProfessionalRepository,
-    IProfessionalSkillRepository,
     IUserAccountSettingsRepository,
     IUserFileRepository,
     IUserImageRepository,
@@ -28,7 +27,6 @@ import { UserFile }                            from "../models/UserFile";
 import { UserSocialMedia }                     from "../models/UserSocialMedia";
 import { UserVideo }                           from "../models/UserVideo";
 import { Professional }                        from "../models/Professional";
-import { ProfessionalSkill }                   from "../models/ProfessionalSkill";
 import { Skill }                               from "../models/Skill";
 import { ChangePasswordResponseDTO,
     ChangePasswordRequestDTO,
@@ -77,7 +75,6 @@ export class UserService extends BaseService<User> implements IUserService {
     private readonly _educationRepository: IEducationRepository;
     private readonly _experienceRepository: IExperienceRepository;
     private readonly _professionalRepository: IProfessionalRepository;
-    private readonly _professionalSkillRepository: IProfessionalSkillRepository;
     private readonly _userAccountSettingsRepository: IUserAccountSettingsRepository;
     private readonly _userFileRepository: IUserFileRepository;
     private readonly _userImageRepository: IUserImageRepository;
@@ -93,7 +90,6 @@ export class UserService extends BaseService<User> implements IUserService {
         @inject(TYPES.EducationRepository) educationRepository: IEducationRepository,
         @inject(TYPES.ExperienceRepository) experienceRepository: IExperienceRepository,
         @inject(TYPES.ProfessionalRepository) professionalRepository: IProfessionalRepository,
-        @inject(TYPES.ProfessionalSkillRepository) professionalSkillRepository: IProfessionalSkillRepository,
         @inject(TYPES.UserAccountSettingsRepository) userAccountSettingsRepository: IUserAccountSettingsRepository,
         @inject(TYPES.UserFileRepository) userFileRepository: IUserFileRepository,
         @inject(TYPES.UserImageRepository) userImageRepository: IUserImageRepository,
@@ -110,7 +106,6 @@ export class UserService extends BaseService<User> implements IUserService {
         this._educationRepository             = educationRepository;
         this._experienceRepository            = experienceRepository;
         this._professionalRepository          = professionalRepository;
-        this._professionalSkillRepository     = professionalSkillRepository;
         this._userAccountSettingsRepository   = userAccountSettingsRepository;
         this._userFileRepository              = userFileRepository;
         this._userImageRepository             = userImageRepository;
@@ -318,27 +313,22 @@ export class UserService extends BaseService<User> implements IUserService {
 
     public async updateSkills(userEmail: string, skillsSection: number[]): Promise<void> {
         const dbUser                         = await this.getByEmail(userEmail);
-        const dbSkillsIDs: number[]          = dbUser.Professional.Skills.map(s => s.SkillID);
-        const addedEntitiesIDs: number[]     = skillsSection.filter(id => dbSkillsIDs.indexOf(id) === -1);
-        const removedEntitiesIDs: number[]   = dbSkillsIDs.filter(id => skillsSection.indexOf(id) === -1);
-        const resultingSkillIDs: number[]    = _.union(dbSkillsIDs, addedEntitiesIDs).filter(id => removedEntitiesIDs.indexOf(id) === -1);
+        const dbUserSkillsIDs: number[]      = dbUser.Professional.Skills.map(s => s.ID);
+        const addedEntitiesIDs: number[]     = skillsSection.filter(id => dbUserSkillsIDs.indexOf(id) === -1);
+        const addedEntities: Skill[]         = await this._skillService.getByIDs(addedEntitiesIDs.map(e => e.toString()));
+        const removedEntitiesIDs: number[]   = dbUserSkillsIDs.filter(id => skillsSection.indexOf(id) === -1);
+        const resultingSkillIDs: number[]    = _.union(dbUserSkillsIDs, addedEntitiesIDs).filter(id => removedEntitiesIDs.indexOf(id) === -1);
 
         if (resultingSkillIDs.length === 0) {
             throw new Error(this._localizationService.getText("validation.skills.required"));
         }
 
-        addedEntitiesIDs.forEach(async id => {
-            const professionalSkill: ProfessionalSkill = {
-                ProfessionalID: dbUser.Professional.ID,
-                SkillID: id
-            } as ProfessionalSkill;
+        dbUser.Professional.Skills = [
+            ...dbUser.Professional.Skills.filter(s => removedEntitiesIDs.indexOf(s.ID) === -1),
+            ...addedEntities
+        ];
 
-            this._professionalSkillRepository.insert(professionalSkill);
-        });
-
-        removedEntitiesIDs.forEach(async id => {
-            this._professionalSkillRepository.delete(dbUser.Professional.Skills.find(ps => ps.SkillID === id));
-        });
+        this._professionalRepository.update(dbUser.Professional);
 
     }
 
@@ -847,14 +837,7 @@ export class UserService extends BaseService<User> implements IUserService {
 
             const skills: Skill[] = await this._skillService.getByIDs(profileSkills);
 
-            skills.forEach(s => {
-                const professionalSkill: ProfessionalSkill = {
-                    ProfessionalID: user.Professional.ID,
-                    SkillID: s.ID
-                } as ProfessionalSkill;
-
-                user.Professional.Skills.push(professionalSkill);
-            });
+            user.Professional.Skills = [...skills];
         }
 
         // Portfolio
@@ -1039,7 +1022,7 @@ export class UserService extends BaseService<User> implements IUserService {
         const birthDateMoment         = moment(dbUser.BirthDate);
         const age                     = Math.floor(moment.duration(currentDateMoment.diff(birthDateMoment)).asYears());
         const skills                  = dbUser.Professional.Skills
-                                        .map(s => this._localizationService.getText(`application-data.skills.${s.Skill.ID}`))
+                                        .map(s => this._localizationService.getText(`application-data.skills.${s.ID}`))
                                         .sort();
         const awards                  = profile.Awards.map(a => {
             return {
@@ -1195,7 +1178,7 @@ export class UserService extends BaseService<User> implements IUserService {
         }
 
         const communityMembers  = selectedUsers.map(u => {
-            const member        = new CommunityMemberDTO(u, true);
+            const member        = new CommunityMemberDTO(u);
             member.ProfileImage = member.ProfileImage ? this._fileService.getSignedCloudFrontUrl(member.ProfileImage) : "";
 
             return member;
@@ -1275,7 +1258,7 @@ export class UserService extends BaseService<User> implements IUserService {
 
         // filter users by skills
         if (request.SkillIDs.length !== 0) {
-            selectedUsers = selectedUsers.filter(u => _.difference(request.SkillIDs, u.Professional.Skills.map(s => s.SkillID)).length === 0);
+            selectedUsers = selectedUsers.filter(u => _.difference(request.SkillIDs, u.Professional.Skills.map(s => s.ID)).length === 0);
         }
 
         communitySize = selectedUsers.length;
@@ -1308,7 +1291,7 @@ export class UserService extends BaseService<User> implements IUserService {
 
         for (const member of communityMembers) {
             if (member.ProfileImage) {
-                member.ProfileImage = this._fileService.getSignedCloudFrontUrl(member.ProfileImage);
+                member.ProfileImage = member.ProfileImage ? this._fileService.getSignedCloudFrontUrl(member.ProfileImage) : "";
             }
         }
 
@@ -1398,7 +1381,7 @@ export class UserService extends BaseService<User> implements IUserService {
 
         communityMemberProfile.Projects = communityMemberProfile.Projects.map(p => ({
             ...p,
-            Image: this._fileService.getSignedCloudFrontUrl(p.Image)
+            Image: p.Image ? this._fileService.getSignedCloudFrontUrl(p.Image) : ""
         }));
 
         return communityMemberProfile;

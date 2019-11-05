@@ -44,7 +44,7 @@ export class ProjectDTO {
             return {
                 ID: n.ID,
                 Description: n.Description,
-                Tags: n.Tags ? n.Tags.map(t => t.TagID) : [],
+                Tags: n.Tags ? n.Tags.map(t => t.ID) : [],
                 Date: n.DateCreated,
                 ProjectID: project.ID
             };

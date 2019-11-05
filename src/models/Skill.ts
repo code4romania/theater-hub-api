@@ -1,5 +1,4 @@
 import { Entity, Column, PrimaryColumn, OneToMany } from "typeorm";
-import { ProfessionalSkill }                        from "./ProfessionalSkill";
 
 @Entity("Skill")
 export class Skill {
@@ -12,8 +11,5 @@ export class Skill {
 
     @Column("bytea", { nullable: true })
     Image: string;
-
-    @OneToMany(type => ProfessionalSkill, professionalSkill => professionalSkill.Skill)
-    Professionals: ProfessionalSkill[];
 
 }

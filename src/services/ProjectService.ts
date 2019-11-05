@@ -11,7 +11,6 @@ import { BaseService }              from "./BaseService";
 import { Project,
     ProjectImage,
     ProjectNeed,
-    ProjectNeedTag,
     Tag,
     ProjectUpdate,
     User }                          from "../models";
@@ -99,17 +98,9 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                 } as ProjectNeed;
 
                 if (n.Tags && n.Tags.length !== 0) {
-                    need.Tags = [];
-                    // const tags: ProjectNeedTagCategory[] = dbTags.filter(t => n.Tags.indexOf(t.ID) !== -1);
-
-                    n.Tags.forEach(t => {
-                        const projectNeedTag: ProjectNeedTag = {
-                            ProjectNeedID: need.ID,
-                            TagID: t
-                        } as ProjectNeedTag;
-
-                        need.Tags.push(projectNeedTag);
-                    });
+                    need.Tags = [
+                        ...dbTags.filter(t => n.Tags.indexOf(t.ID) !== -1)
+                    ];
                 }
 
                 project.Needs.push(need);
