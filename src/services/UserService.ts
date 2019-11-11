@@ -987,7 +987,7 @@ export class UserService extends BaseService<User> implements IUserService {
 
         user.AccountSettings.AccountStatus  = UserAccountStatusType.Enabled;
 
-        this.update(user);
+        await this.update(user);
 
         const me = new MeDTO(user);
         if (me.ProfileImage) {
