@@ -1,6 +1,6 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class SetupMigration1571217652054 implements MigrationInterface {
+export class SetupMigration1572961570025 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.query(
@@ -98,6 +98,17 @@ export class SetupMigration1571217652054 implements MigrationInterface {
                 AFTER INSERT OR UPDATE ON public."ProjectNeed"
                 FOR EACH ROW
                 EXECUTE PROCEDURE update_project_need_search_tokens();`
+        );
+
+        await queryRunner.query(
+            `CREATE OR REPLACE FUNCTION elevate_to_super_admin(email varchar)
+                RETURNS void AS $$
+            BEGIN
+				UPDATE public."UserAccountSettings" uas SET "Role" = 2
+				FROM public."User" u
+				WHERE uas."UserID" = u."ID" AND u."Email" = email;
+            END;
+            $$ LANGUAGE plpgsql;`
         );
     }
 

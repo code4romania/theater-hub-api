@@ -12,9 +12,8 @@ import { IAdministrationController,
     ISkillService, IUserService, IUserVideoService, IEmailService,
     IAwardRepository, IEducationRepository, IEntityCategoryRepository,
     IExperienceRepository, ILocaleRepository, ICurrencyRepository,
-    IProfessionalRepository, IProfessionalSkillRepository,
+    IProfessionalRepository,
     IProjectNeedRepository, ITagRepository,
-    IProjectNeedTagRepository,
     IProjectRepository, IProjectUpdateRepository,
     ISkillRepository,
     IUserAccountSettingsRepository,
@@ -41,9 +40,8 @@ import {
 import { AwardRepository,
     EducationRepository, EntityCategoryRepository, ExperienceRepository,
     LocaleRepository, CurrencyRepository,
-    ProfessionalRepository, ProfessionalSkillRepository,
+    ProfessionalRepository,
     ProjectNeedRepository, TagRepository,
-    ProjectNeedTagRepository,
     ProjectRepository, ProjectUpdateRepository,
     SkillRepository, UserAccountSettingsRepository,
     UserFileRepository, UserImageRepository, ProjectImageRepository,
@@ -93,10 +91,8 @@ container.bind<IExperienceRepository>(TYPES.ExperienceRepository).to(ExperienceR
 container.bind<ILocaleRepository>(TYPES.LocaleRepository).to(LocaleRepository);
 container.bind<ICurrencyRepository>(TYPES.CurrencyRepository).to(CurrencyRepository);
 container.bind<IProfessionalRepository>(TYPES.ProfessionalRepository).to(ProfessionalRepository);
-container.bind<IProfessionalSkillRepository>(TYPES.ProfessionalSkillRepository).to(ProfessionalSkillRepository);
 container.bind<IProjectNeedRepository>(TYPES.ProjectNeedRepository).to(ProjectNeedRepository);
 container.bind<ITagRepository>(TYPES.TagRepository).to(TagRepository);
-container.bind<IProjectNeedTagRepository>(TYPES.ProjectNeedTagRepository).to(ProjectNeedTagRepository);
 container.bind<IProjectRepository>(TYPES.ProjectRepository).to(ProjectRepository);
 container.bind<IProjectUpdateRepository>(TYPES.ProjectUpdateRepository).to(ProjectUpdateRepository);
 container.bind<IUserFileRepository>(TYPES.UserFileRepository).to(UserFileRepository);

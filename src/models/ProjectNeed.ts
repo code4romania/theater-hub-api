@@ -1,10 +1,10 @@
 import { Entity, Column,
     PrimaryGeneratedColumn,
-    OneToMany,
-    ManyToOne, JoinColumn }  from "typeorm";
+    ManyToMany, ManyToOne,
+    JoinColumn, JoinTable }  from "typeorm";
 import { BaseEntity }        from "./BaseEntity";
 import { Project }           from "./Project";
-import { ProjectNeedTag }    from "./ProjectNeedTag";
+import { Tag }               from "./Tag";
 
 @Entity("ProjectNeed")
 export class ProjectNeed extends BaseEntity {
@@ -19,7 +19,8 @@ export class ProjectNeed extends BaseEntity {
     @JoinColumn({ name: "ProjectID" })
     Project: Project;
 
-    @OneToMany(type => ProjectNeedTag, projectNeedTag => projectNeedTag.ProjectNeed, { cascade: true, eager: true })
-    Tags?: ProjectNeedTag[];
+    @ManyToMany(type => Tag, { eager: true })
+    @JoinTable({ name: "ProjectNeedTag" })
+    Tags?: Tag[];
 
 }

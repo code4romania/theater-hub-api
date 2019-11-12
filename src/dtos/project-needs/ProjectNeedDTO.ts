@@ -9,7 +9,7 @@ export class ProjectNeedDTO {
         this.ProjectID   = projectNeed.Project ? projectNeed.Project.ID : "";
 
         if (projectNeed.Tags) {
-            this.Tags = projectNeed.Tags.map(t => t.TagID);
+            this.Tags = projectNeed.Tags.map(t => t.ID);
         }
     }
 
