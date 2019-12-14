@@ -59,7 +59,7 @@ import { UserAccountStatusType }               from "../enums/UserAccountStatusT
 import { UserRoleType }                        from "../enums/UserRoleType";
 import { VisibilityType }                      from "../enums/VisibilityType";
 import { SocialMediaManager, Validators }      from "../utils";
-const bcrypt                                   = require("bcrypt");
+const bcrypt                                   = require("bcryptjs");
 const config                                   = require("../config/env").getConfig();
 const jwt                                      = require("jsonwebtoken");
 const uuidv4                                   = require("uuid/v4");
