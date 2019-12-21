@@ -1,0 +1,17 @@
+[
+  {
+    "name": "theater-hub-api",
+    "image": "${TH_API_DOCKER_IMAGE}",
+    "cpu": ${TH_API_ECS_CPU},
+    "memory": ${TH_API_ECS_MEMORY},
+
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-region": "${AWS_REGION}",
+        "awslogs-group": "theater_hub",
+        "awslogs-stream-prefix": "theater_hub"
+      }
+    }
+  }
+]
