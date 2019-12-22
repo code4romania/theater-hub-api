@@ -5,6 +5,7 @@
     "cpu": ${TH_API_ECS_CPU},
     "memory": ${TH_API_ECS_MEMORY},
     "essential": true,
+    "networkMode": "awsvpc",
 
     "portMappings": [
       {
@@ -13,15 +14,6 @@
         "protocol": "tcp"
       }
     ],    
-
-    "logConfiguration": {
-      "logDriver": "awslogs",
-      "options": {
-        "awslogs-region": "${AWS_REGION}",
-        "awslogs-group": "theater_hub",
-        "awslogs-stream-prefix": "theater_hub"
-      }
-    },
 
     "environment": [
       { "name": "TH_POSTGRES_HOSTNAME", "value": "${TH_POSTGRES_HOSTNAME}" },

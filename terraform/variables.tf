@@ -1,7 +1,3 @@
-variable "aws_vpc_id" {
-  description = "The AWS VPC ID where the resources should be created"
-}
-
 variable "aws_region" {
   description = "The AWS region to use"
   default     = "eu-central-1"
@@ -9,7 +5,7 @@ variable "aws_region" {
 
 variable "aws_azs" {
   description = "The availability zones where to create the Theater Hub API load balancer"
-  default     = ["eu-central-1c"]
+  default     = ["eu-central-1b", "eu-central-1c"]
 }
 
 variable "aws_profile" {
