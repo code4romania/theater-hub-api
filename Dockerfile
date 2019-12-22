@@ -17,4 +17,4 @@ RUN sh -c 'for conf in $(ls src/config/env/_*.ts); do mv $conf ${conf//_/}; done
 COPY --from=build_stage /app/node_modules ./node_modules
 COPY --from=build_stage /app/dist ./dist
 EXPOSE 4002
-CMD "env && npm run serve"
+CMD run.sh

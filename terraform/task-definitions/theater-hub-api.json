@@ -24,10 +24,9 @@
     },
 
     "environment": [
-      {
-        "name": "TH_DB_HOSTNAME",
-        "value": "${TH_DB_HOSTNAME}"
-      }
+      { "name": "TH_POSTGRES_HOSTNAME", "value": "${TH_POSTGRES_HOSTNAME}" },
+      { "name": "TH_POSTGRES_USERNAME", "value": "${TH_POSTGRES_USERNAME}" },
+      { "name": "TH_POSTGRES_PASSWORD", "value": "${TH_POSTGRES_PASSWORD}" }
     ]
   }
 ]        

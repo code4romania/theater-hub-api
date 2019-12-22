@@ -60,11 +60,13 @@ resource "aws_ecs_task_definition" "th_api_task_def" {
   container_definitions = templatefile(
     "task-definitions/theater-hub-api.json",
     {
-      AWS_REGION          = var.aws_region,
-      TH_API_ECS_CPU      = var.th_api_ecs_cpu,
-      TH_API_ECS_MEMORY   = var.th_api_ecs_memory,
-      TH_API_DOCKER_IMAGE = var.th_api_docker_image,
-      TH_DB_HOSTNAME      = aws_db_instance.th-api-db.address
+      AWS_REGION           = var.aws_region,
+      TH_API_ECS_CPU       = var.th_api_ecs_cpu,
+      TH_API_ECS_MEMORY    = var.th_api_ecs_memory,
+      TH_API_DOCKER_IMAGE  = var.th_api_docker_image,
+      TH_POSTGRES_HOSTNAME = aws_db_instance.th-api-db.address,
+      TH_POSTGRES_USERNAME = var.th_rds_username,
+      TH_POSTGRES_PASSWORD = var.th_rds_password
     }
   )
 }
