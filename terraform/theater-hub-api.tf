@@ -8,6 +8,7 @@ provider "aws" {
 resource "aws_security_group" "th_sec_group" {
   name        = "theater-hub-security-group"
   description = "Security group for the Theater Hub app."
+  vpc_id      = var.aws_vpc_id
 
   ingress {
     protocol    = "tcp"
@@ -44,6 +45,11 @@ resource "aws_ecs_cluster" "th_ecs_cluster" {
   name = "theater-hub-ecs-cluster"
 }
 
+resource "aws_cloudwatch_log_group" "th_log_group" {
+  name              = "theater_hub"
+  retention_in_days = var.th_log_retention_days
+}
+
 resource "aws_ecs_task_definition" "th_api_task_def" {
   family = "theater-hub"
   # network_mode             = "awsvpc"
@@ -57,15 +63,43 @@ resource "aws_ecs_task_definition" "th_api_task_def" {
       AWS_REGION          = var.aws_region,
       TH_API_ECS_CPU      = var.th_api_ecs_cpu,
       TH_API_ECS_MEMORY   = var.th_api_ecs_memory,
-      TH_API_DOCKER_IMAGE = var.th_api_docker_image
+      TH_API_DOCKER_IMAGE = var.th_api_docker_image,
+      TH_DB_HOSTNAME      = aws_db_instance.th-api-db.address
     }
   )
 }
 
-resource "aws_lb_target_group" "th_api_target_group" {
-  name     = "theather-hub-api-target-group"
-  port     = 80
-  protocol = "HTTP"
+# resource "aws_lb_target_group" "th_api_target_group" {
+#   name     = "theather-hub-api-target-group"
+#   port     = 80
+#   protocol = "HTTP"
+#   vpc_id   = var.aws_vpc_id
+# }
+
+resource "aws_elb" "th_api_lb" {
+  name            = "theater-hub-api-lb"
+  security_groups = ["${aws_security_group.th_sec_group.id}"]
+  #subnets         = ["${aws_subnet.main.id}"]
+  availability_zones = var.aws_azs
+
+  listener {
+    lb_protocol = "http"
+    lb_port     = 8081
+
+    instance_protocol = "http"
+    instance_port     = 8081
+  }
+
+  health_check {
+    healthy_threshold   = 3
+    unhealthy_threshold = 2
+    timeout             = 3
+    #target              = "HTTP:8081/hello-world"
+    target   = "TCP:8081"
+    interval = 5
+  }
+
+  #cross_zone_load_balancing = true
 }
 
 
@@ -82,9 +116,12 @@ resource "aws_ecs_service" "theater_hub_api" {
   deployment_minimum_healthy_percent = 0
 
   load_balancer {
-    target_group_arn = "${aws_lb_target_group.th_api_target_group.arn}"
-    container_name   = "theater-hub-api"
-    container_port   = 8081
+    #target_group_arn = aws_lb_target_group.th_api_target_group.arn
+    elb_name       = aws_elb.th_api_lb.name
+    container_name = "theater-hub-api"
+    container_port = 8081
   }
 }
+
+# TODO: Route53 record mapping to the LB
 

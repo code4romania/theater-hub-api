@@ -1,6 +1,15 @@
+variable "aws_vpc_id" {
+  description = "The AWS VPC ID where the resources should be created"
+}
+
 variable "aws_region" {
   description = "The AWS region to use"
   default     = "eu-central-1"
+}
+
+variable "aws_azs" {
+  description = "The availability zones where to create the Theater Hub API load balancer"
+  default     = ["eu-central-1c"]
 }
 
 variable "aws_profile" {
@@ -30,14 +39,20 @@ variable "th_api_docker_image" {
 
 variable "th_rds_instance_class" {
   description = "The type of instance to use for the RDS db"
-  default     = "t2.micro"
+  default     = "db.t2.micro"
 }
 
 variable "th_rds_username" {
   description = "The username of the user to create in RDS"
-  default     = "theater-hub"
+  default     = "theaterhub"
 }
+
 variable "th_rds_password" {
   description = "The password of the user to create in RDS"
   default     = "7h3473rhu8"
+}
+
+variable "th_log_retention_days" {
+  description = "The number of days to retain the Theater Hub logs in CloudWatch"
+  default     = 14
 }

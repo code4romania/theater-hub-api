@@ -4,6 +4,15 @@
     "image": "${TH_API_DOCKER_IMAGE}",
     "cpu": ${TH_API_ECS_CPU},
     "memory": ${TH_API_ECS_MEMORY},
+    "essential": true,
+
+    "portMappings": [
+      {
+        "containerPort": 8081,
+        "hostPort": 8081,
+        "protocol": "tcp"
+      }
+    ],    
 
     "logConfiguration": {
       "logDriver": "awslogs",
@@ -12,6 +21,13 @@
         "awslogs-group": "theater_hub",
         "awslogs-stream-prefix": "theater_hub"
       }
-    }
+    },
+
+    "environment": [
+      {
+        "name": "TH_DB_HOSTNAME",
+        "value": "${TH_DB_HOSTNAME}"
+      }
+    ]
   }
-]
+]        

@@ -12,7 +12,7 @@ For the GitHub actions workflow to work, the following secrets must be defined:
 
 ## ECS Secrets
 
-The following secrets must be defined in ECS and be passed to the container as env vars:
+The following secrets must be passed to the container as env vars:
 
 * **TH_POSTGRES_HOST**: The host of the postgres server.
 * **TH_POSTGRES_USERNAME**: The username to use for connecting to Postgres.
