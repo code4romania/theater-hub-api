@@ -29,4 +29,4 @@
       { "name": "TH_POSTGRES_PASSWORD", "value": "${TH_POSTGRES_PASSWORD}" }
     ]
   }
-]        
+]

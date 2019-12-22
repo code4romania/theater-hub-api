@@ -38,6 +38,8 @@ jobs:
         docker tag $HUB_USERNAME/$IMAGE_NAME:$IMAGE_SHA_TAG $HUB_USERNAME/$IMAGE_NAME:$IMAGE_LATEST_TAG
         docker push $HUB_USERNAME/$IMAGE_NAME:$IMAGE_SHA_TAG
         docker push $HUB_USERNAME/$IMAGE_NAME:$IMAGE_LATEST_TAG
+
         echo "::set-output name=image-sha::$HUB_USERNAME/$IMAGE_NAME:$IMAGE_SHA_TAG"
         echo "::set-output name=image-latest::$HUB_USERNAME/$IMAGE_NAME:$IMAGE_LATEST_TAG"
 
+        aws --profile miez ecs update-service --cluster theater-hub-ecs-cluster --service th-api-ecs-service --force-new-deployment
