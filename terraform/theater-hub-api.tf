@@ -39,8 +39,6 @@ resource "aws_db_instance" "th-api-db" {
   backup_retention_period = 30
 }
 
-
-
 resource "aws_ecs_cluster" "th_ecs_cluster" {
   name = "theater-hub-ecs-cluster"
 }
@@ -50,10 +48,36 @@ resource "aws_cloudwatch_log_group" "th_log_group" {
   retention_in_days = var.th_log_retention_days
 }
 
+resource "aws_autoscaling_group" "th-api-as-group" {
+  vpc_id               = var.aws_vpc_id
+  availability_zones   = ["${var.aws_azs}"]
+  name                 = "Theater Hub API AS Group"
+  min_size             = 1
+  max_size             = 1
+  desired_capacity     = 1
+  health_check_type    = "EC2"
+  launch_configuration = "${aws_launch_configuration.th-api-launch-config.name}"
+  #vpc_zone_identifier  = ["${aws_subnet.main.id}"]
+}
+
+resource "aws_launch_configuration" "th-api-launch-config" {
+  name                 = "Theather Hub API Launch Config"
+  image_id             = "${lookup(var.aws_amis, var.aws_region)}"
+  instance_type        = "${var.th_ecs_instance_type}"
+  security_groups      = ["${aws_security_group.th_sec_group.id}"]
+  iam_instance_profile = "${aws_iam_instance_profile.th_ecs_instance_profile.name}"
+  # TODO: is there a good way to make the key configurable sanely?
+  # key_name                    = "${aws_key_pair.alex.key_name}"
+  associate_public_ip_address = false
+  #user_data                   = "#!/bin/bash\necho ECS_CLUSTER='${var.ecs_cluster_name}' > /etc/ecs/ecs.config"
+}
+
+
 resource "aws_ecs_task_definition" "th_api_task_def" {
   family = "theater-hub"
   # network_mode             = "awsvpc"
-  requires_compatibilities = ["EC2"] # FARGATE is the other option
+  requires_compatibilities = ["FARGATE"] # EC2 is the other option
+  network_mode             = "awsvpc"
   cpu                      = var.th_api_ecs_cpu
   memory                   = var.th_api_ecs_memory
 
@@ -127,3 +151,13 @@ resource "aws_ecs_service" "theater_hub_api" {
 
 # TODO: Route53 record mapping to the LB
 
+resource "aws_iam_role" "th_ecs_host_role" {
+  name               = "ecs_host_role"
+  assume_role_policy = file("policies/th-ecs-role.json")
+}
+
+resource "aws_iam_instance_profile" "th_ecs_instance_profile" {
+  name  = "th-ecs-instance-profile"
+  path  = "/"
+  roles = ["${aws_iam_role.th_ecs_host_role.name}"]
+}

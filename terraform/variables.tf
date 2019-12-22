@@ -27,6 +27,11 @@ variable "th_api_ecs_cpu" {
   default     = 256
 }
 
+variable "th_ecs_instance_type" {
+  description = "The type of EC2 instances to use in the ECS cluster"
+  default     = "t2.micro"
+}
+
 variable "th_api_ecs_memory" {
   description = "Fargate instance memory to provision (in MiB)"
   default     = 512
