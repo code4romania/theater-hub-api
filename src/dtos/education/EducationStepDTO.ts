@@ -22,6 +22,6 @@ export class EducationStepDTO {
 
     public StartDate: Date;
 
-    public EndDate: Date;
+    public EndDate?: Date;
 
 }

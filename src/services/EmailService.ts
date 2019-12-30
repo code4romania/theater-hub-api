@@ -54,6 +54,7 @@ export class EmailService implements IEmailService {
                 .replace("{{content1}}", this._localizationService.getText("emails.finish-registration.content-1"))
                 .replace("{{content2}}", this._localizationService.getText("emails.finish-registration.content-2"))
                 .replace("{{applicationName}}", config.application.name)
+                .replace("{{applicationLink}}", config.client.baseURL)
                 .replace("{{buttonLink}}", buttonLink)
                 .replace("{{buttonText}}", this._localizationService.getText("emails.finish-registration.button"));
 
@@ -64,6 +65,7 @@ export class EmailService implements IEmailService {
             content1: this._localizationService.getText("emails.finish-registration.content-1"),
             content2: this._localizationService.getText("emails.finish-registration.content-2"),
             applicationName: config.application.name,
+            applicationLink: config.client.baseURL,
             buttonLink,
             buttonText: this._localizationService.getText("emails.finish-registration.button")
         };
@@ -102,6 +104,7 @@ export class EmailService implements IEmailService {
                     .replace("{{content1}}", this._localizationService.getText("emails.admin-invite-user.content-1"))
                     .replace("{{content2}}", content2)
                     .replace("{{applicationName}}", config.application.name)
+                    .replace("{{applicationLink}}", config.client.baseURL)
                     .replace("{{senderEmailAddress}}", model.SenderEmailAddress)
                     .replace("{{buttonLink}}", buttonLink)
                     .replace("{{buttonText}}", this._localizationService.getText("emails.admin-invite-user.button"));
@@ -113,6 +116,7 @@ export class EmailService implements IEmailService {
             content1: this._localizationService.getText("emails.admin-invite-user.content-1"),
             content2,
             applicationName: config.application.name,
+            applicationLink: config.client.baseURL,
             senderEmailAddress: model.SenderEmailAddress,
             buttonLink,
             buttonText: this._localizationService.getText("emails.admin-invite-user.button")

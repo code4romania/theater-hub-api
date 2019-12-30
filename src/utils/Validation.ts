@@ -5,11 +5,11 @@ import * as _                      from "lodash";
 
 export class Validators {
 
-    public static readonly _instagramBaseURL: string   = "https://www.instagram.com";
-    public static readonly _youtubeBaseURL: string     = "https://www.youtube.com";
+    public static readonly _instagramBaseURL: string   = "instagram.com";
+    public static readonly _youtubeBaseURL: string     = "youtube.com";
     public static readonly _facebookURL: string        = "facebook.com";
-    public static readonly _linkedinBaseURL: string    = "https://www.linkedin.com";
-    public static readonly _vimeoBaseURL: string       = "https://vimeo.com";
+    public static readonly _linkedinBaseURL: string    = "linkedin.com";
+    public static readonly _vimeoBaseURL: string       = "vimeo.com";
 
     public static isValidUUID(value: string): boolean {
         return validator.isUUID(value);
@@ -61,17 +61,17 @@ export class Validators {
         }
 
         if (socialMediaCategory === SocialMediaCategoryType.Instagram) {
-          return value.indexOf(this._instagramBaseURL) === 0;
+          return value.includes(this._instagramBaseURL);
         } else if (socialMediaCategory === SocialMediaCategoryType.Youtube) {
-          return value.indexOf(this._youtubeBaseURL) === 0;
+          return value.includes(this._youtubeBaseURL);
         } else if (socialMediaCategory === SocialMediaCategoryType.Facebook) {
-          return value.indexOf(this._facebookURL) !== -1;
+          return value.includes(this._facebookURL);
         } else if (socialMediaCategory === SocialMediaCategoryType.Linkedin) {
-          return value.indexOf(this._linkedinBaseURL) === 0;
+          return value.includes(this._linkedinBaseURL);
         } else if (socialMediaCategory === SocialMediaCategoryType.Vimeo) {
-          return value.indexOf(this._vimeoBaseURL) === 0;
+          return value.includes(this._vimeoBaseURL);
         } else if (socialMediaCategory === (SocialMediaCategoryType.Youtube | SocialMediaCategoryType.Vimeo)) {
-            return value.indexOf(this._youtubeBaseURL) === 0 || value.indexOf(this._vimeoBaseURL) === 0;
+            return value.includes(this._youtubeBaseURL) || value.includes(this._vimeoBaseURL);
         }
 
         return false;

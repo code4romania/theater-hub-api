@@ -20,7 +20,7 @@ export class Experience extends BaseEntity {
   @Column("timestamp with time zone")
   StartDate: Date;
 
-  @Column("timestamp with time zone")
+  @Column("timestamp with time zone", { nullable: true })
   EndDate: Date;
 
   @ManyToOne(type => Professional, professional => professional.Experience, { onDelete: "CASCADE" })

@@ -412,12 +412,15 @@ export class UserRoutesValidators implements IUserRoutesValidators {
 
                 let isInvalidAwardTitle: boolean   = false;
                 let isInvalidAwardIssuer: boolean  = false;
+                let isInvalidAwardDate: boolean    = false;
+                const currentDate: Date            = new Date();
 
                 for (const award of awards) {
                     isInvalidAwardTitle   = isInvalidAwardTitle  || !award.Title;
                     isInvalidAwardIssuer  = isInvalidAwardIssuer || !award.Issuer;
+                    isInvalidAwardDate    = isInvalidAwardDate   || !award.Date || award.Date > currentDate;
 
-                    if (isInvalidAwardTitle && isInvalidAwardIssuer) {
+                    if (isInvalidAwardTitle && isInvalidAwardIssuer && isInvalidAwardDate) {
                         break;
                     }
                 }
@@ -430,6 +433,8 @@ export class UserRoutesValidators implements IUserRoutesValidators {
                     throw new Error(this._localizationService.getText("validation.award.title.required"));
                 } else if (isInvalidAwardIssuer) {
                     throw new Error(this._localizationService.getText("validation.award.issuer.required"));
+                } else if (isInvalidAwardDate) {
+                    throw new Error(this._localizationService.getText("validation.award.date.invalid"));
                 }
 
                 return true;
@@ -438,14 +443,20 @@ export class UserRoutesValidators implements IUserRoutesValidators {
 
                 const experienceSteps: Experience[] = typeof value === "string" ? JSON.parse(value) : value;
 
-                let isInvalidExperiencePosition: boolean   = false;
-                let isInvalidExperienceEmployer: boolean   = false;
+                let isInvalidExperiencePosition: boolean        = false;
+                let isInvalidExperienceEmployer: boolean        = false;
+                let isInvalidExperienceDateInterval: boolean    = false;
+                const currentDate: Date                         = new Date();
 
                 for (const experience of experienceSteps) {
-                    isInvalidExperiencePosition   = isInvalidExperiencePosition || !experience.Position;
-                    isInvalidExperienceEmployer   = isInvalidExperienceEmployer || !experience.Employer;
+                    isInvalidExperiencePosition     = isInvalidExperiencePosition || !experience.Position;
+                    isInvalidExperienceEmployer     = isInvalidExperienceEmployer || !experience.Employer;
+                    isInvalidExperienceDateInterval = isInvalidExperienceDateInterval ||
+                                                        !experience.StartDate ||
+                                                        experience.StartDate > currentDate ||
+                                                        (experience.EndDate && experience.EndDate < experience.StartDate);
 
-                    if (isInvalidExperiencePosition && isInvalidExperienceEmployer) {
+                    if (isInvalidExperiencePosition && isInvalidExperienceEmployer && isInvalidExperienceDateInterval) {
                         break;
                     }
                 }
@@ -458,6 +469,8 @@ export class UserRoutesValidators implements IUserRoutesValidators {
                     throw new Error(this._localizationService.getText("validation.experience.position.required"));
                 } else if (isInvalidExperienceEmployer) {
                     throw new Error(this._localizationService.getText("validation.experience.employer.required"));
+                } else if (isInvalidExperienceDateInterval) {
+                    throw new Error("validation.experience.invalid-date-interval");
                 }
 
                 return true;
@@ -466,14 +479,20 @@ export class UserRoutesValidators implements IUserRoutesValidators {
 
                 const educationSteps: Education[] = typeof value === "string" ? JSON.parse(value) : value;
 
-                let isInvalidEducationTitle: boolean             = false;
-                let isInvalidEducationInstitutionName: boolean   = false;
+                let isInvalidEducationTitle: boolean            = false;
+                let isInvalidEducationInstitutionName: boolean  = false;
+                let isInvalidEducationDateInterval: boolean     = false;
+                const currentDate: Date                         = new Date();
 
                 for (const education of educationSteps) {
                     isInvalidEducationTitle             = isInvalidEducationTitle || !education.Title;
                     isInvalidEducationInstitutionName   = isInvalidEducationInstitutionName || !education.Institution;
+                    isInvalidEducationDateInterval      = isInvalidEducationDateInterval ||
+                                                            !education.StartDate ||
+                                                            education.StartDate > currentDate ||
+                                                            (education.EndDate && education.EndDate < education.StartDate);
 
-                    if (isInvalidEducationTitle && isInvalidEducationInstitutionName) {
+                    if (isInvalidEducationTitle && isInvalidEducationInstitutionName && isInvalidEducationDateInterval) {
                         break;
                     }
                 }
@@ -486,6 +505,8 @@ export class UserRoutesValidators implements IUserRoutesValidators {
                     throw new Error(this._localizationService.getText("validation.education.title.required"));
                 } else if (isInvalidEducationInstitutionName) {
                     throw new Error(this._localizationService.getText("validation.education.institution.required"));
+                } else if (isInvalidEducationDateInterval) {
+                    throw new Error("validation.education.invalid-date-interval");
                 }
 
                 return true;

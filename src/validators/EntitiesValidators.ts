@@ -32,6 +32,15 @@ export class EntitiesValidators implements IEntitiesValidators {
                 }),
             check("Description").optional().isLength({ max: 500 }).withMessage((value: string, { req }: any) => {
                 return this._localizationService.getText("validation.award.description.length", req.Locale);
+            }),
+            check("Date").custom((value: Date, { req }: any) => {
+                const currentDate: Date = new Date();
+
+                if (!value || value > currentDate) {
+                    throw new Error(this._localizationService.getText("validation.award.date.invalid", req.Locale));
+                }
+
+                return true;
             })
         ];
     }
@@ -53,6 +62,16 @@ export class EntitiesValidators implements IEntitiesValidators {
                 }),
             check("Description").optional().isLength({ max: 500 }).withMessage((value: string, { req }: any) => {
                 return this._localizationService.getText("validation.education.description.length", req.Locale);
+            }),
+            check("EndDate").custom((value: Date, { req }: any) => {
+                const currentDate: Date                 = new Date();
+                const isInvalidEducationDateInterval    = !req.StartDate || req.StartDate > currentDate || (value && value < req.StartDate);
+
+                if (!isInvalidEducationDateInterval) {
+                    throw new Error(this._localizationService.getText("validation.education.invalid-date-interval", req.Locale));
+                }
+
+                return true;
             })
         ];
     }
@@ -74,6 +93,16 @@ export class EntitiesValidators implements IEntitiesValidators {
                 }),
             check("Description").optional().isLength({ max: 500 }).withMessage((value: string, { req }: any) => {
                 return this._localizationService.getText("validation.experience.description.length", req.Locale);
+            }),
+            check("EndDate").custom((value: Date, { req }: any) => {
+                const currentDate: Date                 = new Date();
+                const isInvalidExperienceDateInterval   = !req.StartDate || req.StartDate > currentDate || (value && value < req.StartDate);
+
+                if (!isInvalidExperienceDateInterval) {
+                    throw new Error(this._localizationService.getText("validation.experience.invalid-date-interval", req.Locale));
+                }
+
+                return true;
             })
         ];
     }

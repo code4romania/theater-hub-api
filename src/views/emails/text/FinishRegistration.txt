@@ -1,5 +1,5 @@
 {{greeting}}
 
-{{content1}}{{applicationName}}. {{content2}}
+{{content1}}{{applicationName}} ({{applicationLink}}). {{content2}}
 
 {{buttonText}}: {{buttonLink}}

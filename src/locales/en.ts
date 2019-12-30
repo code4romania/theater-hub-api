@@ -141,8 +141,11 @@ export const enLocale = {
             "description": {
                 "length": "Description's maximum length is of 500 characters"
             },
+            "date": {
+                "invalid": "Date is invalid"
+            },
             "fileds-required": "Award title and issuer are required",
-            "non-existent": "Award does not exist!"
+            "non-existent": "Award does not exist!",
         },
         "education": {
             "title": {
@@ -157,7 +160,8 @@ export const enLocale = {
                 "length": "Description's maximum length is of 500 characters"
             },
             "fileds-required": "Education title and institution name are required",
-            "non-existent": "Education step does not exist!"
+            "non-existent": "Education step does not exist!",
+            "invalid-date-interval": "Date interval is not valid"
         },
         "experience": {
             "position": {
@@ -172,7 +176,8 @@ export const enLocale = {
                 "length": "Description's maximum length is of 500 characters"
             },
             "fileds-required": "Experience position and employer name are required",
-            "non-existent": "Experience step does not exist!"
+            "non-existent": "Experience step does not exist!",
+            "invalid-date-interval": "Date interval is not valid"
         },
         "instagram": {
             "invalid": "Invalid Instagram link"
@@ -322,7 +327,8 @@ export const enLocale = {
         "achievements-title": "Achievements",
         "awards-title": "Awards",
         "experience-title": "Experience",
-        "education-title": "Education"
+        "education-title": "Education",
+        "present": "Present"
     },
     "errors": {
         "file-upload-error": "File could not be uploaded",
