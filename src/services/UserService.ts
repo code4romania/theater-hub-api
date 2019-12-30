@@ -279,7 +279,7 @@ export class UserService extends BaseService<User> implements IUserService {
                     Website: generalInformationSection.Website,
                     Name: `${generalInformationSection.FirstName} ${generalInformationSection.LastName}`,
                     Username: username,
-                    ProfileImageID: profileImage ? profileImage.ID : undefined
+                    ProfileImage: profileImage
                 })
                 .where("Email = :userEmail", { userEmail })
                 .execute();
@@ -1037,7 +1037,7 @@ export class UserService extends BaseService<User> implements IUserService {
                 position: e.Position,
                 employerName: e.Employer,
                 startDate: moment(e.StartDate).format("MM/YYYY"),
-                endDate: moment(e.EndDate).format("MM/YYYY"),
+                endDate: e.EndDate ? moment(e.EndDate).format("MM/YYYY") : this._localizationService.getText("resume.present"),
                 description: e.Description
             };
         });
@@ -1046,7 +1046,7 @@ export class UserService extends BaseService<User> implements IUserService {
                 title: e.Title,
                 institutionName: e.Institution,
                 startDate: moment(e.StartDate).format("MM/YYYY"),
-                endDate: moment(e.EndDate).format("MM/YYYY"),
+                endDate: e.EndDate ? moment(e.EndDate).format("MM/YYYY") : this._localizationService.getText("resume.present"),
                 description: e.Description
             };
         });
@@ -1061,7 +1061,7 @@ export class UserService extends BaseService<User> implements IUserService {
                 undefined;
 
         const context = {
-            profileImageLocation: profile.ProfileImage ? profile.ProfileImage.Location : "",
+            profileImageLocation: profile.ProfileImage ? this._fileService.getPresignedURL(profile.ProfileImage.Key) : "",
             fullNameValue: dbUser.Name,
             ageValue: age,
             emailValue: profile.Email,
@@ -1073,7 +1073,7 @@ export class UserService extends BaseService<User> implements IUserService {
             youtubeValue: profile.YoutubeLink,
             descriptionValue: dbUser.Description,
             skills,
-            photoGalleryImages: profile.PhotoGallery ? profile.PhotoGallery.map(p => p.ThumbnailLocation) : undefined,
+            photoGalleryImages: profile.PhotoGallery ? profile.PhotoGallery.map(p => this._fileService.getSignedCloudFrontUrl(p.ThumbnailLocation)) : undefined,
             videos: videos,
             hasAchievements: awards || experience || education,
             awards,
@@ -1090,10 +1090,16 @@ export class UserService extends BaseService<User> implements IUserService {
             achievementsTitle: this._localizationService.getText("resume.achievements-title"),
             awardsTitle: this._localizationService.getText("resume.awards-title"),
             experienceTitle: this._localizationService.getText("resume.experience-title"),
-            educationTitle: this._localizationService.getText("resume.education-title")
+            educationTitle: this._localizationService.getText("resume.education-title"),
+            isFullZoom: process.platform.indexOf("win") !== -1
         };
 
-        const options  = { "renderDelay": 100, "width": "1020px", "border": "40px" };
+        const options  = {
+            "renderDelay": 100,
+            "width": "1020px",
+            "border": "40px"
+        };
+
         const template = handlebars.compile(resumeHTML);
 
         return pdf.create(template(context), options);

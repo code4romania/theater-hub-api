@@ -141,6 +141,9 @@ export const roLocale = {
             "description": {
                 "length": "Descrierea trebuie să aibă cel mult 500 de caractere"
             },
+            "date": {
+                "invalid": "Data nu este validă"
+            },
             "fileds-required": "Denumirea și emitentul premiului sunt obligatorii",
             "non-existent": "Premiul nu există!"
         },
@@ -157,7 +160,8 @@ export const roLocale = {
                 "length": "Descrierea trebuie să aibă cel mult 500 de caractere"
             },
             "fileds-required": "Specializarea si numele instituției sunt obligatorii",
-            "non-existent": "Experiența educațională nu există!"
+            "non-existent": "Experiența educațională nu există!",
+            "invalid-date-interval": "Intervalul de timp nu este valid"
         },
         "experience": {
             "position": {
@@ -172,7 +176,8 @@ export const roLocale = {
                 "length": "Descrierea trebuie să aibă cel mult 500 de caractere"
             },
             "fileds-required": "Poziția și numele angajatorului sunt obligatorii",
-            "non-existent": "Experiența de lucru nu există!"
+            "non-existent": "Experiența de lucru nu există!",
+            "invalid-date-interval": "Intervalul de timp nu este valid"
         },
         "instagram": {
             "invalid": "Link-ul de Instagram este incorect"
@@ -322,7 +327,8 @@ export const roLocale = {
         "achievements-title": "Realizări",
         "awards-title": "Premii",
         "experience-title": "Experiența profesională",
-        "education-title": "Educație"
+        "education-title": "Educație",
+        "present": "Prezent"
     },
     "errors": {
         "file-upload-error": "Fișierul nu a putut fi incărcat",

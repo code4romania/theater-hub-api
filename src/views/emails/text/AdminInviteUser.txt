@@ -1,5 +1,5 @@
 {{greeting}}
 
-{{content1}} {{applicationName}}. {{content2}} {{senderEmailAddress}}.
+{{content1}} {{applicationName}} ({{applicationLink}}). {{content2}} {{senderEmailAddress}}.
 
 {{buttonText}}: {{buttonLink}}

@@ -11,6 +11,6 @@ export class UpdateEducationDTO {
 
     public StartDate: Date;
 
-    public EndDate: Date;
+    public EndDate?: Date;
 
 }

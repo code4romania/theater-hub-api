@@ -22,6 +22,6 @@ export class ExperienceStepDTO {
 
     public StartDate: Date;
 
-    public EndDate: Date;
+    public EndDate?: Date;
 
 }

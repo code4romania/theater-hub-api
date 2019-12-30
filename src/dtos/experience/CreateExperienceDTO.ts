@@ -9,6 +9,6 @@ export class CreateExperienceDTO {
 
     public StartDate: Date;
 
-    public EndDate: Date;
+    public EndDate?: Date;
 
 }

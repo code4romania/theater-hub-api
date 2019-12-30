@@ -1,6 +1,14 @@
-<html>
+<html {{#isFullZoom}}class="html_full_zoom"{{/isFullZoom}}>
 	<head>
 		<style type="text/css">
+
+			html {
+				zoom: 0.75;
+			}
+
+			.html_full_zoom {
+				zoom: 1 !important;
+			}
 
 			body {
 				font-family: Titillium Web;
@@ -11,6 +19,8 @@
 			#header-image {
 				z-index: 100;
 				position: relative;
+				margin: 0px auto;
+    			display: block;
 			}
 
 			#main-content {
@@ -40,7 +50,7 @@
 			}
 
 			hr {
-				border: 2px solid rgba(151, 151, 151, 0.6);
+				border: 2px solid #e0e0e0;
     			width: 70%;
 			}
 
@@ -134,8 +144,8 @@
 				text-align: center;
     			line-height: 26px;
 				font-size: 14px;
-				background-color: rgba(174, 39, 96, 0.46);
-    			border-color: rgba(174, 39, 96, 0.46);
+				background-color: #F8BBD0;
+    			border-color: #F8BBD0;
 				margin: 4px 8px 4px 0px;
 			}
 
@@ -207,10 +217,9 @@
 				height: 48px;
 				line-height: 48px;
 				width: calc(100% - 25px);
-				background-color: rgba(174, 39, 96, 0.46);
-    			border-color: rgba(174, 39, 96, 0.46);
+				background-color: #F8BBD0;
+    			border-color: #F8BBD0;
 				padding-left: 16px;
-				box-shadow: 0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12);
 				border-radius: 2px;
 				margin: 24px 0px 24px 10px;
 			}
@@ -225,7 +234,6 @@
 			.achievement-item {
 				min-height: 77px;
 				width: calc(100% - 10px);
-				box-shadow: 0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12);
 				margin-bottom: 24px;
 				margin-left: 10px;
 				position: relative;
@@ -304,9 +312,6 @@
 							<a href="http://theaterhub.ro" target="_blank" class="website-field">{{websiteValue}}</a>
 						</div>
 					{{/if}}
-				</div>
-			</div>
-			<div class="social-media-section">
 					{{#if facebookValue}}
 						<div class="social-media-row">
 							<a href="https://www.facebook.com/" target="_blank" class="social-media-icon-wrapper">
@@ -339,8 +344,8 @@
 							<a href="{{youtubeValue}}" target="_blank" class="youtube-field social-media-field">{{youtubeValue}}</a>
 						</div>
 					{{/if}}
+				</div>
 			</div>
-
 
 			{{#if descriptionValue}}
 				<div>
