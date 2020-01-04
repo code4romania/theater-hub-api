@@ -108,12 +108,15 @@ export class FileService implements IFileService {
             return;
         }
 
-        const key: string           = uuid();
+        const id: string            = uuid();
         const fileExtension: string = FileManager.getFileExtension(fileType);
+        const filePrefix: string    = fileType === FileType.ProjectImage ?
+                                                config.aws.files_prefix.projects :
+                                                config.aws.files_prefix.profile;
 
         const objectParams = {
             Bucket: config.aws.files_bucket,
-            Key: `${userEmail}/${key}.${fileExtension}`,
+            Key: `${userEmail}/${filePrefix}/${id}.${fileExtension}`,
             Body: file.buffer,
             ACL: config.aws.files_ACL,
             Metadata: {

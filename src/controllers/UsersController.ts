@@ -264,8 +264,8 @@ export class UsersController extends BaseApiController<User> implements IUsersCo
       photoGalleryFiles = request.files["AddedPhotos"];
     }
 
-    const profileImageUploadPromise = this._fileService.uploadFile(profileImageFile, FileType.Image, request.Principal.Email);
-    const photoGalleryUploadPromise = this._fileService.uploadFiles(photoGalleryFiles, FileType.Image, request.Principal.Email);
+    const profileImageUploadPromise = this._fileService.uploadFile(profileImageFile, FileType.UserImage, request.Principal.Email);
+    const photoGalleryUploadPromise = this._fileService.uploadFiles(photoGalleryFiles, FileType.UserImage, request.Principal.Email);
 
     const uploadPhotosResults: any  = await Promise.all([profileImageUploadPromise, photoGalleryUploadPromise]);
 

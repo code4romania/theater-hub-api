@@ -47,8 +47,7 @@ export class Project extends BaseEntity {
   @JoinColumn({ name: "InitiatorID" })
   Initiator: User;
 
-  @OneToOne(type => ProjectImage, { cascade: true, eager: true })
-  @JoinColumn({ name: "ImageID" })
+  @OneToOne(type => ProjectImage, image => image.Project, { cascade: true, eager: true })
   Image: ProjectImage;
 
   @Column()

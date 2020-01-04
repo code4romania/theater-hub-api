@@ -11,6 +11,7 @@ import { IUserService, IEmailService,
     IExperienceRepository,
     IProfessionalRepository,
     IUserAccountSettingsRepository,
+    IProjectImageRepository,
     IUserFileRepository,
     IUserImageRepository,
     IUserRepository,
@@ -23,10 +24,10 @@ import { Experience }                          from "../models/Experience";
 import { User }                                from "../models/User";
 import { UserAccountSettings }                 from "../models/UserAccountSettings";
 import { UserImage }                           from "../models/UserImage";
-import { UserFile }                            from "../models/UserFile";
 import { UserSocialMedia }                     from "../models/UserSocialMedia";
 import { UserVideo }                           from "../models/UserVideo";
 import { Professional }                        from "../models/Professional";
+import { ProjectImage }                        from "../models/ProjectImage";
 import { Skill }                               from "../models/Skill";
 import { ChangePasswordResponseDTO,
     ChangePasswordRequestDTO,
@@ -50,8 +51,6 @@ import { ChangePasswordResponseDTO,
     UpdatePhotoGalleryResponse, UserImageDTO } from "../dtos";
 import { EntityCategoryType }                  from "../enums/EntityCategoryType";
 import { FileType }                            from "../enums/FileType";
-import { FileCategoryType }                    from "../enums/FileCategoryType";
-import { LocaleType }                          from "../enums/LocaleType";
 import { SocialMediaCategoryType }             from "../enums/SocialMediaCategoryType";
 import { SortOrientationType }                 from "../enums/SortOrientationType";
 import { UserAccountProviderType }             from "../enums/UserAccountProviderType";
@@ -78,6 +77,7 @@ export class UserService extends BaseService<User> implements IUserService {
     private readonly _userAccountSettingsRepository: IUserAccountSettingsRepository;
     private readonly _userFileRepository: IUserFileRepository;
     private readonly _userImageRepository: IUserImageRepository;
+    private readonly _projectImageRepository: IProjectImageRepository;
     private readonly _userRepository: IUserRepository;
     private readonly _userSocialMediaRepository: IUserSocialMediaRepository;
     private readonly _userVideoRepository: IUserVideoRepository;
@@ -90,6 +90,7 @@ export class UserService extends BaseService<User> implements IUserService {
         @inject(TYPES.EducationRepository) educationRepository: IEducationRepository,
         @inject(TYPES.ExperienceRepository) experienceRepository: IExperienceRepository,
         @inject(TYPES.ProfessionalRepository) professionalRepository: IProfessionalRepository,
+        @inject(TYPES.ProjectImageRepository) projectImageRepository: IProjectImageRepository,
         @inject(TYPES.UserAccountSettingsRepository) userAccountSettingsRepository: IUserAccountSettingsRepository,
         @inject(TYPES.UserFileRepository) userFileRepository: IUserFileRepository,
         @inject(TYPES.UserImageRepository) userImageRepository: IUserImageRepository,
@@ -106,6 +107,7 @@ export class UserService extends BaseService<User> implements IUserService {
         this._educationRepository             = educationRepository;
         this._experienceRepository            = experienceRepository;
         this._professionalRepository          = professionalRepository;
+        this._projectImageRepository            = projectImageRepository;
         this._userAccountSettingsRepository   = userAccountSettingsRepository;
         this._userFileRepository              = userFileRepository;
         this._userImageRepository             = userImageRepository;
@@ -117,14 +119,56 @@ export class UserService extends BaseService<User> implements IUserService {
         this._skillService                    = skillService;
     }
 
-    public async deleteByID(id: string): Promise<User> {
+    public async deleteByEmail (email: string): Promise<ProfileDTO> {
+        const userImages: UserImage[] = await this._userImageRepository
+            .runCreateQueryBuilder()
+            .select(["userImage.ID", "userImage.Key", "userImage.IsProfileImage"])
+            .from(UserImage, "userImage")
+            .where("userImage.Key like :key", { key: `${email}%` })
+            .getMany();
 
-        return this._userRepository
+        const projectsImages: ProjectImage[] = await this._projectImageRepository
+            .runCreateQueryBuilder()
+            .select(["projectImage.Key"])
+            .from(ProjectImage, "projectImage")
+            .where("projectImage.Key like :key", { key: `${email}%` })
+            .getMany();
+
+        // delete the files from AWS S3
+        this._fileService.deleteFiles(
+            [
+                ...userImages.map(ui => ui.Key),
+                ...projectsImages.map(pi => pi.Key)
+            ]
+        );
+
+        const user = await this._userRepository
                 .runCreateQueryBuilder()
                 .delete()
                 .from(User)
-                .where("ID = :id", { id })
+                .where("Email = :email", { email })
                 .execute();
+
+        const profileImage = userImages.find(ui => ui.IsProfileImage);
+
+        if (profileImage) {
+            await this._userImageRepository.deleteByID(profileImage.ID);
+        }
+
+        return user;
+    }
+
+    public async deleteByID(id: string): Promise<User> {
+        const dbUser = await this._userRepository
+            .runCreateQueryBuilder()
+            .select("user.Email")
+            .from(User, "user")
+            .where("user.ID = :id", { id })
+            .getOne();
+
+        await this.deleteByEmail(dbUser.Email);
+
+        return dbUser;
     }
 
     public async getMe(email: string): Promise<MeDTO> {
@@ -160,13 +204,7 @@ export class UserService extends BaseService<User> implements IUserService {
     }
 
     public async deleteMe(email: string): Promise<ProfileDTO> {
-
-        return this._userRepository
-                .runCreateQueryBuilder()
-                .delete()
-                .from(User)
-                .where("Email = :email", { email })
-                .execute();
+        return this.deleteByEmail(email);
     }
 
     public async updateGeneralInformation(userEmail: string, generalInformationSection: ProfileDTO, profileImageFile: any): Promise<MeDTO> {
@@ -175,20 +213,19 @@ export class UserService extends BaseService<User> implements IUserService {
         let profileImage: UserImage = dbProfileImage;
 
         if (profileImageFile && !dbProfileImage) {
-            const uploadProfileImageResult: any = await this._fileService.uploadFile(profileImageFile, FileType.Image, userEmail);
+            const uploadProfileImageResult: any = await this._fileService.uploadFile(profileImageFile, FileType.UserImage, userEmail);
 
             profileImage = {
                 Key: uploadProfileImageResult.Key,
                 Location: uploadProfileImageResult.Location,
                 ThumbnailLocation: this._fileService.getThumbnailURL(uploadProfileImageResult.Key),
                 Size: Math.round(profileImageFile.size * 100 / (1000 * 1000)) / 100, // in MB
-                IsProfileImage: true,
-                User: dbUser
+                IsProfileImage: true
             } as UserImage;
 
             profileImage = await this._userImageRepository.insert(profileImage);
         } else if (profileImageFile && dbProfileImage) {
-            const newProfileImageUploadPromise = this._fileService.uploadFile(profileImageFile, FileType.Image, userEmail);
+            const newProfileImageUploadPromise = this._fileService.uploadFile(profileImageFile, FileType.UserImage, userEmail);
             const oldProfileImageRemovePromise = this._fileService.deleteFile(dbProfileImage.Key);
 
             const updateProfileImageResults: any  = await Promise.all([newProfileImageUploadPromise, oldProfileImageRemovePromise]);
@@ -350,10 +387,10 @@ export class UserService extends BaseService<User> implements IUserService {
                 .getMany();
         }
 
-        const photosUploadPromise = this._fileService.uploadFiles(addedPhotos, FileType.Image, userEmail);
+        const photosUploadPromise = this._fileService.uploadFiles(addedPhotos, FileType.UserImage, userEmail);
         const photosRemovePromise = this._fileService.deleteFiles(removedEntities.map(e => e.Key));
 
-        const updatePhotoGalleryResults: any  = await Promise.all([photosUploadPromise, photosRemovePromise]);
+        const updatePhotoGalleryResults: any = await Promise.all([photosUploadPromise, photosRemovePromise]);
 
         for (let index = 0; index <  updatePhotoGalleryResults[0].length; index++) {
             const photo: UserImage = {

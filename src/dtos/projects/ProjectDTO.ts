@@ -1,4 +1,4 @@
-import { Project, ProjectImage }            from "../../models";
+import { Project, UserImage }               from "../../models";
 import { ProjectNeedDTO,
         OtherProjectDTO,
         UpdateDTO }                         from "../";
@@ -17,7 +17,7 @@ export class ProjectDTO {
             this.ID = project.ID;
         }
 
-        let initiatorProfileImage: ProjectImage;
+        let initiatorProfileImage: UserImage;
         let initiatorName: string;
 
         if (includeInitiator && project.Initiator) {

@@ -20,6 +20,8 @@ export interface IProjectService extends IBaseService<Project> {
 
     updateGeneralInformation(userEmail: string, generalInformationSection: ProjectDTO, projectImageFile: any): Promise<ProjectDTO>;
 
-    deleteProjectByID(email: string, projectID: string): Promise<Project>;
+    deleteProjectByID(projectID: string): Promise<Project>;
+
+    deleteProject(email: string, projectID: string): Promise<Project>;
 
 }

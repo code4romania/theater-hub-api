@@ -50,27 +50,27 @@ export class User extends BaseEntity {
   SearchTokens: string;
 
   @OneToMany(type => UserImage, userImage => userImage.User, { cascade: true, eager: true })
-  PhotoGallery?: UserImage[];
+  PhotoGallery: UserImage[];
 
   @OneToMany(type => UserVideo, userVideo => userVideo.User, { cascade: true, eager: true })
-  VideoGallery?: UserVideo[];
+  VideoGallery: UserVideo[];
 
   @OneToMany(type => UserFile, userFile => userFile.User, { cascade: true, eager: true })
-  Files?: UserFile[];
+  Files: UserFile[];
 
   @OneToMany(type => Award, award => award.User, { cascade: true, eager: true })
   Awards: Award[];
 
   @OneToMany(type => UserSocialMedia, userSocialMedia => userSocialMedia.User, { cascade: true, eager: true })
-  SocialMedia?: UserSocialMedia[];
+  SocialMedia: UserSocialMedia[];
 
   @OneToMany(type => Project, project => project.Initiator, { cascade: true, eager: true })
-  Projects?: Project[];
+  Projects: Project[];
 
   @OneToOne(type => Professional, professional => professional.User, { cascade: true, eager: true })
-  Professional?: Professional;
+  Professional: Professional;
 
   @OneToOne(type => UserAccountSettings, accountSettings => accountSettings.User, { cascade: true, eager: true })
-  AccountSettings?: UserAccountSettings;
+  AccountSettings: UserAccountSettings;
 
 }

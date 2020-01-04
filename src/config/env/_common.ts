@@ -38,6 +38,10 @@ export const commonConfig = {
         secretAccessKey: "",
         region: "",
         files_bucket: "",
+        files_prefix: {
+            profile: "profile",
+            projects: "projects"
+        },
         cloudFront: {
             url: "",
             accessKeyId: "",
