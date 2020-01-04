@@ -7,7 +7,8 @@ export class FileManager {
         switch (fileType) {
             case FileType.PDF:
                 return "pdf";
-            case FileType.Image:
+            case FileType.UserImage:
+            case FileType.ProjectImage:
             default:
                 return "jpg";
         }

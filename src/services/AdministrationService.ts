@@ -504,7 +504,7 @@ export class AdministrationService implements IAdministrationService {
 
         const dbUser = project.Initiator;
 
-        await this._projectService.deleteByID(projectID);
+        await this._projectService.deleteProjectByID(projectID);
 
         const adminUpdateUserEmailDTO: AdminUpdateProjectEmailDTO = {
             SenderEmailAddress:     adminUser.Email,

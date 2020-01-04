@@ -83,7 +83,7 @@ export class ProjectsController extends BaseApiController<Project> implements IP
 
         this._projectService.setLocale(request.Locale);
 
-        const project = await this._projectService.deleteProjectByID(request.Principal.Email, request.params.projectID);
+        const project = await this._projectService.deleteProject(request.Principal.Email, request.params.projectID);
 
         response.send(project);
     }

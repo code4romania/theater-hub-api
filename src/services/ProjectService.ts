@@ -73,7 +73,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
         } as Project;
 
         if (createProjectDTO.Image) {
-            const uploadProjectImageResult: any = await this._fileService.uploadFile(createProjectDTO.Image, FileType.Image, email);
+            const uploadProjectImageResult: any = await this._fileService.uploadFile(createProjectDTO.Image, FileType.ProjectImage, email);
 
             const projectImage = {
                 Key: uploadProjectImageResult.Key,
@@ -412,7 +412,7 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
 
         if (projectImageFile && !dbProjectImage) {
             const uploadProjectImageResult: any
-                            = await this._fileService.uploadFile(projectImageFile, FileType.Image, userEmail);
+                            = await this._fileService.uploadFile(projectImageFile, FileType.ProjectImage, userEmail);
 
             projectImage = {
                 Key: uploadProjectImageResult.Key,
@@ -421,9 +421,11 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
                 Size: Math.round(projectImageFile.size * 100 / (1000 * 1000)) / 100, // in MB
             } as ProjectImage;
 
+            projectImage.Project = dbProject;
+
             projectImage = await this._projectImageRepository.insert(projectImage);
         } else if (projectImageFile && dbProjectImage) {
-            const newProjectImageUploadPromise = this._fileService.uploadFile(projectImageFile, FileType.Image, userEmail);
+            const newProjectImageUploadPromise = this._fileService.uploadFile(projectImageFile, FileType.ProjectImage, userEmail);
             const oldProjectImageRemovePromise = this._fileService.deleteFile(dbProjectImage.Key);
 
             const updateProjectImageResults: any  = await Promise.all([newProjectImageUploadPromise, oldProjectImageRemovePromise]);
@@ -473,17 +475,24 @@ export class ProjectService extends BaseService<Project> implements IProjectServ
         };
     }
 
-    public async deleteProjectByID(email: string, projectID: string): Promise<Project> {
+    public async deleteProjectByID(projectID: string): Promise<Project> {
+        const project = await this.deleteByID(projectID);
+
+        if (project.Image) {
+            await this._fileService.deleteFile(project.Image.Key);
+        }
+
+        return project;
+    }
+
+    public async deleteProject(email: string, projectID: string): Promise<Project> {
         const dbUser: User = await this._userService.getByEmail(email);
 
         if (!dbUser.Projects.find(p => p.ID === projectID)) {
             throw new Error(this._localizationService.getText("validation.project.non-existent"));
         }
 
-        const project =  await this.deleteByID(projectID);
-        await this._projectImageRepository.deleteByID(project.Image.ID);
-
-        return project;
+        return this.deleteProjectByID(projectID);
     }
 
 }
