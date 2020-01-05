@@ -18,3 +18,11 @@ The following secrets must be passed to the container as env vars:
 * **TH_POSTGRES_USERNAME**: The username to use for connecting to Postgres.
 * **TH_POSTGRES_PASSWORD**: The password to use for connecting to Postgres.
 
+## Terraforming
+
+```
+$ terraform init
+...
+$ terraform apply -var=aws_profile=miez -var=aws_region=eu-central-1 -var=th_api_docker_image=eugenanghel/theater-hub-api:Eugen-TH-76-latest
+...
+```
