@@ -1,0 +1,24 @@
+[
+  {
+    "name": "theater-hub-api",
+    "image": "${TH_API_DOCKER_IMAGE}",
+    "cpu": ${TH_API_ECS_CPU},
+    "memory": ${TH_API_ECS_MEMORY},
+    "essential": true,
+    "networkMode": "awsvpc",
+
+    "portMappings": [
+      {
+        "containerPort": 8081,
+        "hostPort": 8081,
+        "protocol": "tcp"
+      }
+    ],    
+
+    "environment": [
+      { "name": "TH_POSTGRES_HOSTNAME", "value": "${TH_POSTGRES_HOSTNAME}" },
+      { "name": "TH_POSTGRES_USERNAME", "value": "${TH_POSTGRES_USERNAME}" },
+      { "name": "TH_POSTGRES_PASSWORD", "value": "${TH_POSTGRES_PASSWORD}" }
+    ]
+  }
+]
