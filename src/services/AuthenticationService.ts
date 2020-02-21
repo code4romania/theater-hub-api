@@ -4,7 +4,7 @@ import { IAuthenticationService, IUserService }                from "../contract
 import { User }                                                 from "../models";
 import { AuthenticationRequestDTO, AuthenticationResponseDTO } from "../dtos";
 import { UserAccountStatusType }                               from "../enums/UserAccountStatusType";
-const bcrypt                                                   = require("bcrypt");
+const bcrypt                                                   = require("bcryptjs");
 const config                                                   = require("../config/env").getConfig();
 const jwt                                                      = require("jsonwebtoken");
 
