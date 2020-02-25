@@ -1,0 +1,43 @@
+# See CI.md for information about the secrets that need to be setup for this flow to work.
+
+on:
+  push:
+    branches:
+      - "*/TH-*"
+
+name: Deploy to Amazon ECS
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: eu-central-1
+
+    - name: Build, tag, and push image to Docker Hub
+      id: build-image
+      env:
+        HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+        HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+        BRANCH_NAME: ${{ github.ref }}
+        IMAGE_SHA_TAG: ${{ github.sha }}
+        IMAGE_NAME: theater-hub-api
+      run: |
+        IMAGE_LATEST_TAG=$(echo ${BRANCH_NAME/refs\/heads\/} | sed -E -e 's/[^a-zA-Z0-9_-]+/-/g')-latest
+        docker login --username=$HUB_USERNAME --password=$HUB_ACCESS_TOKEN
+        docker build -t $HUB_USERNAME/$IMAGE_NAME:$IMAGE_SHA_TAG .
+        docker tag $HUB_USERNAME/$IMAGE_NAME:$IMAGE_SHA_TAG $HUB_USERNAME/$IMAGE_NAME:$IMAGE_LATEST_TAG
+        docker push $HUB_USERNAME/$IMAGE_NAME:$IMAGE_SHA_TAG
+        docker push $HUB_USERNAME/$IMAGE_NAME:$IMAGE_LATEST_TAG
+        echo "::set-output name=image-sha::$HUB_USERNAME/$IMAGE_NAME:$IMAGE_SHA_TAG"
+        echo "::set-output name=image-latest::$HUB_USERNAME/$IMAGE_NAME:$IMAGE_LATEST_TAG"
+        aws --profile miez ecs update-service --cluster theater-hub-ecs-cluster --service th-api-ecs-service --force-new-deployment

@@ -1,0 +1,32 @@
+on:
+  pull_request:
+    branches:
+      - develop
+      - master
+
+name: Pull request checks
+
+jobs:
+  check:
+    name: pull-request-check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Install node
+      uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+
+    - name: Install dependencies
+      run: npm install
+    - name: Rename config files
+      run: |
+        cp src/config/env/_common.ts src/config/env/common.ts
+        cp src/config/env/_development.ts src/config/env/development.ts
+        cp src/config/env/_production.ts src/config/env/production.ts
+    - name: Run build
+      run: npm run build
+    - name: Run tests
+      run: npm run test

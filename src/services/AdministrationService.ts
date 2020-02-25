@@ -1,5 +1,5 @@
 import { inject, injectable }               from "inversify";
-const bcrypt                                = require("bcrypt");
+const bcrypt                                = require("bcryptjs");
 const uuidv4                                = require("uuid/v4");
 import { TYPES }                            from "../types";
 import { IAdministrationService,
