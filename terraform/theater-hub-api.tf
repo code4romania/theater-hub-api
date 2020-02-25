@@ -39,6 +39,40 @@ resource "aws_db_instance" "th-api-db" {
   backup_retention_period = 30
 }
 
+# Allow ECS to access SSM
+data "aws_iam_role" "ecsTaskExecutionRole" {
+  name = "ecsTaskExecutionRole"
+}
+
+data "aws_iam_policy_document" "ssm-read-policy" {
+  statement {
+    sid = ""
+
+    actions = [
+      "ssm:GetParameters"
+    ]
+
+    resources = [
+      aws_ssm_parameter.th-db-password.arn
+    ]
+  }
+}
+
+resource "aws_iam_policy" "ssm-read-policy" {
+  policy = data.aws_iam_policy_document.ssm-read-policy.json
+}
+
+resource "aws_iam_role_policy_attachment" "ssm-read-to-ecs" {
+  policy_arn = aws_iam_policy.ssm-read-policy.arn
+  role = data.aws_iam_role.ecsTaskExecutionRole.name
+}
+
+resource "aws_ssm_parameter" "th-db-password" {
+  name = "th-db-password"
+  type = "SecureString"
+  value = var.th_rds_password
+}
+
 resource "aws_ecs_cluster" "th_ecs_cluster" {
   name = "theater-hub-ecs-cluster"
 }
@@ -83,7 +117,7 @@ resource "aws_ecs_task_definition" "th_api_task_def" {
   # execution_role_arn       = aws_iam_role.th_ecs_task_execution_role.id
 
   container_definitions = templatefile(
-    "task-definitions/theater-hub-api.json",
+    "terraform/task-definitions/theater-hub-api.json",
     {
       AWS_REGION           = var.aws_region,
       TH_API_ECS_CPU       = var.th_api_ecs_cpu,
@@ -91,7 +125,7 @@ resource "aws_ecs_task_definition" "th_api_task_def" {
       TH_API_DOCKER_IMAGE  = var.th_api_docker_image,
       TH_POSTGRES_HOSTNAME = aws_db_instance.th-api-db.address,
       TH_POSTGRES_USERNAME = var.th_rds_username,
-      TH_POSTGRES_PASSWORD = var.th_rds_password
+      TH_POSTGRES_PASSWORD_SSM_ARN = aws_ssm_parameter.th-db-password.arn
     }
   )
 }

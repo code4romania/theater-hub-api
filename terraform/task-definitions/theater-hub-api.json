@@ -17,8 +17,13 @@
 
     "environment": [
       { "name": "TH_POSTGRES_HOSTNAME", "value": "${TH_POSTGRES_HOSTNAME}" },
-      { "name": "TH_POSTGRES_USERNAME", "value": "${TH_POSTGRES_USERNAME}" },
-      { "name": "TH_POSTGRES_PASSWORD", "value": "${TH_POSTGRES_PASSWORD}" }
+      { "name": "TH_POSTGRES_USERNAME", "value": "${TH_POSTGRES_USERNAME}" }
+    ],
+    "secrets": [
+      {
+        "name": "TH_POSTGRES_PASSWORD",
+        "valueFrom": "${TH_POSTGRES_PASSWORD_SSM_ARN}"
+      }
     ]
   }
 ]
