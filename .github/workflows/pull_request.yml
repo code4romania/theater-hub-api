@@ -23,9 +23,9 @@ jobs:
       run: npm install
     - name: Rename config files
       run: |
-        cp src/config/env/_common.ts config/env/common.ts
-        cp src/config/env/_development.ts config/env/development.ts
-        cp src/config/env/_production.ts config/env/production.ts
+        cp src/config/env/_common.ts src/config/env/common.ts
+        cp src/config/env/_development.ts src/config/env/development.ts
+        cp src/config/env/_production.ts src/config/env/production.ts
     - name: Run build
       run: npm run build
     - name: Run tests
