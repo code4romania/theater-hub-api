@@ -1,0 +1,22 @@
+on:
+  pull_request:
+    branches:
+      - develop
+      - master
+
+name: Pull request checks
+
+jobs:
+  check:
+    name: pull-request-check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Install node
+      uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      run: npm run build
+      run: npm run test
