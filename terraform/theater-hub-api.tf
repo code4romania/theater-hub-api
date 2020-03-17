@@ -53,6 +53,7 @@ data "aws_iam_policy_document" "ssm-read-policy" {
     ]
 
     resources = [
+      aws_ssm_parameter.th-config.arn,
       aws_ssm_parameter.th-db-password.arn
     ]
   }
@@ -65,6 +66,19 @@ resource "aws_iam_policy" "ssm-read-policy" {
 resource "aws_iam_role_policy_attachment" "ssm-read-to-ecs" {
   policy_arn = aws_iam_policy.ssm-read-policy.arn
   role = data.aws_iam_role.ecsTaskExecutionRole.name
+}
+
+data "template_file" "th-config" {
+  template = "file(${path.module}/th-config.json.tpl)"
+  vars = {
+    th_api_port = var.th_api_port
+  }
+}
+
+resource "aws_ssm_parameter" "th-config" {
+  name = "th-config"
+  type = "SecureString"
+  value = data.template_file.th-config.rendered
 }
 
 resource "aws_ssm_parameter" "th-db-password" {
@@ -123,9 +137,11 @@ resource "aws_ecs_task_definition" "th_api_task_def" {
       TH_API_ECS_CPU       = var.th_api_ecs_cpu,
       TH_API_ECS_MEMORY    = var.th_api_ecs_memory,
       TH_API_DOCKER_IMAGE  = var.th_api_docker_image,
+      TH_API_PORT          = var.th_api_port,
       TH_POSTGRES_HOSTNAME = aws_db_instance.th-api-db.address,
       TH_POSTGRES_USERNAME = var.th_rds_username,
-      TH_POSTGRES_PASSWORD_SSM_ARN = aws_ssm_parameter.th-db-password.arn
+      TH_POSTGRES_PASSWORD_SSM_ARN = aws_ssm_parameter.th-db-password.arn,
+      TH_CONFIG_SSM_ARN = aws_ssm_parameter.th-config.arn
     }
   )
 }

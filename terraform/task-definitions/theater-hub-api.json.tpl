@@ -9,17 +9,21 @@
 
     "portMappings": [
       {
-        "containerPort": 8081,
-        "hostPort": 8081,
+        "containerPort": ${TH_API_PORT},
+        "hostPort": ${TH_API_PORT},
         "protocol": "tcp"
       }
-    ],    
-
+    ],
     "environment": [
       { "name": "TH_POSTGRES_HOSTNAME", "value": "${TH_POSTGRES_HOSTNAME}" },
       { "name": "TH_POSTGRES_USERNAME", "value": "${TH_POSTGRES_USERNAME}" }
     ],
+
     "secrets": [
+      {
+        "name": "CONFIG",
+        "valueFrom": "${TH_CONFIG_SSM_ARN}"
+      },
       {
         "name": "TH_POSTGRES_PASSWORD",
         "valueFrom": "${TH_POSTGRES_PASSWORD_SSM_ARN}"

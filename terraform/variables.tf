@@ -15,7 +15,7 @@ variable "aws_profile" {
 
 variable "th_api_port" {
   description = "The port on which the Theather Hub API runs"
-  default     = 443
+  default     = 8081
 }
 
 variable "th_api_ecs_cpu" {
