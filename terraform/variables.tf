@@ -79,7 +79,6 @@ variable "th_rds_username" {
 
 variable "th_rds_password" {
   description = "The password of the user to create in RDS"
-  default     = "7h3473rhu8"
 }
 
 variable "th_log_retention_days" {
