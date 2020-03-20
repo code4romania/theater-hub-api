@@ -23,6 +23,35 @@ variable "th_api_ecs_cpu" {
   default     = 256
 }
 
+variable "th_api_token_secret" {
+  description = "The secret key used by the API. You can generate it with echo \"$(openssl rand -base64 32)\""
+}
+
+variable "th_api_facebook_app_id" {
+  description = "The Facebook App ID"
+}
+
+variable "th_api_facebook_app_secret" {
+  description = "The Facebook App secret"
+}
+
+variable "th_api_google_app_id" {
+  description = "The Google App ID"
+}
+
+variable "th_api_google_app_secret" {
+  description = "The Google App secret"
+}
+
+variable "th_api_youtube_api_key" {
+  description = "The Youtube Api key"
+}
+
+variable "th_client_base_url" {
+  description = "The URL used to access the client. The site's domain name, basically."
+  default = "www.theaterhub.ro"
+}
+
 variable "th_ecs_instance_type" {
   description = "The type of EC2 instances to use in the ECS cluster"
   default     = "t2.micro"

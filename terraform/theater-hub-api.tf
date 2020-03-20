@@ -72,6 +72,15 @@ data "template_file" "th-config" {
   template = "file(${path.module}/th-config.json.tpl)"
   vars = {
     th_api_port = var.th_api_port
+    th_api_token_secret = var.th_api_token_secret
+    th_api_facebook_app_id = var.th_api_facebook_app_id
+    th_api_facebook_app_secret = var.th_api_facebook_app_secret
+    th_api_google_app_id = var.th_api_google_app_id
+    th_api_google_app_secret = var.th_api_google_app_secret
+    th_api_youtube_api_key = var.th_api_youtube_api_key
+    th_client_base_url = var.th_client_base_url
+    th_aws_region = var.aws_region
+    th_aws_s3_bucket = aws_s3_bucket.th_s3_bucket.bucket
   }
 }
 
@@ -292,6 +301,12 @@ resource "aws_ecs_service" "theater_hub_api" {
     container_name = "theater-hub-api"
     container_port = 8081
   }
+}
+
+# TODO: Complete the setup for this bucket, including an access policy
+resource "aws_s3_bucket" "th_s3_bucket" {
+  bucket = "th-client"
+  region = var.aws_region
 }
 
 # TODO: Route53 record mapping to the LB

@@ -2,13 +2,13 @@
     "application": {
         "name": "Theater Hub",
         "email": "",
-        "tokenSecret": "",
+        "tokenSecret": "${th_api_token_secret}",
         "baseURL": "http://0.0.0.0:${th_api_port}",
         "maxFileSize": 5,
         "maxPhotoGalleryFileCount": 10
     },
     "client": {
-        "baseURL": "http://localhost:3000",
+        "baseURL": "${th_client_base_url}",
         "endpoints": {
             "loginResource": "login",
             "createProfileResource": "create-profile",
@@ -17,17 +17,17 @@
         }
     },
     "facebook": {
-        "app_id": "",
-        "app_secret": "",
+        "app_id": "${th_api_facebook_app_id}",
+        "app_secret": "${th_api_facebook_app_secret}",
         "callback_resource": "api/authentication/facebook/callback"
     },
     "google": {
-        "app_id": "",
-        "app_secret": "",
+        "app_id": "${th_api_google_app_id}",
+        "app_secret": "${th_api_google_app_secret}",
         "callback_resource": "api/authentication/google/callback"
     },
     "youtube": {
-       "api_key": "",
+       "api_key": "${th_api_youtube_api_key}",
        "videos_information_url": "https://www.googleapis.com/youtube/v3/videos?part=snippet&id={0}&key={1}"
     },
     "vimeo": {
@@ -36,8 +36,8 @@
     "aws": {
         "accessKeyId": "",
         "secretAccessKey": "",
-        "region": "",
-        "files_bucket": "",
+        "region": "${th_aws_region}",
+        "files_bucket": "${th_aws_s3_bucket}",
         "cloudFront": {
             "url": "",
             "accessKeyId": "",
