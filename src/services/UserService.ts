@@ -1189,18 +1189,30 @@ export class UserService extends BaseService<User> implements IUserService {
                         .innerJoinAndSelect("professional.Skills", "skills")
                         .addSelect()
                         .where(
-                            `accountSettings.AccountStatus <> :disabledStatus AND
+                            `accountSettings.Role = :userRole AND
+                            accountSettings.AccountStatus <> :disabledStatus AND
                             (
                                 (:searchTerm = '') IS NOT FALSE OR
                                 LOWER(user.Name) like :likeSearchTerm OR
                                 LOWER(user.Description) like :likeSearchTerm OR
+                                (
+                                    (
+                                        ((:viewerIsVisitor IS NOT FALSE) AND (accountSettings.EmailVisibility = :everyoneVisibility)) OR
+                                        ((:viewerIsVisitor IS FALSE) AND (accountSettings.EmailVisibility <> :privateVisibility))
+                                    ) AND
+                                    user.Email like :likeSearchTerm
+                                ) OR
                                 (user.SearchTokens @@ to_tsquery(:normalizedSearchTerm))
                             )`,
                             {
+                                userRole: UserRoleType.User,
                                 disabledStatus: UserAccountStatusType.Disabled,
                                 searchTerm,
                                 likeSearchTerm,
-                                normalizedSearchTerm
+                                viewerIsVisitor,
+                                everyoneVisibility: VisibilityType.Everyone,
+                                privateVisibility: VisibilityType.Private,
+                                normalizedSearchTerm,
                             })
                         .orderBy("LOWER(user.Name)", "ASC")
                         .getMany();
@@ -1267,17 +1279,30 @@ export class UserService extends BaseService<User> implements IUserService {
                         .innerJoinAndSelect("professional.Skills", "skills")
                         .leftJoinAndSelect("user.SocialMedia", "socialMedia")
                         .where(
-                            `accountSettings.AccountStatus <> :disabledStatus AND
+                            `accountSettings.Role = :userRole AND
+                            accountSettings.AccountStatus <> :disabledStatus AND
                             (
                                 (:searchTerm = '') IS NOT FALSE OR
                                 LOWER(user.Name) like :likeSearchTerm OR
                                 LOWER(user.Description) like :likeSearchTerm OR
-                                (user.SearchTokens @@ to_tsquery(:normalizedSearchTerm)))`,
+                                (
+                                    (
+                                        ((:viewerIsVisitor IS NOT FALSE) AND (accountSettings.EmailVisibility = :everyoneVisibility)) OR
+                                        ((:viewerIsVisitor IS FALSE) AND (accountSettings.EmailVisibility <> :privateVisibility))
+                                    ) AND
+                                    user.Email like :likeSearchTerm
+                                ) OR
+                                (user.SearchTokens @@ to_tsquery(:normalizedSearchTerm))
+                            )`,
                             {
+                                userRole: UserRoleType.User,
                                 disabledStatus: UserAccountStatusType.Disabled,
                                 searchTerm,
                                 likeSearchTerm,
-                                normalizedSearchTerm
+                                viewerIsVisitor,
+                                everyoneVisibility: VisibilityType.Everyone,
+                                privateVisibility: VisibilityType.Private,
+                                normalizedSearchTerm,
                             })
                         .orderBy("LOWER(user.Name)", sortOrientation)
                         .getMany();
