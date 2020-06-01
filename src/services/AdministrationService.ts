@@ -75,15 +75,13 @@ export class AdministrationService implements IAdministrationService {
             .innerJoinAndSelect("user.Professional", "professional")
             .innerJoinAndSelect("user.AccountSettings", "accountSettings")
             .where(
-                `accountSettings.AccountStatus <> :disabledStatus AND
-                (
+                `
                     (:searchTerm = '') IS NOT FALSE OR
                     LOWER(user.Name) like :likeSearchTerm OR
                     LOWER(user.Description) like :likeSearchTerm OR
                     (user.SearchTokens @@ to_tsquery(:normalizedSearchTerm))
-                )`,
+                `,
                 {
-                    disabledStatus: UserAccountStatusType.Disabled,
                     searchTerm,
                     likeSearchTerm,
                     normalizedSearchTerm
