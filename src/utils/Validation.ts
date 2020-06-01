@@ -38,7 +38,7 @@ export class Validators {
     }
 
     public static isValidPassword(value: string): boolean {
-        if (value.length < 7 || value.length > 100) {
+        if (value.length < 7 || value.length > 50) {
             return false;
         }
 
