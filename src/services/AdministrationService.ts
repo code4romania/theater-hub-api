@@ -79,6 +79,7 @@ export class AdministrationService implements IAdministrationService {
                     (:searchTerm = '') IS NOT FALSE OR
                     LOWER(user.Name) like :likeSearchTerm OR
                     LOWER(user.Description) like :likeSearchTerm OR
+                    user.Email like :likeSearchTerm OR
                     (user.SearchTokens @@ to_tsquery(:normalizedSearchTerm))
                 `,
                 {
