@@ -20,6 +20,8 @@ import { createConnection,
                    Connection } from "typeorm";
 const expressValidator          = require("express-validator");
 const fs                        = require("fs");
+const cluster                   = require("cluster");
+const numCPUs                   = require("os").cpus().length;
 const config                    = require("./config/env").getConfig();
 import { getAcceptedLocale }    from "./middlewares";
 
@@ -28,78 +30,83 @@ import { getAcceptedLocale }    from "./middlewares";
  */
 dotenv.config({ path: ".env.example" });
 
-/**
- * API keys and Passport configuration.
- */
-import * as passportConfig    from "./config/passport";
+if (cluster.isMaster) {
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+} else {
+  // create connection with database
+  // note that it's not active database connection
+  // TypeORM creates connection pools and uses them for your requests
+  createConnection().then(async (connection: Connection) => {
+    /**
+     * Create Express server.
+     */
 
-// create connection with database
-// note that it's not active database connection
-// TypeORM creates connection pools and uses them for your requests
-createConnection().then(async (connection: Connection) => {
+    const app: express.Application = express();
 
-  /**
-   * Create Express server.
-   */
+    /**
+     * Express configuration.
+     */
 
-  const app: express.Application = express();
+    app.set("port", process.env.PORT || 8081);
+    app.set("models", models);
+    app.use(compression());
+    app.use(logger("dev"));
+    app.use(bodyParser.json({ limit: "50mb" }));
+    app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+    app.use(bodyParser.json());
+    app.use(expressValidator());
+    app.use(session({
+      resave: true,
+      saveUninitialized: true,
+      secret: process.env.SESSION_SECRET
+    }));
+    app.use(passport.initialize());
+    app.use(passport.session());
+    app.use(flash());
+    app.use(lusca.xframe("SAMEORIGIN"));
+    app.use(lusca.xssProtection(true));
+    app.use((req, res, next) => {
+      res.locals.user = req.user;
+      next();
+    });
+    app.use(getAcceptedLocale);
+    app.use((req, res, next) => {
+      res.header("Access-Control-Allow-Origin", config.client.baseURL);
+      res.header("Access-Control-Allow-Headers", "accept-language, authorization, content-type");
+      res.header("Access-Control-Allow-Methods", "GET, PATCH, POST, PUT, DELETE, OPTIONS");
+      res.header("Access-Control-Allow-Credentials", "true");
 
-  /**
-   * Express configuration.
-   */
+      next();
+    });
+    app.use(express.static(path.join(__dirname, "public"), { maxAge: 31557600000 }));
 
-  app.set("port", process.env.PORT || 443);
-  app.set("models", models);
-  app.use(compression());
-  app.use(logger("dev"));
-  app.use(bodyParser.json({ limit: "50mb" }));
-  app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
-  app.use(bodyParser.json());
-  app.use(expressValidator());
-  app.use(session({
-    resave: true,
-    saveUninitialized: true,
-    secret: process.env.SESSION_SECRET
-  }));
-  app.use(passport.initialize());
-  app.use(passport.session());
-  app.use(flash());
-  app.use(lusca.xframe("SAMEORIGIN"));
-  app.use(lusca.xssProtection(true));
-  app.use((req, res, next) => {
-    res.locals.user = req.user;
-    next();
-  });
-  app.use(getAcceptedLocale);
-  app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", config.client.baseURL);
-    res.header("Access-Control-Allow-Headers", "accept-language, authorization, content-type");
-    res.header("Access-Control-Allow-Methods", "GET, PATCH, POST, PUT, DELETE, OPTIONS");
-    res.header("Access-Control-Allow-Credentials", "true");
+    /**
+     * Routes (route handlers).
+     */
 
-    next();
-  });
-  app.use(express.static(path.join(__dirname, "public"), { maxAge: 31557600000 }));
+    require("./routes")(app);
 
-  /**
-   * Routes (route handlers).
-   */
+    /**
+     * Error Handler. Provides full stack - remove for production
+     */
+    app.use(errorHandler());
 
-  require("./routes")(app);
+    const httpsOptions = {
+      key: fs.readFileSync(path.join(process.cwd(), "certificate", "key.pem"), "utf8"),
+      cert: fs.readFileSync(path.join(process.cwd(), "certificate", "cert.pem"), "utf8")
+    };
 
-  /**
-   * Error Handler. Provides full stack - remove for production
-   */
-  app.use(errorHandler());
+    // const httpsServer = https.createServer(httpsOptions, app).listen(443, () => {
+    //   console.log(("  App is running at https://localhost:%d in %s mode"), app.get("port"), app.get("env"));
+    //   console.log("  Press CTRL-C to stop\n");
+    // });
 
-  const httpsOptions = {
-    key: fs.readFileSync(path.join(process.cwd(), "certificate", "key.pem"), "utf8"),
-    cert: fs.readFileSync(path.join(process.cwd(), "certificate", "cert.pem"), "utf8")
-  };
+    app.listen(app.get("port"), () => {
+      console.log(("  App is running at http://localhost:%d in %s mode"), app.get("port"), app.get("env"));
+      console.log("  Press CTRL-C to stop\n");
+    });
 
-  const httpsServer = https.createServer(httpsOptions, app).listen(443, () => {
-    console.log(("  App is running at https://localhost:%d in %s mode"), app.get("port"), app.get("env"));
-    console.log("  Press CTRL-C to stop\n");
-  });
-
-}).catch(error => console.log("TypeORM connection error: ", error));
+  }).catch(error => console.log("TypeORM connection error: ", error));
+}
