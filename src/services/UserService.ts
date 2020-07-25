@@ -1350,6 +1350,7 @@ export class UserService extends BaseService<User> implements IUserService {
                             .from(User, "user")
                             .innerJoinAndSelect("user.AccountSettings", "accountSettings")
                             .innerJoinAndSelect("user.Professional", "professional")
+                            .leftJoinAndSelect("user.ProfileImage", "profileImage")
                             .where("accountSettings.ProfileVisibility = :everyone", { everyone: VisibilityType.Everyone})
                             .orderBy("random()")
                             .limit(count)
