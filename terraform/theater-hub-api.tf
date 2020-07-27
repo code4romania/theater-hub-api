@@ -39,6 +39,63 @@ resource "aws_db_instance" "th-api-db" {
   backup_retention_period = 30
 }
 
+# Allow ECS to access SSM
+data "aws_iam_role" "ecsTaskExecutionRole" {
+  name = "ecsTaskExecutionRole"
+}
+
+data "aws_iam_policy_document" "ssm-read-policy" {
+  statement {
+    sid = ""
+
+    actions = [
+      "ssm:GetParameters"
+    ]
+
+    resources = [
+      aws_ssm_parameter.th-config.arn,
+      aws_ssm_parameter.th-db-password.arn
+    ]
+  }
+}
+
+resource "aws_iam_policy" "ssm-read-policy" {
+  policy = data.aws_iam_policy_document.ssm-read-policy.json
+}
+
+resource "aws_iam_role_policy_attachment" "ssm-read-to-ecs" {
+  policy_arn = aws_iam_policy.ssm-read-policy.arn
+  role = data.aws_iam_role.ecsTaskExecutionRole.name
+}
+
+data "template_file" "th-config" {
+  template = "file(${path.module}/th-config.json.tpl)"
+  vars = {
+    th_api_port = var.th_api_port
+    th_api_token_secret = var.th_api_token_secret
+    th_api_facebook_app_id = var.th_api_facebook_app_id
+    th_api_facebook_app_secret = var.th_api_facebook_app_secret
+    th_api_google_app_id = var.th_api_google_app_id
+    th_api_google_app_secret = var.th_api_google_app_secret
+    th_api_youtube_api_key = var.th_api_youtube_api_key
+    th_client_base_url = var.th_client_base_url
+    th_aws_region = var.aws_region
+    th_aws_s3_bucket = aws_s3_bucket.th_s3_bucket.bucket
+  }
+}
+
+resource "aws_ssm_parameter" "th-config" {
+  name = "th-config"
+  type = "SecureString"
+  value = data.template_file.th-config.rendered
+}
+
+resource "aws_ssm_parameter" "th-db-password" {
+  name = "th-db-password"
+  type = "SecureString"
+  value = var.th_rds_password
+}
+
 resource "aws_ecs_cluster" "th_ecs_cluster" {
   name = "theater-hub-ecs-cluster"
 }
@@ -83,15 +140,17 @@ resource "aws_ecs_task_definition" "th_api_task_def" {
   # execution_role_arn       = aws_iam_role.th_ecs_task_execution_role.id
 
   container_definitions = templatefile(
-    "task-definitions/theater-hub-api.json",
+    "terraform/task-definitions/theater-hub-api.json",
     {
       AWS_REGION           = var.aws_region,
       TH_API_ECS_CPU       = var.th_api_ecs_cpu,
       TH_API_ECS_MEMORY    = var.th_api_ecs_memory,
       TH_API_DOCKER_IMAGE  = var.th_api_docker_image,
+      TH_API_PORT          = var.th_api_port,
       TH_POSTGRES_HOSTNAME = aws_db_instance.th-api-db.address,
       TH_POSTGRES_USERNAME = var.th_rds_username,
-      TH_POSTGRES_PASSWORD = var.th_rds_password
+      TH_POSTGRES_PASSWORD_SSM_ARN = aws_ssm_parameter.th-db-password.arn,
+      TH_CONFIG_SSM_ARN = aws_ssm_parameter.th-config.arn
     }
   )
 }
@@ -242,6 +301,12 @@ resource "aws_ecs_service" "theater_hub_api" {
     container_name = "theater-hub-api"
     container_port = 8081
   }
+}
+
+# TODO: Complete the setup for this bucket, including an access policy
+resource "aws_s3_bucket" "th_s3_bucket" {
+  bucket = "th-client"
+  region = var.aws_region
 }
 
 # TODO: Route53 record mapping to the LB
