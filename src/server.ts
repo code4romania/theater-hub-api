@@ -38,7 +38,30 @@ if (cluster.isMaster) {
   // create connection with database
   // note that it's not active database connection
   // TypeORM creates connection pools and uses them for your requests
-  createConnection().then(async (connection: Connection) => {
+  createConnection({
+    type: "postgres",
+    host: process.env.DB_HOST || "127.0.0.1",
+    port: process.env.DB_PORT || 5432,
+    username: process.env.DB_USERNAME || "postgres",
+    password: process.env.DB_PASSWORD || "pass1234",
+    database: process.env.DB_NAME ||"TheaterHub",
+    synchronize: false,
+    logging: false,
+    entities: [
+       "dist/models/**/*.js"
+    ],
+    migrations: [
+       "dist/migrations/**/*.js"
+    ],
+    subscribers: [
+       "src/subscribers/**/*.ts"
+    ],
+    cli: {
+       entitiesDir: "src/models",
+       migrationsDir: "src/migrations",
+       subscribersDir: "src/subscribers"
+    }
+  }).then(async (connection: Connection) => {
     /**
      * Create Express server.
      */
