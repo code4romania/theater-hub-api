@@ -44,7 +44,7 @@ if (cluster.isMaster) {
     port: process.env.DB_PORT || 5432,
     username: process.env.DB_USERNAME || "postgres",
     password: process.env.DB_PASSWORD || "pass1234",
-    database: process.env.DB_NAME ||"TheaterHub",
+    database: process.env.DB_NAME || "TheaterHub",
     synchronize: false,
     logging: false,
     entities: [
