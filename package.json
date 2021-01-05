@@ -44,7 +44,7 @@
     "@types/validator": "^9.4.3",
     "async": "^2.1.2",
     "aws-sdk": "^2.558.0",
-    "axios": "^0.18.1",
+    "axios": "^0.21.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.15.2",
     "chalk": "^2.3.0",
