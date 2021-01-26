@@ -7,7 +7,7 @@
     "start": "npm run build && npm run watch",
     "start-aws": "node dist/server.js",
     "dev": "SET NODE_ENV=development && npm run start",
-    "prod": "SET NODE_ENV=production && npm run start",
+    "prod": "NODE_ENV=production && npm run start",
     "build": "npm run build-ts && npm run tslint && npm run copy-static-assets",
     "serve": "nodemon dist/server.js",
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve\"",
@@ -21,7 +21,8 @@
     "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\"",
     "generate-migration": "typeorm migration:generate -n %NAME% && npm run build-ts",
     "create-migration": "typeorm migration:create -n %NAME% && npm run build-ts",
-    "run-migration": "typeorm migration:run"
+    "run-migration": "typeorm migration:run",
+    "migrate-and-serve": "npm run run-migration && npm run serve"
   },
   "jest": {
     "globals": {

@@ -1,0 +1,35 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres:11
+    container_name: th-db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    env_file: .env
+    ports:
+      - "$TH_DB_PUBLIC_PORT:$TH_DB_PORT"
+    environment:
+      POSTGRES_DB: "$TH_DB_NAME"
+      POSTGRES_USER: "$TH_DB_USER"
+      POSTGRES_PASSWORD: "$TH_DB_PASSWORD"
+
+  api:
+    image: th-api:0.2
+    container_name: th-api
+    stdin_open: true
+    tty: true
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command: "dockerize -wait tcp://db:$TH_DB_PORT -timeout 90s"
+    links:
+      - db
+    ports:
+      - "127.0.0.1:$TH_API_PORT:$TH_API_PORT"
+    depends_on:
+      - db
+    env_file: .env
+
+volumes:
+  pgdata:
