@@ -3,12 +3,12 @@ export const commonConfig = {
         name: "Theater Hub",
         email: "",
         tokenSecret: "",
-        baseURL: "http://127.0.0.1:8081",
+        baseURL: `http://127.0.0.1:${process.env.TH_API_PORT}`,
         maxFileSize: 5, // MB
         maxPhotoGalleryFileCount: 10
     },
     client: {
-        baseURL: "http://localhost:3000",
+        baseURL: process.env.TH_CLIENT_BASE_URL,
         endpoints: {
             loginResource: "login",
             createProfileResource: "create-profile",
@@ -17,17 +17,17 @@ export const commonConfig = {
         }
     },
     facebook: {
-        app_id: "",
-        app_secret: "",
+        app_id: "lorem ipsum",
+        app_secret: "lorem ipsum",
         callback_resource: "api/authentication/facebook/callback"
     },
     google: {
-        app_id: "",
-        app_secret: "",
+        app_id: "lorem ipsum",
+        app_secret: "lorem ipsum",
         callback_resource: "api/authentication/google/callback"
     },
     youtube: {
-       api_key: "",
+       api_key: "lorem ipsum",
        videos_information_url: "https://www.googleapis.com/youtube/v3/videos?part=snippet&id={0}&key={1}"
     },
     vimeo: {
@@ -59,8 +59,8 @@ export const commonConfig = {
         }
     },
     mailchimp: {
-        api_key: "",
-        audience_id: "",
+        api_key: process.env.TH_MAILGUN_API_KEY,
+        audience_id: process.env.TH_MAILGUN_AUDIENCE_ID,
         subscribe_url: "/lists/{0}/members"
     }
 };

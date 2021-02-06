@@ -38,30 +38,7 @@ if (cluster.isMaster) {
   // create connection with database
   // note that it's not active database connection
   // TypeORM creates connection pools and uses them for your requests
-  createConnection({
-    type: "postgres",
-    host: process.env.DB_HOST || "127.0.0.1",
-    port: process.env.DB_PORT || 5432,
-    username: process.env.DB_USERNAME || "postgres",
-    password: process.env.DB_PASSWORD || "pass1234",
-    database: process.env.DB_NAME || "TheaterHub",
-    synchronize: false,
-    logging: false,
-    entities: [
-       "dist/models/**/*.js"
-    ],
-    migrations: [
-       "dist/migrations/**/*.js"
-    ],
-    subscribers: [
-       "src/subscribers/**/*.ts"
-    ],
-    cli: {
-       entitiesDir: "src/models",
-       migrationsDir: "src/migrations",
-       subscribersDir: "src/subscribers"
-    }
-  }).then(async (connection: Connection) => {
+  createConnection().then(async (connection: Connection) => {
     /**
      * Create Express server.
      */
@@ -72,7 +49,7 @@ if (cluster.isMaster) {
      * Express configuration.
      */
 
-    app.set("port", process.env.PORT || 8081);
+    app.set("port", process.env.TH_API_PORT);
     app.set("models", models);
     app.use(compression());
     app.use(logger("dev"));
@@ -83,7 +60,7 @@ if (cluster.isMaster) {
     app.use(session({
       resave: true,
       saveUninitialized: true,
-      secret: process.env.SESSION_SECRET
+      secret: process.env.TH_SESSION_SECRET
     }));
     app.use(passport.initialize());
     app.use(passport.session());
@@ -116,10 +93,10 @@ if (cluster.isMaster) {
      */
     app.use(errorHandler());
 
-    const httpsOptions = {
-      key: fs.readFileSync(path.join(process.cwd(), "certificate", "key.pem"), "utf8"),
-      cert: fs.readFileSync(path.join(process.cwd(), "certificate", "cert.pem"), "utf8")
-    };
+    // const httpsOptions = {
+    //   key: fs.readFileSync(path.join(process.cwd(), "certificate", "key.pem"), "utf8"),
+    //   cert: fs.readFileSync(path.join(process.cwd(), "certificate", "cert.pem"), "utf8")
+    // };
 
     // const httpsServer = https.createServer(httpsOptions, app).listen(443, () => {
     //   console.log(("  App is running at https://localhost:%d in %s mode"), app.get("port"), app.get("env"));

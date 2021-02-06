@@ -1,17 +1,15 @@
-import * as _ from "lodash";
-import { commonConfig } from "./common";
+import * as _                from "lodash";
+import { commonConfig }      from "./common";
 import { developmentConfig } from "./development";
-import { productionConfig } from "./production";
+import { productionConfig }  from "./production";
 
 export function getConfig() {
 
-    const config = process.env.CONFIG ? JSON.parse(process.env.CONFIG) : {};
-
     switch (process.env.NODE_ENV) {
         case "development":
-            return _.merge(commonConfig, developmentConfig, config);
+            return _.merge(commonConfig, developmentConfig);
         case "production":
-            return _.merge(commonConfig, productionConfig, config);
+            return _.merge(commonConfig, productionConfig);
         default:
             return commonConfig;
     }
