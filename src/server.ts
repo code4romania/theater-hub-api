@@ -49,6 +49,7 @@ if (cluster.isMaster) {
      * Express configuration.
      */
 
+    app.set("host", process.env.TH_API_HOST);
     app.set("port", process.env.TH_API_PORT);
     app.set("models", models);
     app.use(compression());
@@ -103,8 +104,8 @@ if (cluster.isMaster) {
     //   console.log("  Press CTRL-C to stop\n");
     // });
 
-    app.listen(app.get("port"), () => {
-      console.log(("  App is running at http://localhost:%d in %s mode"), app.get("port"), app.get("env"));
+    app.listen(app.get("port"), app.get("host"), () => {
+      console.log(("  App is running at http://%s:%d in %s mode"), app.get("host"), app.get("port"), app.get("env"));
       console.log("  Press CTRL-C to stop\n");
     });
 
