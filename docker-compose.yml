@@ -26,7 +26,7 @@ services:
     links:
       - db
     ports:
-      - "127.0.0.1:$TH_API_PORT:$TH_API_PORT"
+      - "$TH_API_PORT:$TH_API_PORT"
     depends_on:
       - db
     env_file: .env
