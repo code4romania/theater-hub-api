@@ -61,7 +61,7 @@
     "fresh": "^0.5.2",
     "handlebars": "^4.3.0",
     "hoek": "^6.1.2",
-    "html-pdf": "^2.2.0",
+    "html-pdf": "^3.0.1",
     "https": "^1.0.0",
     "inversify": "^4.5.2",
     "jsonwebtoken": "^8.4.0",
